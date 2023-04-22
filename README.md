@@ -1,4 +1,10 @@
 # Status: In progress
+## To DO List
+- Create the ImGUI menu bar events
+- Create the mouse events
+- Import the model data
+- Create class to handle the model data
+
 
 # Plane truss finite element solver
 
