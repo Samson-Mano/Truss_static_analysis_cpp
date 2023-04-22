@@ -159,6 +159,10 @@
   <ItemGroup>
     <Image Include="Images\innx_icon.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="Images\font\FreeSans.ttf" />
+    <Font Include="Images\font\HyperFont.ttf" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

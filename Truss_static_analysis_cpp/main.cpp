@@ -46,13 +46,12 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Create a window
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Plane Truss Analysis - OpenGL 3.3", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(800, 600, "Plane Truss Finite Element Solver", nullptr, nullptr);
 	if (!window) {
 		std::cerr << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
-
 
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
@@ -78,6 +77,9 @@ int main()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+	// Create a custom font for the menu bar
+	ImFont* myFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
+
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -85,6 +87,9 @@ int main()
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		// Change the font for the menu bar
+		ImGui::PushFont(myFont);
 
 		// Create a menu bar
 		if (ImGui::BeginMainMenuBar(), ImGuiWindowFlags_MenuBar)
@@ -110,6 +115,9 @@ int main()
 			ImGui::EndMainMenuBar();
 		}
 
+		// Pop the custom font after using it
+		ImGui::PopFont();
+
 		// Render OpenGL graphics here
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Set the clear color to black
 		glClear(GL_COLOR_BUFFER_BIT);  // Clear the color buffer
@@ -126,6 +134,7 @@ int main()
 		// Poll for events
 		glfwPollEvents();
 	}
+
 	// Cleanup ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

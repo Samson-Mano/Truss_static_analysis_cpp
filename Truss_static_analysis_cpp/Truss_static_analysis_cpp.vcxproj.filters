@@ -78,4 +78,8 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Font Include="Images\font\FreeSans.ttf" />
+    <Font Include="Images\font\HyperFont.ttf" />
+  </ItemGroup>
 </Project>
