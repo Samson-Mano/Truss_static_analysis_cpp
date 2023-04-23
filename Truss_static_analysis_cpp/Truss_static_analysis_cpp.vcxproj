@@ -139,6 +139,8 @@
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\app_window.cpp" />
+    <ClCompile Include="src\stb_implement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h" />
@@ -151,6 +153,8 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="ImGui\stb_image.h" />
+    <ClInclude Include="src\app_window.h" />
+    <ClInclude Include="src\stb_implement.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\glew32.dll" />

@@ -1,4 +1,31 @@
 #include <iostream>
+#include <windows.h>
+#include "src/app_window.h"
+
+
+int main()
+{
+	app_window app;
+
+	if (app.is_glwindow_success == false)
+	{
+		// Window creation failed
+		// Display error in the console
+		std::cerr << app.log << std::endl;
+		std::cin.get();
+		return -1;
+	}
+	else
+	{
+		// Window creation successful (Hide the console window)
+		ShowWindow(GetConsoleWindow(), SW_HIDE); //SW_RESTORE to bring back
+		app.app_render();
+	}
+
+	return 0;
+}
+
+/*
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <windows.h>
@@ -7,6 +34,8 @@
 #include "ImGui/imgui_impl_opengl3.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "ImGui/stb_image.h"
+
+void opengl_window(GLFWwindow* window, ImFont* myFont);
 
 // Callback function for handling window resize
 void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
@@ -35,9 +64,11 @@ int main()
 	// Close the console window
 	ShowWindow(GetConsoleWindow(), SW_HIDE); //SW_RESTORE to bring back
 
-	// Initialize GLFW
+	// Initialize GLFW 
 	if (!glfwInit()) {
+		ShowWindow(GetConsoleWindow(), SW_RESTORE);
 		std::cerr << "Failed to initialize GLFW" << std::endl;
+		std::cin.get();
 		return -1;
 	}
 
@@ -80,6 +111,22 @@ int main()
 	// Create a custom font for the menu bar
 	ImFont* myFont = ImGui::GetIO().Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
 
+
+	opengl_window(window, myFont);
+
+	// Cleanup ImGui
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	// Terminate GLFW
+	glfwTerminate();
+
+	return 0;
+}
+
+void opengl_window(GLFWwindow* window, ImFont* myFont)
+{
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -134,15 +181,6 @@ int main()
 		// Poll for events
 		glfwPollEvents();
 	}
-
-	// Cleanup ImGui
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-
-	// Terminate GLFW
-	glfwTerminate();
-
-	return 0;
 }
 
+*/
