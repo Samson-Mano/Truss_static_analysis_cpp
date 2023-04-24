@@ -106,13 +106,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\openGL\glew-2.2.0\lib\Release\x64;C:\openGL\glfw-3.3.8.bin.WIN64\lib-vc2022;</AdditionalLibraryDirectories>
+      <AdditionalOptions>/NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,7 +141,10 @@
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app_window.cpp" />
-    <ClCompile Include="src\stb_implement.cpp" />
+    <ClCompile Include="ImGui\stb_implement.cpp" />
+    <ClCompile Include="src\menu_events.cpp" />
+    <ClCompile Include="src\mouse_events.cpp" />
+    <ClCompile Include="src\mouse_event_handler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h" />
@@ -154,7 +158,10 @@
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="ImGui\stb_image.h" />
     <ClInclude Include="src\app_window.h" />
-    <ClInclude Include="src\stb_implement.h" />
+    <ClInclude Include="ImGui\stb_implement.h" />
+    <ClInclude Include="src\menu_events.h" />
+    <ClInclude Include="src\mouse_events.h" />
+    <ClInclude Include="src\mouse_event_handler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\glew32.dll" />

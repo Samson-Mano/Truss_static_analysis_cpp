@@ -17,7 +17,7 @@ int main()
 	else
 	{
 		// Window creation successful (Hide the console window)
-		ShowWindow(GetConsoleWindow(), SW_HIDE); //SW_RESTORE to bring back
+		// ShowWindow(GetConsoleWindow(), SW_HIDE); //SW_RESTORE to bring back
 		app.app_render();
 	}
 

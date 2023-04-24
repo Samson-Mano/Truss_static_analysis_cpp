@@ -1,6 +1,5 @@
 #include "app_window.h"
 
-
 app_window::app_window()
 {
 	// Main constructor
@@ -54,8 +53,20 @@ app_window::app_window()
 
 	// Window initialize success
 	is_glwindow_success = true;
-}
 
+	// Set the mouse button callback function with the user pointer pointing to the mouseHandler object
+	glfwSetWindowUserPointer(window, &mouse_Handler);
+	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
+
+	// Set the mouse move callback function with the user pointer pointing to the mouseHandler object
+	glfwSetCursorPosCallback(window, mouse_event_handler::mouseMoveCallback);
+
+	// Set the mouse scroll callback function with the user pointer pointing to the mouseHandler object
+	glfwSetScrollCallback(window, mouse_event_handler::mouseScrollCallback);
+
+	// Set key input callback function with the user pointer pointing to the mouseHandler object
+	glfwSetKeyCallback(window, mouse_event_handler::keyDownCallback);
+}
 
 app_window::~app_window()
 {
@@ -82,35 +93,8 @@ void app_window::app_render()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		// Change the font for the menu bar
-		ImGui::PushFont(imgui_font);
-
-		// Create a menu bar
-		if (ImGui::BeginMainMenuBar(), ImGuiWindowFlags_MenuBar)
-		{
-			// File menu item
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("Import varai2D"))
-				{
-					// Handle menu Import varai2D
-				}
-				if (ImGui::MenuItem("Import raw data"))
-				{
-					// Handle menu Import raw data
-				}
-				if (ImGui::MenuItem("Export raw data"))
-				{
-					// Handle menu Export raw data
-				}
-				ImGui::EndMenu();
-			}
-			// Add more menu items here as needed
-			ImGui::EndMainMenuBar();
-		}
-
-		// Pop the custom font after using it
-		ImGui::PopFont();
+		// menu events
+		menu_events();
 
 		// Render OpenGL graphics here
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Set the clear color to black
@@ -128,6 +112,108 @@ void app_window::app_render()
 		// Poll for events
 		glfwPollEvents();
 	}
+}
+
+void app_window::menu_events()
+{
+	// Control the menu events
+	// Change the font for the menu bar
+	ImGui::PushFont(imgui_font);
+
+	// Create a menu bar
+	if (ImGui::BeginMainMenuBar(), ImGuiWindowFlags_MenuBar)
+	{
+		// File menu item
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Import varai2D"))
+			{
+				// Handle menu Import varai2D
+				menu_click.update_event(import_varai2d);
+			}
+			if (ImGui::MenuItem("Import raw data"))
+			{
+				// Handle menu Import raw data
+				menu_click.update_event(import_raw_data);
+			}
+			if (ImGui::MenuItem("Export raw data"))
+			{
+				// Handle menu Export raw data
+				menu_click.update_event(export_raw_data);
+			}
+			if (ImGui::MenuItem("Exit"))
+			{
+				// Handle menu Exit
+				menu_click.update_event(exit_p);
+			}
+			ImGui::EndMenu();
+		}
+		// Constraint menu item
+		if (ImGui::BeginMenu("Constraints"))
+		{
+			if (ImGui::MenuItem("Add Constraint"))
+			{
+				// Handle menu Add constraint
+				menu_click.update_event(Add_Constraint);
+			}
+			if (ImGui::MenuItem("Delete Constraint"))
+			{
+				// Handle menu Delete constraint
+				menu_click.update_event(Delete_Constraint);
+			}
+			if (ImGui::MenuItem("Edit Constraint"))
+			{
+				// Handle menu Edit Constraint
+				menu_click.update_event(Edit_Constraint);
+			}
+			ImGui::EndMenu();
+		}
+		// Load menu item
+		if (ImGui::BeginMenu("Loads"))
+		{
+			if (ImGui::MenuItem("Add Load"))
+			{
+				// Handle menu Add Load
+				menu_click.update_event(Add_Load);
+			}
+			if (ImGui::MenuItem("Delete Load"))
+			{
+				// Handle menu Delete Load
+				menu_click.update_event(Delete_Load);
+			}
+			if (ImGui::MenuItem("Edit Load"))
+			{
+				// Handle menu Edit Load
+				menu_click.update_event(Edit_Load);
+			}
+			ImGui::EndMenu();
+		}
+		// Solve menu item
+		if (ImGui::BeginMenu("Solve"))
+		{
+			if (ImGui::MenuItem("FE Solve"))
+			{
+				// Handle menu FE Solve
+				menu_click.update_event(FE_Solve);
+			}
+			if (ImGui::MenuItem("Displacement"))
+			{
+				// Handle menu Displacement
+				menu_click.update_event(Displacement);
+			}
+			if (ImGui::MenuItem("Member force"))
+			{
+				// Handle menu Member force
+				menu_click.update_event(Member_force);
+			}
+			ImGui::EndMenu();
+		}
+		// Add more menu items here as needed
+		ImGui::EndMainMenuBar();
+	}
+
+	// Pop the custom font after using it
+	ImGui::PopFont();
 }
 
 // Static callback function for framebuffer size changes
