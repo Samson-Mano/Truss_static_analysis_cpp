@@ -3,6 +3,10 @@
 // Mouse button callback function
 void mouse_event_handler::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
+	if (ImGui::GetIO().WantCaptureMouse) {
+		return;
+	}
+
 	double xpos, ypos;
 	glfwGetCursorPos(window, &xpos, &ypos);  // Get mouse position
 	mouse_event_handler* handler = static_cast<mouse_event_handler*>(glfwGetWindowUserPointer(window));

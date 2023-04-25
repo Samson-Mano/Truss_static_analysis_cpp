@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "mouse_events.h"
+#include "../ImGui/imgui.h"
 
 class mouse_event_handler {
 private:

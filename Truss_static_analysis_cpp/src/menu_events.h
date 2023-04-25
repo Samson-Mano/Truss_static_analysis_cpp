@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 enum menu_item
 {
@@ -24,5 +25,6 @@ public:
 	~menu_events();
 	void update_event(menu_item m_ck);
 private:
-
+	std::string fileNameStr = "";  // Initialize with an empty string
+	std::string ShowFileDialog();
 };

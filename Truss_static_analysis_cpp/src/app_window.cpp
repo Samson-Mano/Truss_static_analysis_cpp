@@ -46,10 +46,6 @@ app_window::app_window()
 	// Set the icon for the window
 	GLFWwindow_set_icon(window);
 
-	// Setup ImGui context
-	ImGui::CreateContext();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330");
 
 	// Window initialize success
 	is_glwindow_success = true;
@@ -66,6 +62,12 @@ app_window::app_window()
 
 	// Set key input callback function with the user pointer pointing to the mouseHandler object
 	glfwSetKeyCallback(window, mouse_event_handler::keyDownCallback);
+
+
+	// Setup ImGui context
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 app_window::~app_window()
@@ -83,7 +85,8 @@ app_window::~app_window()
 void app_window::app_render()
 {
 	// Create a custom font for the menu bar
-	imgui_font = ImGui::GetIO().Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
+	ImGuiIO& io = ImGui::GetIO();
+	imgui_font = io.Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
 
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window))
