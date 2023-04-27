@@ -142,6 +142,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app_window.cpp" />
     <ClCompile Include="ImGui\stb_implement.cpp" />
+    <ClCompile Include="src\geometry_store\geom_store.cpp" />
+    <ClCompile Include="src\geometry_store\lines_store.cpp" />
+    <ClCompile Include="src\geometry_store\nodes_store.cpp" />
+    <ClCompile Include="src\geometry_store\shaders\shader.cpp" />
     <ClCompile Include="src\menu_events.cpp" />
     <ClCompile Include="src\mouse_events.cpp" />
     <ClCompile Include="src\mouse_event_handler.cpp" />
@@ -159,6 +163,10 @@
     <ClInclude Include="ImGui\stb_image.h" />
     <ClInclude Include="src\app_window.h" />
     <ClInclude Include="ImGui\stb_implement.h" />
+    <ClInclude Include="src\geometry_store\geom_store.h" />
+    <ClInclude Include="src\geometry_store\lines_store.h" />
+    <ClInclude Include="src\geometry_store\nodes_store.h" />
+    <ClInclude Include="src\geometry_store\shaders\shader.h" />
     <ClInclude Include="src\menu_events.h" />
     <ClInclude Include="src\mouse_events.h" />
     <ClInclude Include="src\mouse_event_handler.h" />

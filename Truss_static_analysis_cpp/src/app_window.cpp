@@ -29,6 +29,8 @@ app_window::app_window()
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
 
+	// Initialize an empty geometry
+
 
 	// Initialize GLEW
 	if (glewInit() != GLEW_OK) {
@@ -132,22 +134,22 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Import varai2D"))
 			{
 				// Handle menu Import varai2D
-				menu_click.update_event(import_varai2d);
+				menu_click.update_event(import_varai2d, &geom);
 			}
 			if (ImGui::MenuItem("Import raw data"))
 			{
 				// Handle menu Import raw data
-				menu_click.update_event(import_raw_data);
+				menu_click.update_event(import_raw_data, &geom);
 			}
 			if (ImGui::MenuItem("Export raw data"))
 			{
 				// Handle menu Export raw data
-				menu_click.update_event(export_raw_data);
+				menu_click.update_event(export_raw_data, &geom);
 			}
 			if (ImGui::MenuItem("Exit"))
 			{
 				// Handle menu Exit
-				menu_click.update_event(exit_p);
+				menu_click.update_event(exit_p, &geom);
 			}
 			ImGui::EndMenu();
 		}
@@ -157,17 +159,17 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Add Constraint"))
 			{
 				// Handle menu Add constraint
-				menu_click.update_event(Add_Constraint);
+				menu_click.update_event(Add_Constraint, &geom);
 			}
 			if (ImGui::MenuItem("Delete Constraint"))
 			{
 				// Handle menu Delete constraint
-				menu_click.update_event(Delete_Constraint);
+				menu_click.update_event(Delete_Constraint, &geom);
 			}
 			if (ImGui::MenuItem("Edit Constraint"))
 			{
 				// Handle menu Edit Constraint
-				menu_click.update_event(Edit_Constraint);
+				menu_click.update_event(Edit_Constraint, &geom);
 			}
 			ImGui::EndMenu();
 		}
@@ -177,17 +179,17 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Add Load"))
 			{
 				// Handle menu Add Load
-				menu_click.update_event(Add_Load);
+				menu_click.update_event(Add_Load, &geom);
 			}
 			if (ImGui::MenuItem("Delete Load"))
 			{
 				// Handle menu Delete Load
-				menu_click.update_event(Delete_Load);
+				menu_click.update_event(Delete_Load, &geom);
 			}
 			if (ImGui::MenuItem("Edit Load"))
 			{
 				// Handle menu Edit Load
-				menu_click.update_event(Edit_Load);
+				menu_click.update_event(Edit_Load, &geom);
 			}
 			ImGui::EndMenu();
 		}
@@ -197,17 +199,17 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("FE Solve"))
 			{
 				// Handle menu FE Solve
-				menu_click.update_event(FE_Solve);
+				menu_click.update_event(FE_Solve, &geom);
 			}
 			if (ImGui::MenuItem("Displacement"))
 			{
 				// Handle menu Displacement
-				menu_click.update_event(Displacement);
+				menu_click.update_event(Displacement, &geom);
 			}
 			if (ImGui::MenuItem("Member force"))
 			{
 				// Handle menu Member force
-				menu_click.update_event(Member_force);
+				menu_click.update_event(Member_force, &geom);
 			}
 			ImGui::EndMenu();
 		}

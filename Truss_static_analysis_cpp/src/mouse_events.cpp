@@ -1,5 +1,4 @@
 #include "mouse_events.h"
-#include <iostream>
 
 mouse_events::mouse_events()
 {

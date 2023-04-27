@@ -6,6 +6,7 @@
 #include "../ImGui/imgui_impl_glfw.h"
 #include "../ImGui/imgui_impl_opengl3.h"
 #include "../ImGui/stb_implement.h"
+#include "geometry_store/geom_store.h"
 #include "menu_events.h"
 #include "mouse_event_handler.h"
 
@@ -22,6 +23,7 @@ private:
 public:
 	bool is_glwindow_success = false;
 	const char* log = "";
+	geom_store geom;
 
 	// Constructor and Destructor
 	app_window();
