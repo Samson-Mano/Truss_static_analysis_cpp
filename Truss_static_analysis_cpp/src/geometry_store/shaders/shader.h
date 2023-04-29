@@ -3,6 +3,7 @@
 #include<iostream>
 #include<fstream>
 #include<string>
+#include<unordered_map>
 
 #include<GL\glew.h>
 #include<GLFW\glfw3.h>
@@ -21,19 +22,20 @@ class shader
 {
 private:
 	// Member variables
-	GLuint id; // OpenGL program ID
-	std::string loadShaderSource(char* fileName); // Function to load shader source from file
-	GLuint loadShader(GLenum type, char* fileName); // Function to load a shader of given type
-	void linkProgram(GLuint vertexShader, GLuint fragmentShader); // Function to link the shader program
-
+	unsigned int s_id; // OpenGL program ID
+	std::unordered_map<std::string, unsigned int> uniform_location_cache;
+	std::string loadShaderSource(const char* fileName); // Function to load shader source from file
+	unsigned int loadShader(GLenum type, const char* fileName); // Function to load a shader of given type
+	void linkProgram(unsigned int vertexShader, unsigned int fragmentShader); // Function to link the shader program
+	unsigned int get_uniform_location(const std::string uniform_name);
 public:
 	// Constructors/Destructors
-	shader(char* vertexFile, char* fragmentFile); // Constructor that takes vertex and fragment shader file names
+	shader(const char* vertexFile, const char* fragmentFile); // Constructor that takes vertex and fragment shader file path
 	~shader(); // Destructor to clean up OpenGL resources
 
 	// Shader usage functions
-	void Use(); // Function to use the shader program
-	void unUse(); // Function to unuse the shader program
+	void Bind(); // Function to use the shader program
+	void UnBind(); // Function to unuse the shader program
 
 	// Uniform setting functions
 	void setUniform(std::string name, float X, float Y); // Function to set a 2D float uniform
@@ -46,5 +48,5 @@ public:
 	void setUniform(std::string name, glm::vec4 X); // Function to set a vec4 uniform
 	void setUniform(std::string name, glm::vec3 X); // Function to set a vec3 uniform
 	void setUniform(std::string name, glm::vec2 X); // Function to set a vec2 uniform
-	void setUniform(int i, GLuint tid); // Function to set a texture uniform
+	void setUniform(int i, unsigned int tid); // Function to set a texture uniform
 };

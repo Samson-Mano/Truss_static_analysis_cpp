@@ -33,9 +33,9 @@ class menu_events
 public:
 	menu_events();
 	~menu_events();
-	void update_event(menu_item m_ck, geom_store* geom);
+	void update_event(menu_item m_ck, geom_store& geom);
 private:
 	std::string fileNameStr = "";  // Initialize with an empty string
 	std::string ShowFileDialog();
-	void import_varai2d_geometry(geom_store* geom);
+	void import_varai2d_geometry(geom_store& geom);
 };

@@ -63,6 +63,18 @@
     <ClCompile Include="src\geometry_store\shaders\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\VertexArray.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\VertexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\IndexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\VertexBufferLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -122,10 +134,24 @@
     <ClInclude Include="src\geometry_store\geom_store.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\VertexArray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\VertexBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\VertexBufferLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\glew32.dll" />
     <None Include="dlls\glfw3.dll" />
+    <None Include="src\geometry_store\shaders\geom_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png">

@@ -1,6 +1,11 @@
 #include <iostream>
-#include <windows.h>
 #include "src/app_window.h"
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#include <windows.h>
 
 int main()
 {

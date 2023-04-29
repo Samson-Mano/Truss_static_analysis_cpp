@@ -9,7 +9,7 @@ menu_events::~menu_events()
 {
 }
 
-void menu_events::update_event(menu_item m_ck, geom_store* geom)
+void menu_events::update_event(menu_item m_ck, geom_store& geom)
 {
 	// Menu item m is clicked
 	switch (m_ck)
@@ -82,7 +82,7 @@ std::string menu_events::ShowFileDialog()
 }
 
 
-void menu_events::import_varai2d_geometry(geom_store* geom)
+void menu_events::import_varai2d_geometry(geom_store& geom)
 {
 	std::string file_path = ShowFileDialog();
 	std::cout << "Selected File: " << file_path << std::endl;
@@ -190,6 +190,6 @@ void menu_events::import_varai2d_geometry(geom_store* geom)
 	}
 
 	// Re-instantitize geom_store object using the nodeMap and lineMap
-	geom->deleteResources();
-	*geom=geom_store(nodeMap, lineMap);
+	geom.deleteResources();
+	geom.create_geometry(nodeMap, lineMap);
 }

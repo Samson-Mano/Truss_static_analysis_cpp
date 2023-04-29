@@ -8,6 +8,8 @@ private:
 public:
 	int node_id;
 	glm::vec3 node_pt;
+	glm::vec3 default_color; // Store the default color of this node
+	glm::vec3 contour_color;
 	nodes_store();
 	nodes_store(int id, const glm::vec3& pt); // Constructor to initialize node_id and node_pt directly
 	~nodes_store();

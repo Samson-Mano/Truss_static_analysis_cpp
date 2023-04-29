@@ -142,6 +142,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app_window.cpp" />
     <ClCompile Include="ImGui\stb_implement.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\IndexBuffer.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\VertexArray.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\VertexBuffer.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\VertexBufferLayout.cpp" />
     <ClCompile Include="src\geometry_store\geom_store.cpp" />
     <ClCompile Include="src\geometry_store\lines_store.cpp" />
     <ClCompile Include="src\geometry_store\nodes_store.cpp" />
@@ -163,6 +167,10 @@
     <ClInclude Include="ImGui\stb_image.h" />
     <ClInclude Include="src\app_window.h" />
     <ClInclude Include="ImGui\stb_implement.h" />
+    <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h" />
+    <ClInclude Include="src\geometry_store\buffers\VertexArray.h" />
+    <ClInclude Include="src\geometry_store\buffers\VertexBuffer.h" />
+    <ClInclude Include="src\geometry_store\buffers\VertexBufferLayout.h" />
     <ClInclude Include="src\geometry_store\geom_store.h" />
     <ClInclude Include="src\geometry_store\lines_store.h" />
     <ClInclude Include="src\geometry_store\nodes_store.h" />
@@ -174,6 +182,8 @@
   <ItemGroup>
     <None Include="dlls\glew32.dll" />
     <None Include="dlls\glfw3.dll" />
+    <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\geom_vertex_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png" />
