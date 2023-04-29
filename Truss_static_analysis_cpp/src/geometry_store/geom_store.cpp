@@ -150,67 +150,62 @@ void geom_store::paint_geometry()
 	if (is_geometry_set == false)
 		return;
 
-	// Create a shader program
-	const char* vertexShaderSource =
-		"#version 330 core\n"
-		"layout (location = 0) in vec3 aPos;\n"
-		"layout (location = 1) in vec3 aColor;\n"
-		"out vec3 fColor;\n"
-		"void main()\n"
-		"{\n"
-		"    gl_Position = vec4(aPos, 1.0);\n"
-		"    fColor = aColor;\n"
-		"}\n";
-	const char* fragmentShaderSource =
-		"#version 330 core\n"
-		"in vec3 fColor;\n"
-		"out vec4 FragColor;\n"
-		"void main()\n"
-		"{\n"
-		"    FragColor = fColor;\n"
-		"}\n";
+	//// Create a shader program
+	//const char* vertexShaderSource =
+	//	"#version 330 core\n"
+	//	"layout (location = 0) in vec3 aPos;\n"
+	//	"layout (location = 1) in vec3 aColor;\n"
+	//	"out vec3 fColor;\n"
+	//	"void main()\n"
+	//	"{\n"
+	//	"    gl_Position = vec4(aPos, 1.0);\n"
+	//	"    fColor = aColor;\n"
+	//	"}\n";
+	//const char* fragmentShaderSource =
+	//	"#version 330 core\n"
+	//	"in vec3 fColor;\n"
+	//	"out vec4 FragColor;\n"
+	//	"void main()\n"
+	//	"{\n"
+	//	"    FragColor = fColor;\n"
+	//	"}\n";
 
-	// Create Vertex Shader Object and get its reference
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	// Attach Vertex Shader source to the Vertex Shader Object
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	// Compile the Vertex Shader into machine code
-	glCompileShader(vertexShader);
+	//// Create Vertex Shader Object and get its reference
+	//GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	//// Attach Vertex Shader source to the Vertex Shader Object
+	//glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+	//// Compile the Vertex Shader into machine code
+	//glCompileShader(vertexShader);
 
-	// Create Fragment Shader Object and get its reference
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	// Attach Fragment Shader source to the Fragment Shader Object
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	// Compile the Vertex Shader into machine code
-	glCompileShader(fragmentShader);
+	//// Create Fragment Shader Object and get its reference
+	//GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+	//// Attach Fragment Shader source to the Fragment Shader Object
+	//glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	//// Compile the Vertex Shader into machine code
+	//glCompileShader(fragmentShader);
 
-	// Create Shader Program Object and get its reference
-	GLuint shaderProgram = glCreateProgram();
-	// Attach the Vertex and Fragment Shaders to the Shader Program
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	// Wrap-up/Link all the shaders together into the Shader Program
-	glLinkProgram(shaderProgram);
+	//// Create Shader Program Object and get its reference
+	//GLuint shaderProgram = glCreateProgram();
+	//// Attach the Vertex and Fragment Shaders to the Shader Program
+	//glAttachShader(shaderProgram, vertexShader);
+	//glAttachShader(shaderProgram, fragmentShader);
+	//// Wrap-up/Link all the shaders together into the Shader Program
+	//glLinkProgram(shaderProgram);
 
-	// Delete the now useless Vertex and Fragment Shader objects
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
+	//// Delete the now useless Vertex and Fragment Shader objects
+	//glDeleteShader(vertexShader);
+	//glDeleteShader(fragmentShader);
 
 
 	// Clean the back buffer and assign the new color to it
-	glClear(GL_COLOR_BUFFER_BIT);
-	glUseProgram(shaderProgram);
-	//// glClear(GL_COLOR_BUFFER_BIT);
+	// glClear(GL_COLOR_BUFFER_BIT);
+	// glUseProgram(shaderProgram);
+
 	vao.Bind();
-	//vbo->Bind();
 	ibo.Bind();
 
 	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-	// glDrawArrays(GL_TRIANGLES, 0, 3);
-	vao.UnBind();
-	//vbo->UnBind();
-	ibo.UnBind();
 
-	//vao1.~VertexArray();
-	//ibo1.~IndexBuffer();
+	vao.UnBind();
+	ibo.UnBind();
 }

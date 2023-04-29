@@ -5,9 +5,8 @@
 #include "geometry_store/buffers/VertexBufferLayout.h"
 
 app_window::app_window()
+	:geom()
 {
-	geom_store geom();
-
 	// Main constructor
 	// Initialize GLFW
 	is_glwindow_success = false;
@@ -35,9 +34,6 @@ app_window::app_window()
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
 
-	// Initialize an empty geometry
-
-
 	// Initialize GLEW
 	if (glewInit() != GLEW_OK) {
 		log = "Failed to initialize GLEW";
@@ -53,7 +49,6 @@ app_window::app_window()
 
 	// Set the icon for the window
 	GLFWwindow_set_icon(window);
-
 
 	// Window initialize success
 	is_glwindow_success = true;
@@ -113,7 +108,6 @@ void app_window::app_render()
 		glClear(GL_COLOR_BUFFER_BIT);  // Clear the color buffer
 
 		geom.paint_geometry();
-
 
 		// Render ImGui UI
 		ImGui::Render();
