@@ -1,9 +1,16 @@
 # Status: In progress
 ## To DO List
-- Create the ImGUI menu bar events
-- Create the mouse events
-- Import the model data
-- Create class to handle the model data
+- ~~Create the ImGUI menu bar events~~
+- ~~Create the mouse events~~
+- ~~Import the model data~~
+- ~~Create class to handle the model data~~
+- Set up the vertex buffer, index buffer, buffer layout etc
+- Create a basic vertex & fragment shader
+- Define the model matrix as well as translate, zoom and rotate matrix for vertex shader
+- Paint the truss model with basic elements (as points and lines)
+- Implement circle for nodes (instead of points)
+- Implement rectangle for lines (instead of primitive line)
+
 
 
 # Plane truss finite element solver
