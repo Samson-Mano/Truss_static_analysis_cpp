@@ -1,7 +1,13 @@
 #include "shader.h"
 
+shader::shader()
+	:s_id(0), uniform_location_cache()
+{
+
+}
+
 // Constructor that takes vertex and fragment shader file names
-shader::shader(const char* vertexFile, const char* fragmentFile)
+void shader::create_shader(const char* vertexFile, const char* fragmentFile)
 {
 	// Load and compile the vertex shader
 	unsigned int vertexShader = loadShader(GL_VERTEX_SHADER, vertexFile);
@@ -23,6 +29,11 @@ shader::~shader()
 	glDeleteProgram(this->s_id);
 }
 
+unsigned int shader::get_shader_id() const
+{
+	return s_id;
+}
+
 // Load shader source from file and return as string
 std::string shader::loadShaderSource(const char* fileName)
 {
@@ -31,8 +42,13 @@ std::string shader::loadShaderSource(const char* fileName)
 
 	std::ifstream in_file; // Input file stream for reading from file
 
+	//std::filesystem::path original_dir = std::filesystem::current_path();
+	//std::filesystem::current_path("C:/Users/HFXMSZ/OneDrive - LR/ Documents/Programming/Other programs/Cpp_projects/Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders/");
+
 	// Open the file with the given file name
 	in_file.open(fileName);
+
+	// std::filesystem::current_path(original_dir);
 
 	if (in_file.is_open()) // Check if file was successfully opened
 	{
@@ -74,6 +90,7 @@ unsigned int shader::loadShader(GLenum type,const char* fileName)
 
 	return shader; // Return compiled shader object
 }
+
 
 // Link vertex and fragment shaders to create shader program
 void shader::linkProgram(unsigned int vertexShader, unsigned int fragmentShader)

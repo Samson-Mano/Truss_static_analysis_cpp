@@ -107,6 +107,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -182,6 +183,8 @@
   <ItemGroup>
     <None Include="dlls\glew32.dll" />
     <None Include="dlls\glfw3.dll" />
+    <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\basic_vert_shader.vert" />
     <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\geom_vertex_shader.vert" />
   </ItemGroup>

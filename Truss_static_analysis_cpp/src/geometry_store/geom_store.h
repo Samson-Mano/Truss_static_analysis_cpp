@@ -22,6 +22,9 @@ private:
 	std::unordered_map<int, nodes_store> nodeMap;
 	// Create an unordered_map to store lines with ID as key
 	std::unordered_map<int, lines_store> lineMap;
+	// Count
+	unsigned int node_count;
+	unsigned int line_count;
 	// store the bounds of geometry
 	glm::vec3 min_b; // (min_x, min_y,0)
 	glm::vec3 max_b; // (max_x, max_y,0)
@@ -29,15 +32,17 @@ private:
 	glm::vec3 center; // center of the geometry
 
 	// Store the openGL buffers
-	unsigned int shaderProgram;
 	VertexBuffer vbo;
 	VertexArray vao;
 	IndexBuffer ibo;
-	
+	shader sh;
+	shader model_sh;
+
 	// Functions to set the geometry
 	bool is_geometry_loaded;
 	bool is_geometry_set;
 	void set_geometry();
 	std::pair<glm::vec3, glm::vec3> findMinMaxXY(const std::unordered_map<int, nodes_store>& nodeMap);
 	glm::vec3 findGeometricCenter(const std::unordered_map<int, nodes_store>& nodeMap);
+	void set_model_matrix(shader& sh);
 };

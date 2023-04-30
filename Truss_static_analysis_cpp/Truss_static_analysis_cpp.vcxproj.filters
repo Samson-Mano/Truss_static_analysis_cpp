@@ -152,6 +152,8 @@
     <None Include="dlls\glfw3.dll" />
     <None Include="src\geometry_store\shaders\geom_vertex_shader.vert" />
     <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\basic_vert_shader.vert" />
+    <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png">

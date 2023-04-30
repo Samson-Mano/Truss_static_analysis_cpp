@@ -44,7 +44,7 @@ app_window::app_window()
 
 	// Set viewport size and register framebuffer resize callback
 	glfwGetFramebufferSize(window, &window_width, &window_height);
-	glViewport(0, 0, window_width, window_height);
+	// glViewport(0, 0, window_width, window_height);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	// Set the icon for the window
@@ -228,7 +228,15 @@ void app_window::menu_events()
 // allows it to be used as a callback function for the GLFW library
 void app_window::framebufferSizeCallback(GLFWwindow* window, int window_width, int window_height)
 {
-	glViewport(0, 0, window_width, window_height);
+	// Triggers when the openGL window is resized
+	int max_dim = window_width > window_height ? window_width : window_height;
+	int x_offset = (max_dim - window_width) / 2; // Calculate x offset to center the viewport
+	int y_offset = (max_dim - window_height) / 2; // Calculate y offset to center the viewport
+
+	// Set the viewport to the maximum dimension and center it at (0, 0)
+	glViewport(-x_offset, -y_offset, max_dim, max_dim);
+
+	// glViewport(0, 0, max_size, max_size);
 }
 
 void app_window::GLFWwindow_set_icon(GLFWwindow* window)

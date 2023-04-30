@@ -4,6 +4,7 @@
 #include<fstream>
 #include<string>
 #include<unordered_map>
+#include <filesystem>
 
 #include<GL\glew.h>
 #include<GLFW\glfw3.h>
@@ -30,9 +31,10 @@ private:
 	unsigned int get_uniform_location(const std::string uniform_name);
 public:
 	// Constructors/Destructors
-	shader(const char* vertexFile, const char* fragmentFile); // Constructor that takes vertex and fragment shader file path
+	shader();
 	~shader(); // Destructor to clean up OpenGL resources
 
+	void create_shader(const char* vertexFile, const char* fragmentFile);// Function that takes vertex and fragment shader file path
 	// Shader usage functions
 	void Bind(); // Function to use the shader program
 	void UnBind(); // Function to unuse the shader program
@@ -49,4 +51,5 @@ public:
 	void setUniform(std::string name, glm::vec3 X); // Function to set a vec3 uniform
 	void setUniform(std::string name, glm::vec2 X); // Function to set a vec2 uniform
 	void setUniform(int i, unsigned int tid); // Function to set a texture uniform
+	unsigned int get_shader_id() const;
 };

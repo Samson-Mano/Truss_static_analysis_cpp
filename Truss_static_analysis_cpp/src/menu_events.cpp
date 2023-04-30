@@ -189,6 +189,13 @@ void menu_events::import_varai2d_geometry(geom_store& geom)
 		j++;
 	}
 
+	if (nodeMap.size() < 1 || lineMap.size() < 1)
+	{
+		// No elements added
+		return;
+	}
+
+
 	// Re-instantitize geom_store object using the nodeMap and lineMap
 	geom.deleteResources();
 	geom.create_geometry(nodeMap, lineMap);

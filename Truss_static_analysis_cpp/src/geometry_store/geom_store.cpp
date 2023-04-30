@@ -3,22 +3,26 @@
 geom_store::geom_store()
 	: is_geometry_set(false),
 	is_geometry_loaded(false),
+	node_count(0), line_count(0),
 	min_b(glm::vec3(0)),
 	max_b(glm::vec3(0)),
 	geom_bound(glm::vec3(0)),
 	center(glm::vec3(0)),
-	shaderProgram(0),
-	vao(),vbo(),ibo()
+	vao(), vbo(), ibo(), sh(), model_sh()
 {
 	// Empty constructor
 }
 
-void geom_store::create_geometry(const std::unordered_map<int, nodes_store>& nodeMap, 
+void geom_store::create_geometry(const std::unordered_map<int, nodes_store>& nodeMap,
 	std::unordered_map<int, lines_store>& lineMap)
 {
 	// Constructor
 	this->nodeMap = nodeMap;
 	this->lineMap = lineMap;
+
+	// Set the number of nodes and lines
+	node_count = static_cast<unsigned int>(nodeMap.size());
+	line_count = static_cast<unsigned int>(lineMap.size());
 
 	// Set the boundary of the geometry
 	std::pair<glm::vec3, glm::vec3> result = findMinMaxXY(nodeMap);
@@ -111,13 +115,133 @@ void geom_store::set_geometry()
 	if (is_geometry_loaded == false)
 		return;
 
-
-
-	/*shader main_shader("/shaders/geom_vertex_shader.vert", "/shaders/geom_frag_shader.frag");
-	main_shader.Bind();*/
 	// Set the geometry
-// Define the vertices of the triangle
-	float vertices[] = {
+	// Define the vertices of the model
+	const unsigned int vertex_size = 6 * node_count;
+
+	float* vertices = new float[vertex_size]; //dynamic array
+	std::unordered_map<int, int> node_id_map;
+
+	// Assuming you have an index variable to keep track of the array position
+	int index = 0;
+	int v_id = 0;
+
+	for (const auto& node : nodeMap)
+	{
+		// node_store
+		// Add the node id to map
+		node_id_map[node.first] = v_id;
+		// Add the node point
+		vertices[index + 0] = node.second.node_pt.x;
+		vertices[index + 1] = node.second.node_pt.y;
+		vertices[index + 2] = node.second.node_pt.z;
+
+		vertices[index + 3] = node.second.default_color.x;
+		vertices[index + 4] = node.second.default_color.y;
+		vertices[index + 5] = node.second.default_color.z;
+
+		v_id++;
+		index = index + 6;
+	}
+
+	// Define the indices of the lines of the model
+	const int indices_size = 2 * line_count;
+
+	unsigned int* indices = new unsigned int[indices_size];
+	index = 0;
+
+	for (const auto& line : lineMap)
+	{
+		// Add the node point
+		indices[index + 0] = node_id_map[line.second.s_nd.node_id];
+		indices[index + 1] = node_id_map[line.second.e_nd.node_id];
+
+		index = index + 2;
+	}
+
+	vao.createVertexArray();
+
+	// Vertex buffer (vertices and number of vertices * sizeof(float)
+	vbo.createVertexBuffer((void*)vertices, vertex_size * sizeof(float));
+
+	// Index buffer (indices and number of indices)
+	ibo.createIndexBuffer((unsigned int*)indices, indices_size);
+
+	VertexBufferLayout layout;
+	layout.AddFloat(3);  // Position
+	layout.AddFloat(3);  // Color
+
+	vao.AddBuffer(vbo, layout);
+
+	// Create shader
+	model_sh.create_shader("C:/Users/HFXMSZ/OneDrive - LR/Documents/Programming/Other programs/Cpp_projects/Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders/geom_vertex_shader.vert",
+		"C:/Users/HFXMSZ/OneDrive - LR/Documents/Programming/Other programs/Cpp_projects/Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders/geom_frag_shader.frag");
+
+	// Set the model matrix
+	set_model_matrix(model_sh);
+
+	// Set the rotation matrix
+	glm::mat4 rotationMatrix(1.0f);
+
+	model_sh.setUniform("rotationMatrix", rotationMatrix, false);
+
+	glm::mat4 panTranslation(1.0f);
+
+	model_sh.setUniform("panTranslation", panTranslation, false);
+
+	float zoomscale = 1.0f;
+
+	model_sh.setUniform("zoomscale", zoomscale);
+
+	// Geometry is set
+	is_geometry_set = true;
+
+	// Delete the Dynamic arrays
+	delete[] vertices;
+	delete[] indices;
+}
+
+void geom_store::paint_geometry()
+{
+	if (is_geometry_set == false)
+		return;
+
+	// Clean the back buffer and assign the new color to it
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	model_sh.Bind();
+	vao.Bind();
+	ibo.Bind();
+
+	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
+
+	model_sh.UnBind();
+	vao.UnBind();
+	ibo.UnBind();
+}
+
+void geom_store::set_model_matrix(shader& sh)
+{
+	// Set the model matrix for the model shader
+	// Find the scale of the model (with 0.5 being the maximum used)
+
+	float geom_scale = 0.8f / std::max(geom_bound.x, geom_bound.y);
+
+	// Translation
+	glm::vec3 geom_translation = glm::vec3(-1.0f * (max_b.x + min_b.x) * 0.5f * geom_scale,
+		-1.0f * (max_b.y + min_b.y) * 0.5f * geom_scale,
+		-1.0f * (max_b.z + min_b.z) * 0.5f * geom_scale);
+
+	glm::mat4 g_transl = glm::translate(glm::mat4(1.0f), geom_translation);
+
+	glm::mat4 modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(geom_scale));
+
+	model_sh.setUniform("modelMatrix", modelMatrix, false);
+}
+
+/*
+
+float vertices[] = {
 		// Position          // Color
 		-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
@@ -141,71 +265,5 @@ void geom_store::set_geometry()
 
 	vao.AddBuffer(vbo, layout);
 
-	// Geometry is set
-	is_geometry_set = true;
-}
 
-void geom_store::paint_geometry()
-{
-	if (is_geometry_set == false)
-		return;
-
-	//// Create a shader program
-	//const char* vertexShaderSource =
-	//	"#version 330 core\n"
-	//	"layout (location = 0) in vec3 aPos;\n"
-	//	"layout (location = 1) in vec3 aColor;\n"
-	//	"out vec3 fColor;\n"
-	//	"void main()\n"
-	//	"{\n"
-	//	"    gl_Position = vec4(aPos, 1.0);\n"
-	//	"    fColor = aColor;\n"
-	//	"}\n";
-	//const char* fragmentShaderSource =
-	//	"#version 330 core\n"
-	//	"in vec3 fColor;\n"
-	//	"out vec4 FragColor;\n"
-	//	"void main()\n"
-	//	"{\n"
-	//	"    FragColor = fColor;\n"
-	//	"}\n";
-
-	//// Create Vertex Shader Object and get its reference
-	//GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	//// Attach Vertex Shader source to the Vertex Shader Object
-	//glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	//// Compile the Vertex Shader into machine code
-	//glCompileShader(vertexShader);
-
-	//// Create Fragment Shader Object and get its reference
-	//GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	//// Attach Fragment Shader source to the Fragment Shader Object
-	//glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	//// Compile the Vertex Shader into machine code
-	//glCompileShader(fragmentShader);
-
-	//// Create Shader Program Object and get its reference
-	//GLuint shaderProgram = glCreateProgram();
-	//// Attach the Vertex and Fragment Shaders to the Shader Program
-	//glAttachShader(shaderProgram, vertexShader);
-	//glAttachShader(shaderProgram, fragmentShader);
-	//// Wrap-up/Link all the shaders together into the Shader Program
-	//glLinkProgram(shaderProgram);
-
-	//// Delete the now useless Vertex and Fragment Shader objects
-	//glDeleteShader(vertexShader);
-	//glDeleteShader(fragmentShader);
-
-
-	// Clean the back buffer and assign the new color to it
-	// glClear(GL_COLOR_BUFFER_BIT);
-	// glUseProgram(shaderProgram);
-
-	vao.Bind();
-	ibo.Bind();
-
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-
-	vao.UnBind();
-	ibo.UnBind();
-}
+*/
