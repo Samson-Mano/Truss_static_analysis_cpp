@@ -4,13 +4,14 @@
 - ~~Create the mouse events~~
 - ~~Import the model data~~
 - ~~Create class to handle the model data~~
-- Set up the vertex buffer, index buffer, buffer layout etc
-- Create a basic vertex & fragment shader
-- Define the model matrix as well as translate, zoom and rotate matrix for vertex shader
-- Paint the truss model with basic elements (as points and lines)
+- ~~Set up the vertex buffer, index buffer, buffer layout etc~~
+- ~~Create a basic vertex & fragment shader~~
+- ~~Define the model matrix as well as translate, zoom and rotate matrix for vertex shader~~
+- ~~Paint the truss model with basic elements (as points and lines)~~
+- Fit the imported geometry with proper geometry scale
 - Implement circle for nodes (instead of points)
 - Implement rectangle for lines (instead of primitive line)
-
+- UI for adding constraint
 
 
 # Plane truss finite element solver
