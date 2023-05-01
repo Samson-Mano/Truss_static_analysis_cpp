@@ -1,5 +1,21 @@
 #include "mouse_event_handler.h"
 
+mouse_event_handler::mouse_event_handler()
+	:isCtrlDown(false), mouse_click()
+{
+	// Constructor
+}
+
+mouse_event_handler::~mouse_event_handler()
+{
+	// Destructor
+}
+
+void mouse_event_handler::add_geometry_ptr(geom_store* geom)
+{
+	mouse_click.add_geometry_ptr(geom);
+}
+
 // Mouse button callback function
 void mouse_event_handler::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -59,7 +75,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (isCtrlDown == true)
 			{
 				// Rotate operation start
-				mouse_click.rotation_operation_start(&xpos, &ypos);
+				mouse_click.rotation_operation_start(xpos, ypos);
 			}
 		}
 		else if (action == GLFW_RELEASE)
@@ -75,7 +91,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (deltaX == 0.0 && deltaY == 0.0 && currentTime - lastClickTime < 0.2)
 			{
 				// Left Mouse click
-				mouse_click.left_mouse_click(&xpos, &ypos);
+				mouse_click.left_mouse_click(xpos, ypos);
 			}
 
 			// Update last position
@@ -86,7 +102,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (currentTime - lastClickTime < 0.5 && lastButton == GLFW_MOUSE_BUTTON_LEFT)
 			{
 				// Left Mouse double click
-				mouse_click.left_mouse_doubleclick(&xpos, &ypos);
+				mouse_click.left_mouse_doubleclick(xpos, ypos);
 			}
 		}
 	}
@@ -103,7 +119,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (isCtrlDown == true)
 			{
 				// Pan operation start
-				mouse_click.pan_operation_start(&xpos, &ypos);
+				mouse_click.pan_operation_start(xpos, ypos);
 			}
 		}
 		else if (action == GLFW_RELEASE)
@@ -119,7 +135,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (deltaX == 0.0 && deltaY == 0.0 && currentTime - lastClickTime < 0.2)
 			{
 				// Right Mouse click
-				mouse_click.right_mouse_click(&xpos, &ypos);
+				mouse_click.right_mouse_click(xpos, ypos);
 			}
 
 			// Update last position
@@ -130,7 +146,7 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (currentTime - lastClickTime < 0.5 && lastButton == GLFW_MOUSE_BUTTON_RIGHT)
 			{
 				// Right Mouse double click
-				mouse_click.right_mouse_doubleclick(&xpos, &ypos);
+				mouse_click.right_mouse_doubleclick(xpos, ypos);
 			}
 		}
 	}
@@ -144,14 +160,14 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 void mouse_event_handler::handleMouseMove(double xpos, double ypos)
 {
 	// Mouse move operation
-	mouse_click.mouse_location(&xpos, &ypos);
+	mouse_click.mouse_location(xpos, ypos);
 }
 
 void mouse_event_handler::handleMouseScroll(double xoffset, double yoffset, double xpos, double ypos)
 {
 	if (isCtrlDown == true)
 	{
-		mouse_click.zoom_operation(&yoffset, &xpos, &ypos);
+		mouse_click.zoom_operation(yoffset, xpos, ypos);
 	}
 }
 

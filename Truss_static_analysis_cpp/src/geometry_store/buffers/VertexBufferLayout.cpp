@@ -30,15 +30,3 @@ void VertexBufferLayout::Push(unsigned int type, unsigned int count, unsigned ch
     m_Elements.push_back({ type, count, normalized });// Add a new element of type GL_FLOAT, GL_UNSIGNED_INT, GL_UNSIGNED_BYTE to the vector
     m_Stride += count * VertexBufferElement::GetSizeOfType(type); // Increase the stride by the size of the new element
 }
-
-// Getter function that returns the vector of vertex buffer elements
-const std::vector<VertexBufferElement>& VertexBufferLayout::GetElements() const
-{ 
-    return m_Elements; 
-}
-
-// Getter function that returns the stride of the vertex buffer layout in bytes
-unsigned int VertexBufferLayout::GetStride() const
-{ 
-    return m_Stride; 
-}

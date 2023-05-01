@@ -24,11 +24,11 @@ class shader
 private:
 	// Member variables
 	unsigned int s_id; // OpenGL program ID
-	std::unordered_map<std::string, unsigned int> uniform_location_cache;
+	std::unordered_map<std::string,int> uniform_location_cache;
 	std::string loadShaderSource(const char* fileName); // Function to load shader source from file
 	unsigned int loadShader(GLenum type, const char* fileName); // Function to load a shader of given type
 	void linkProgram(unsigned int vertexShader, unsigned int fragmentShader); // Function to link the shader program
-	unsigned int get_uniform_location(const std::string uniform_name);
+	int get_uniform_location(const std::string uniform_name);
 public:
 	// Constructors/Destructors
 	shader();

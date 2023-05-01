@@ -117,7 +117,7 @@ void shader::linkProgram(unsigned int vertexShader, unsigned int fragmentShader)
 	glUseProgram(0); // Unbind shader program
 }
 
-unsigned int shader::get_uniform_location(const std::string uniform_name)
+int shader::get_uniform_location(const std::string uniform_name)
 {
 	// Return the uniform location
 	if (uniform_location_cache.find(uniform_name) != uniform_location_cache.end())
@@ -127,7 +127,7 @@ unsigned int shader::get_uniform_location(const std::string uniform_name)
 
 	// Uniform is not found in the hashtable ? Dictionary
 	// So add it to the dictionary
-	unsigned int uniform_location_id = glGetUniformLocation(this->s_id, uniform_name.c_str());
+	int uniform_location_id = glGetUniformLocation(this->s_id, uniform_name.c_str());
 	uniform_location_cache[uniform_name] = uniform_location_id;
 
 	return uniform_location_id;
@@ -159,7 +159,7 @@ void shader::setUniform(std::string name, float X, float Y, float Z) // Function
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 	glUniform3f(uniformLocation, X, Y, Z); // Set the 3D float uniform with the provided values for X, Y and Z
 
 	UnBind(); // Un-use the shader program
@@ -169,7 +169,7 @@ void shader::setUniform(std::string name, float X, float Y, float Z, float W) //
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 	glUniform4f(uniformLocation, X, Y, Z,W); // Set the 4D float uniform with the provided values for X, Y and Z
 
 	UnBind(); // Un-use the shader program
@@ -179,7 +179,7 @@ void shader::setUniform(std::string name, float X) // Function to set a float un
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 	glUniform1f(uniformLocation, X); // Set the 1D float uniform with the provided value for X
 
 	UnBind(); // Un-use the shader program
@@ -189,7 +189,7 @@ void shader::setUniform(std::string name, int X) // Function to set an integer u
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 	glUniform1i(uniformLocation, X); // Set the 1D int uniform with the provided value for X
 
 	UnBind(); // Un-use the shader program
@@ -199,7 +199,7 @@ void shader::setUniform(std::string name, glm::mat3 X, bool transpose) // Functi
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 
 	if (transpose)
 	{
@@ -217,7 +217,7 @@ void shader::setUniform(std::string name, glm::mat4 X, bool transpose) // Functi
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 
 	if (transpose)
 	{
@@ -235,7 +235,7 @@ void shader::setUniform(std::string name, glm::vec4 X) // Function to set a vec4
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 
 	glUniform4fv(uniformLocation, 1, glm::value_ptr(X)); // Set the vec4 uniform with the provided value for X
 
@@ -246,7 +246,7 @@ void shader::setUniform(std::string name, glm::vec3 X) // Function to set a vec3
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 
 	glUniform3fv(uniformLocation, 1, glm::value_ptr(X)); // Set the vec3 uniform with the provided value for X
 
@@ -257,7 +257,7 @@ void shader::setUniform(std::string name, glm::vec2 X) // Function to set a vec2
 {
 	Bind(); // Use the shader program
 
-	unsigned int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
+	int uniformLocation = glGetUniformLocation(this->s_id, name.c_str()); // Get the uniform location using the provided name
 
 	glUniform2fv(uniformLocation, 1, glm::value_ptr(X)); // Set the vec2 uniform with the provided value for X
 

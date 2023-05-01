@@ -4,10 +4,11 @@
 #include <glm/glm.hpp>
 #include "nodes_store.h"
 #include "lines_store.h"
-#include "buffers/VertexBuffer.h"
-#include "buffers/IndexBuffer.h"
-#include "buffers/VertexArray.h"
+#include "buffers/gBuffers.h"
+#include "buffers/Texture.h"
 #include "shaders/shader.h"
+#include "../../ImGui/stb_image.h"
+#include <filesystem>
 
 class geom_store
 {
@@ -16,7 +17,10 @@ public:
 	~geom_store();
 	void create_geometry(const std::unordered_map<int, nodes_store>& nodeMap, std::unordered_map<int, lines_store>& lineMap);
 	void paint_geometry();
+	void updateWindowDimension(const int& window_width, const int& window_height);
 	void deleteResources();
+	void zoomfit_geometry();
+	void pan_geometry(glm::vec2& transl);
 private:
 	// Create an unordered_map to store nodes with ID as key
 	std::unordered_map<int, nodes_store> nodeMap;
@@ -32,17 +36,20 @@ private:
 	glm::vec3 center; // center of the geometry
 
 	// Store the openGL buffers
-	VertexBuffer vbo;
-	VertexArray vao;
-	IndexBuffer ibo;
-	shader sh;
+	gBuffers line_buffer;
+	gBuffers node_buffer;
+	Texture node_texture;
+
+	shader node_sh;
 	shader model_sh;
 
 	// Functions to set the geometry
+	int window_width;
+	int window_height;
 	bool is_geometry_loaded;
 	bool is_geometry_set;
 	void set_geometry();
 	std::pair<glm::vec3, glm::vec3> findMinMaxXY(const std::unordered_map<int, nodes_store>& nodeMap);
 	glm::vec3 findGeometricCenter(const std::unordered_map<int, nodes_store>& nodeMap);
-	void set_model_matrix(shader& sh);
+	void set_model_matrix();
 };

@@ -143,7 +143,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app_window.cpp" />
     <ClCompile Include="ImGui\stb_implement.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\gBuffers.cpp" />
     <ClCompile Include="src\geometry_store\buffers\IndexBuffer.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\Texture.cpp" />
     <ClCompile Include="src\geometry_store\buffers\VertexArray.cpp" />
     <ClCompile Include="src\geometry_store\buffers\VertexBuffer.cpp" />
     <ClCompile Include="src\geometry_store\buffers\VertexBufferLayout.cpp" />
@@ -168,7 +170,9 @@
     <ClInclude Include="ImGui\stb_image.h" />
     <ClInclude Include="src\app_window.h" />
     <ClInclude Include="ImGui\stb_implement.h" />
+    <ClInclude Include="src\geometry_store\buffers\gBuffers.h" />
     <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h" />
+    <ClInclude Include="src\geometry_store\buffers\Texture.h" />
     <ClInclude Include="src\geometry_store\buffers\VertexArray.h" />
     <ClInclude Include="src\geometry_store\buffers\VertexBuffer.h" />
     <ClInclude Include="src\geometry_store\buffers\VertexBufferLayout.h" />
@@ -187,9 +191,13 @@
     <None Include="src\geometry_store\shaders\basic_vert_shader.vert" />
     <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\geom_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\node_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\node_vertex_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png" />
+    <Image Include="src\geometry_store\shaders\node_texture.png" />
+    <Image Include="src\geometry_store\shaders\node_texture2.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Images\font\FreeSans.ttf" />

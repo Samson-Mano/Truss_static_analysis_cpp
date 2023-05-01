@@ -4,6 +4,10 @@
 #include "geometry_store/buffers/VertexBuffer.h"
 #include "geometry_store/buffers/VertexBufferLayout.h"
 
+int app_window::window_width = 800;
+int app_window::window_height = 600;
+bool app_window::isWindowSizeChanging = false;
+
 app_window::app_window()
 	:geom()
 {
@@ -44,8 +48,8 @@ app_window::app_window()
 
 	// Set viewport size and register framebuffer resize callback
 	glfwGetFramebufferSize(window, &window_width, &window_height);
-	// glViewport(0, 0, window_width, window_height);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+	geom.updateWindowDimension(window_width, window_height);
 
 	// Set the icon for the window
 	GLFWwindow_set_icon(window);
@@ -55,6 +59,7 @@ app_window::app_window()
 
 	// Set the mouse button callback function with the user pointer pointing to the mouseHandler object
 	glfwSetWindowUserPointer(window, &mouse_Handler);
+	mouse_Handler.add_geometry_ptr(&geom);
 	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
 
 	// Set the mouse move callback function with the user pointer pointing to the mouseHandler object
@@ -107,6 +112,14 @@ void app_window::app_render()
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Set the clear color to black
 		glClear(GL_COLOR_BUFFER_BIT);  // Clear the color buffer
 
+		// Window size change event
+		if (isWindowSizeChanging == true)
+		{
+			geom.updateWindowDimension(window_width, window_height);
+		}
+		isWindowSizeChanging = false;
+
+		// Paint the geometry
 		geom.paint_geometry();
 
 		// Render ImGui UI
@@ -229,6 +242,9 @@ void app_window::menu_events()
 void app_window::framebufferSizeCallback(GLFWwindow* window, int window_width, int window_height)
 {
 	// Triggers when the openGL window is resized
+	app_window::window_width = window_width;
+	app_window::window_height = window_height;
+
 	int max_dim = window_width > window_height ? window_width : window_height;
 	int x_offset = (max_dim - window_width) / 2; // Calculate x offset to center the viewport
 	int y_offset = (max_dim - window_height) / 2; // Calculate y offset to center the viewport
@@ -236,8 +252,10 @@ void app_window::framebufferSizeCallback(GLFWwindow* window, int window_width, i
 	// Set the viewport to the maximum dimension and center it at (0, 0)
 	glViewport(-x_offset, -y_offset, max_dim, max_dim);
 
+	isWindowSizeChanging = true;
 	// glViewport(0, 0, max_size, max_size);
 }
+
 
 void app_window::GLFWwindow_set_icon(GLFWwindow* window)
 {

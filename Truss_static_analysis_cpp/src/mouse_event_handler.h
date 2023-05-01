@@ -4,15 +4,19 @@
 #include <GLFW/glfw3.h>
 #include "mouse_events.h"
 #include "../ImGui/imgui.h"
+#include "geometry_store/geom_store.h"
 
 class mouse_event_handler {
 private:
 	bool isCtrlDown = false; // Flag to indicate if Ctrl key is currently pressed
 	mouse_events mouse_click;
+	// geom_store* geom;
 public:
 		// Constructor
-	mouse_event_handler() {}
+	mouse_event_handler();
+	~mouse_event_handler();
 
+	void add_geometry_ptr(geom_store* geom);
 	// Mouse button callback function
 	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	// Mouse move callback function

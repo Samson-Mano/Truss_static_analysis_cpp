@@ -7,8 +7,8 @@ geom_store::geom_store()
 	min_b(glm::vec3(0)),
 	max_b(glm::vec3(0)),
 	geom_bound(glm::vec3(0)),
-	center(glm::vec3(0)),
-	vao(), vbo(), ibo(), sh(), model_sh()
+	center(glm::vec3(0)), window_width(0), window_height(0),
+	line_buffer(), node_buffer(), node_texture(), node_sh(), model_sh()
 {
 	// Empty constructor
 }
@@ -117,9 +117,12 @@ void geom_store::set_geometry()
 
 	// Set the geometry
 	// Define the vertices of the model
-	const unsigned int vertex_size = 6 * node_count;
+	const unsigned int vertex_count = 8 * node_count;
+	unsigned int vertex_indices_count = node_count;
 
-	float* vertices = new float[vertex_size]; //dynamic array
+	float* vertices = new float[vertex_count]; //dynamic array
+	unsigned int* vertex_indices = new unsigned int[vertex_indices_count];
+
 	std::unordered_map<int, int> node_id_map;
 
 	// Assuming you have an index variable to keep track of the array position
@@ -136,69 +139,82 @@ void geom_store::set_geometry()
 		vertices[index + 1] = node.second.node_pt.y;
 		vertices[index + 2] = node.second.node_pt.z;
 
+		// Node default color
 		vertices[index + 3] = node.second.default_color.x;
 		vertices[index + 4] = node.second.default_color.y;
 		vertices[index + 5] = node.second.default_color.z;
 
+		// Node Texture
+		vertices[index + 6] = 0.0f;
+		vertices[index + 7] = 0.0f;
+
+		vertex_indices[v_id] = v_id;
 		v_id++;
-		index = index + 6;
+		index = index + 8;
 	}
 
 	// Define the indices of the lines of the model
-	const int indices_size = 2 * line_count;
+	unsigned int line_indices_count = 2 * line_count;
 
-	unsigned int* indices = new unsigned int[indices_size];
+	unsigned int* line_indices = new unsigned int[line_indices_count];
 	index = 0;
 
 	for (const auto& line : lineMap)
 	{
 		// Add the node point
-		indices[index + 0] = node_id_map[line.second.s_nd.node_id];
-		indices[index + 1] = node_id_map[line.second.e_nd.node_id];
+		line_indices[index + 0] = node_id_map[line.second.s_nd.node_id];
+		line_indices[index + 1] = node_id_map[line.second.e_nd.node_id];
 
 		index = index + 2;
 	}
 
-	vao.createVertexArray();
-
-	// Vertex buffer (vertices and number of vertices * sizeof(float)
-	vbo.createVertexBuffer((void*)vertices, vertex_size * sizeof(float));
-
-	// Index buffer (indices and number of indices)
-	ibo.createIndexBuffer((unsigned int*)indices, indices_size);
+	unsigned int vertex_size = vertex_count * sizeof(float);
 
 	VertexBufferLayout layout;
 	layout.AddFloat(3);  // Position
 	layout.AddFloat(3);  // Color
+	layout.AddFloat(2);  // Texture co-ordinate
 
-	vao.AddBuffer(vbo, layout);
+	// Create the Line buffers
+	line_buffer.CreateBuffers((void*)vertices, vertex_size, (unsigned int*)line_indices, line_indices_count, layout);
+
+	// Create the Node buffers
+	node_buffer.CreateBuffers((void*)vertices, vertex_size, (unsigned int*)vertex_indices, vertex_indices_count, layout);
 
 	// Create shader
-	model_sh.create_shader("C:/Users/HFXMSZ/OneDrive - LR/Documents/Programming/Other programs/Cpp_projects/Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders/geom_vertex_shader.vert",
-		"C:/Users/HFXMSZ/OneDrive - LR/Documents/Programming/Other programs/Cpp_projects/Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders/geom_frag_shader.frag");
+	std::filesystem::path currentDirPath = std::filesystem::current_path();
+	std::filesystem::path parentPath = currentDirPath.parent_path();
+	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::string parentString = shadersPath.string();
+	std::cout << "Parent path: " << parentString << std::endl;
+
+	// Model shader
+	model_sh.create_shader((shadersPath.string() + "/geom_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/geom_frag_shader.frag").c_str());
+
+	// Node shader
+	node_sh.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/node_frag_shader.frag").c_str());
+
+	node_texture.LoadTexture((shadersPath.string() + "/node_texture2.png").c_str());
+	node_texture.Bind();
+	node_sh.setUniform("u_Texture", 0);
+
 
 	// Set the model matrix
-	set_model_matrix(model_sh);
+	set_model_matrix();
 
-	// Set the rotation matrix
-	glm::mat4 rotationMatrix(1.0f);
+	// Set the model to zoom fit (No pan, No rotation, No zoom scale)
+	zoomfit_geometry();
 
-	model_sh.setUniform("rotationMatrix", rotationMatrix, false);
-
-	glm::mat4 panTranslation(1.0f);
-
-	model_sh.setUniform("panTranslation", panTranslation, false);
-
-	float zoomscale = 1.0f;
-
-	model_sh.setUniform("zoomscale", zoomscale);
 
 	// Geometry is set
 	is_geometry_set = true;
 
 	// Delete the Dynamic arrays
 	delete[] vertices;
-	delete[] indices;
+	delete[] vertex_indices;
+	delete[] line_indices;
 }
 
 void geom_store::paint_geometry()
@@ -208,24 +224,42 @@ void geom_store::paint_geometry()
 
 	// Clean the back buffer and assign the new color to it
 	glClear(GL_COLOR_BUFFER_BIT);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// Paint the Lines
 	model_sh.Bind();
-	vao.Bind();
-	ibo.Bind();
-
+	line_buffer.Bind();
 	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
-
+	line_buffer.UnBind();
 	model_sh.UnBind();
-	vao.UnBind();
-	ibo.UnBind();
+
+	// Paint the Nodes
+	node_sh.Bind();
+	node_buffer.Bind();
+	glPointSize(8.0f);
+	glDrawElements(GL_POINTS, node_count, GL_UNSIGNED_INT, 0);
+	node_buffer.UnBind();
+	node_sh.UnBind();
+
+	//model_sh.UnBind();
+
+	// GL.DrawElements(PrimitiveType.Points, this._point_indices.Length, DrawElementsType.UnsignedInt, 0);
+
+
 }
 
-void geom_store::set_model_matrix(shader& sh)
+void geom_store::set_model_matrix()
 {
 	// Set the model matrix for the model shader
 	// Find the scale of the model (with 0.5 being the maximum used)
+	int max_dim = window_width > window_height ? window_width : window_height;
 
-	float geom_scale = 0.8f / std::max(geom_bound.x, geom_bound.y);
+	float normalized_screen_width = 1.8f * (float(window_width) / float(max_dim));
+	float normalized_screen_height = 1.8f * (float(window_height) / float(max_dim));
+
+
+	float geom_scale = std::min(normalized_screen_width / geom_bound.x,
+		normalized_screen_height / geom_bound.y);
 
 	// Translation
 	glm::vec3 geom_translation = glm::vec3(-1.0f * (max_b.x + min_b.x) * 0.5f * geom_scale,
@@ -237,33 +271,64 @@ void geom_store::set_model_matrix(shader& sh)
 	glm::mat4 modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(geom_scale));
 
 	model_sh.setUniform("modelMatrix", modelMatrix, false);
+	node_sh.setUniform("modelMatrix", modelMatrix, false);
 }
 
-/*
+void geom_store::updateWindowDimension(const int& window_width, const int& window_height)
+{
+	// Update the window dimension
+	this->window_width = window_width;
+	this->window_height = window_height;
+	// float mmatrix_scale = std::min(float(window_width) / model_width, float(window_height) / model_height);
 
-float vertices[] = {
-		// Position          // Color
-		-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f
-	};
+	if (is_geometry_set == true)
+	{
+		// Update the model matrix
+		set_model_matrix();
+		zoomfit_geometry();
+	}
 
-	// Define the indices of the triangle
-	unsigned int indices[] = {
-		0, 1, 2
-	};
+}
 
-	vao.createVertexArray();
-	vbo.createVertexBuffer(vertices, 3 * 6 * sizeof(float));
+void geom_store::zoomfit_geometry()
+{
+	// Zoom Fit the geometry
+	// Set the rotation matrix
+	glm::mat4 rotationMatrix(1.0f);
 
-	// Create an index buffer object and bind it to the vertex array object
-	ibo.createIndexBuffer(indices, 3);
+	model_sh.setUniform("rotationMatrix", rotationMatrix, false);
+	node_sh.setUniform("rotationMatrix", rotationMatrix, false);
 
-	VertexBufferLayout layout;
-	layout.AddFloat(3);  // Position
-	layout.AddFloat(3);  // Color
+	// Set the pan translation matrix
+	glm::mat4 panTranslation(1.0f);
 
-	vao.AddBuffer(vbo, layout);
+	model_sh.setUniform("panTranslation", panTranslation, false);
+	node_sh.setUniform("panTranslation", panTranslation, false);
+
+	// Set the zoom matrix
+	float zoomscale = 1.0f;
+
+	model_sh.setUniform("zoomscale", zoomscale);
+	node_sh.setUniform("zoomscale", zoomscale);
+}
 
 
-*/
+void geom_store::pan_geometry(glm::vec2& transl)
+{
+	int max_dim = window_width > window_height ? window_width : window_height;
+
+	// Pan Translation
+	float x_transl = 2 * ((-transl.x) / float(max_dim));
+	float y_transl = 2 * ((-transl.y) / float(max_dim));
+
+	// std::cout << "Pan translation " << x_transl << ", " << y_transl << std::endl;
+
+	glm::mat4 panTranslation(1.0f);
+
+	panTranslation[0][3] = x_transl;
+	panTranslation[1][3] = y_transl;
+
+	model_sh.setUniform("panTranslation", panTranslation, false);
+	node_sh.setUniform("panTranslation", panTranslation, false);
+
+}

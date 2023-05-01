@@ -7,8 +7,9 @@ uniform float zoomscale;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 vertexColor;
+layout(location = 2) in vec2 textureCoord;
 
-out vec3 v_Color;
+out vec2 v_textureCoord;
 
 void main()
 {
@@ -22,6 +23,6 @@ void main()
 	// apply Translation to the final position 
 	vec4 finalPosition = rotatedModelMatrix * vec4(position,1.0f) * panTranslation;
 
-	v_Color = vertexColor;
+	v_textureCoord = textureCoord;
 	gl_Position = finalPosition;
 }

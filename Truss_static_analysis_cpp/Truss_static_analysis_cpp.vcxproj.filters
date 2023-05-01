@@ -75,6 +75,12 @@
     <ClCompile Include="src\geometry_store\buffers\VertexBufferLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\gBuffers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -146,6 +152,12 @@
     <ClInclude Include="src\geometry_store\buffers\VertexBufferLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\gBuffers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\glew32.dll" />
@@ -154,9 +166,17 @@
     <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\basic_vert_shader.vert" />
     <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\node_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\node_vertex_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\node_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\node_texture2.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
