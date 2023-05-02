@@ -279,15 +279,13 @@ void geom_store::updateWindowDimension(const int& window_width, const int& windo
 	// Update the window dimension
 	this->window_width = window_width;
 	this->window_height = window_height;
-	// float mmatrix_scale = std::min(float(window_width) / model_width, float(window_height) / model_height);
 
 	if (is_geometry_set == true)
 	{
 		// Update the model matrix
 		set_model_matrix();
-		zoomfit_geometry();
+		// !! Zoom to fit operation during window resize is handled in mouse event class !!
 	}
-
 }
 
 void geom_store::zoomfit_geometry()
@@ -315,20 +313,30 @@ void geom_store::zoomfit_geometry()
 
 void geom_store::pan_geometry(glm::vec2& transl)
 {
-	int max_dim = window_width > window_height ? window_width : window_height;
+	//// Pan the geometry
+	//int max_dim = window_width > window_height ? window_width : window_height;
 
-	// Pan Translation
-	float x_transl = 2 * ((-transl.x) / float(max_dim));
-	float y_transl = 2 * ((-transl.y) / float(max_dim));
+	//// Pan Translation
+	//float x_transl = 2 * ((-transl.x) / float(max_dim));
+	//float y_transl = 2 * ((-transl.y) / float(max_dim));
 
 	// std::cout << "Pan translation " << x_transl << ", " << y_transl << std::endl;
 
+	// Pan the geometry
 	glm::mat4 panTranslation(1.0f);
 
-	panTranslation[0][3] = x_transl;
-	panTranslation[1][3] = y_transl;
+	panTranslation[0][3] = -1.0f*transl.x;
+	panTranslation[1][3] = transl.y;
 
 	model_sh.setUniform("panTranslation", panTranslation, false);
 	node_sh.setUniform("panTranslation", panTranslation, false);
 
+}
+
+
+void geom_store::zoom_geometry(float& z_scale)
+{
+	// Zoom the geometry
+	model_sh.setUniform("zoomscale", z_scale);
+	node_sh.setUniform("zoomscale", z_scale);
 }

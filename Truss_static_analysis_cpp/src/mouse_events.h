@@ -8,20 +8,22 @@ class mouse_events
 public:
 	mouse_events();
 	~mouse_events();
-	void mouse_location(double& x, double& y);
-	void pan_operation_start(double& x, double& y);
+	void mouse_location(glm::vec2& loc);
+	void pan_operation_start(glm::vec2& loc);
 	void pan_operation_ends();
-	void zoom_operation(double& e_x, double& x, double& y);
+	void zoom_operation(double& e_x, glm::vec2& loc);
 	void zoom_to_fit();
-	void rotation_operation_start(double& x, double& y);
+	void rotation_operation_start(glm::vec2& loc);
 	void rotation_operation_ends();
-	void left_mouse_click(double& x, double& y);
-	void left_mouse_doubleclick(double& x, double& y);
-	void right_mouse_click(double& x, double& y);
-	void right_mouse_doubleclick(double& x, double& y);
-	void add_geometry_ptr(geom_store* geom);
+	void left_mouse_click(glm::vec2& loc);
+	void left_mouse_doubleclick(glm::vec2& loc);
+	void right_mouse_click(glm::vec2& loc);
+	void right_mouse_doubleclick(glm::vec2& loc);
+	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height);
 private:
 	geom_store* geom;
+	int* window_width;
+	int* window_height;
 	glm::vec2 click_pt;
 	glm::vec2 curr_pt;
 	glm::vec2 prev_translation;
@@ -31,4 +33,5 @@ private:
 	float zoom_val;
 	void pan_operation(glm::vec2& current_translataion);
 	void rotate_operation(glm::vec2& delta_d);
+	glm::vec2 intellizoom_normalized_screen_pt(glm::vec2 delta_d);
 };

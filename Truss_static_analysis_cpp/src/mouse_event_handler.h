@@ -10,13 +10,12 @@ class mouse_event_handler {
 private:
 	bool isCtrlDown = false; // Flag to indicate if Ctrl key is currently pressed
 	mouse_events mouse_click;
-	// geom_store* geom;
 public:
-		// Constructor
+	// Constructor
 	mouse_event_handler();
 	~mouse_event_handler();
 
-	void add_geometry_ptr(geom_store* geom);
+	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height);
 	// Mouse button callback function
 	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	// Mouse move callback function
@@ -27,10 +26,12 @@ public:
 	static void keyDownCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	// Handle mouse button event
 	void handleMouseButton(int button, int action, int mods, double xpos, double ypos);
-    // Handle mouse move event
+	// Handle mouse move event
 	void handleMouseMove(double xpos, double ypos);
-    // Handle mouse scroll event
+	// Handle mouse scroll event
 	void handleMouseScroll(double xoffset, double yoffset, double xpos, double ypos);
-    // Handle key down event
+	// Handle key down event
 	void handleKeyDown(int key, int scancode, int action, int mods);
+	// Zoom to fit
+	void zoom_to_fit();
 };

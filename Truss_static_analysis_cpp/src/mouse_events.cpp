@@ -1,8 +1,16 @@
 #include "mouse_events.h"
 
 mouse_events::mouse_events()
-	:click_pt(0), curr_pt(0), total_translation(0), prev_translation(0), 
-	is_pan(false), is_rotate(false), zoom_val(1.0f)
+	:geom(nullptr),
+	window_width(nullptr),
+	window_height(nullptr),
+	click_pt(0), 
+	curr_pt(0),
+	prev_translation(0),
+	total_translation(0),
+	is_pan(false), 
+	is_rotate(false), 
+	zoom_val(1.0f)
 {
 	// Constructor
 }
@@ -12,47 +20,49 @@ mouse_events::~mouse_events()
 	// Destructor
 }
 
-void mouse_events::add_geometry_ptr(geom_store* geom)
+void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height)
 {
 	this->geom = geom;
+	this->window_width = window_width;
+	this->window_height = window_height;
 }
 
-void mouse_events::mouse_location(double& x, double& y)
+void mouse_events::mouse_location(glm::vec2& loc)
 {
 	// Copy the current mouse location only when for pan or zoom operation
 	if (is_pan == true)
 	{
 		// Pan operation in progress
-		curr_pt = glm::vec2(x, -1.0f*y);
-		glm::vec2 delta_d = click_pt - curr_pt;
+		glm::vec2 delta_d = click_pt - loc;
 		// pan
 		// std::cout << "Pan translation "<<delta_d.x<<", " << delta_d.y << std::endl;
-		pan_operation(delta_d);
+		glm::vec2 current_translataion = delta_d / (std::max((*window_width), (*window_height)) * 0.5f);
+		pan_operation(current_translataion);
 	}
 
 	if (is_rotate == true)
 	{
 		// Rotate operation in progress
-		curr_pt = glm::vec2(x, y);
-		glm::vec2 delta_d = click_pt - curr_pt;
+		glm::vec2 delta_d = click_pt - loc;
 		// rotate
 		rotate_operation(delta_d);
 	}
 }
 
-void mouse_events::pan_operation_start(double& x, double& y)
+void mouse_events::pan_operation_start(glm::vec2& loc)
 {
 	// Pan operation start
 	is_pan = true;
 	// Note the click point when the pan operation start
-	click_pt = glm::vec2(x, -1.0f * y);
+	click_pt = loc;
 	std::cout << "Pan Operation Start" << std::endl;
 }
 
 void mouse_events::pan_operation(glm::vec2& current_translataion)
 {
 	// Pan operation in progress
-	total_translation = prev_translation + current_translataion;
+
+	total_translation = (prev_translation + current_translataion);
 
 	geom->pan_geometry(total_translation);
 }
@@ -65,12 +75,12 @@ void mouse_events::pan_operation_ends()
 	std::cout << "Pan Operation End" << std::endl;
 }
 
-void mouse_events::rotation_operation_start(double& x, double& y)
+void mouse_events::rotation_operation_start(glm::vec2& loc)
 {
 	// Rotate operation start
 	is_rotate = true;
 	// Note the click point when the pan operation start
-	click_pt = glm::vec2(x, y);
+	click_pt = loc;
 	std::cout << "Rotate Operation Start" << std::endl;
 }
 
@@ -87,8 +97,11 @@ void mouse_events::rotation_operation_ends()
 	std::cout << "Rotate Operation End" << std::endl;
 }
 
-void mouse_events::zoom_operation(double& e_delta, double& x, double& y)
+void mouse_events::zoom_operation(double& e_delta, glm::vec2& loc)
 {
+	// Screen point before zoom
+	glm::vec2 screen_pt_b4_scale = intellizoom_normalized_screen_pt(loc);
+	
 	// Zoom operation
 	if ((e_delta) > 0)
 	{
@@ -106,7 +119,28 @@ void mouse_events::zoom_operation(double& e_delta, double& x, double& y)
 			zoom_val = zoom_val - 0.1f;
 		}
 	}
-	std::cout << "Zoom val: " << zoom_val << std::endl;
+
+	// Hypothetical Screen point after zoom
+	glm::vec2 screen_pt_a4_scale = intellizoom_normalized_screen_pt(loc);
+	glm::vec2 g_tranl = -0.5f * zoom_val * (screen_pt_b4_scale - screen_pt_a4_scale);
+
+	// Set the zoom
+	geom->zoom_geometry(zoom_val);
+	
+	// Perform Translation for Intelli Zoom
+	pan_operation(g_tranl);
+	pan_operation_ends();
+}
+
+glm::vec2 mouse_events::intellizoom_normalized_screen_pt(glm::vec2 loc)
+{
+	// Function returns normalized screen point for zoom operation
+	glm::vec2 mid_pt = glm::vec2((*window_width), (*window_height)) * 0.5f;
+	float min_size = std::min((*window_width), (*window_height));
+
+	glm::vec2 mouse_pt = (-1.0f * (loc - mid_pt)) / (min_size * 0.5f);
+
+	return (mouse_pt - (2.0f * prev_translation))/zoom_val;
 }
 
 void  mouse_events::zoom_to_fit()
@@ -118,25 +152,25 @@ void  mouse_events::zoom_to_fit()
 	std::cout << "Zoom val: " << zoom_val << std::endl;
 }
 
-void mouse_events::left_mouse_click(double& x, double& y)
+void mouse_events::left_mouse_click(glm::vec2& loc)
 {
 	// Left mouse single click
 	std::cout << "Left mouse single click" << std::endl;
 }
 
-void mouse_events::left_mouse_doubleclick(double& x, double& y)
+void mouse_events::left_mouse_doubleclick(glm::vec2& loc)
 {
 	// Left mouse double click
 	std::cout << "Left mouse double click" << std::endl;
 }
 
-void mouse_events::right_mouse_click(double& x, double& y)
+void mouse_events::right_mouse_click(glm::vec2& loc)
 {
 	// Right mouse single click
 	std::cout << "Right mouse single click" << std::endl;
 }
 
-void mouse_events::right_mouse_doubleclick(double& x, double& y)
+void mouse_events::right_mouse_doubleclick(glm::vec2& loc)
 {
 	// Right mouse double click
 	std::cout << "Right mouse double click" << std::endl;

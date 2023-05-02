@@ -21,6 +21,7 @@ public:
 	void deleteResources();
 	void zoomfit_geometry();
 	void pan_geometry(glm::vec2& transl);
+	void zoom_geometry(float& z_scale);
 private:
 	// Create an unordered_map to store nodes with ID as key
 	std::unordered_map<int, nodes_store> nodeMap;

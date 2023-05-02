@@ -1,7 +1,8 @@
 #include "mouse_event_handler.h"
 
 mouse_event_handler::mouse_event_handler()
-	:isCtrlDown(false), mouse_click()
+	:isCtrlDown(false),
+	mouse_click()
 {
 	// Constructor
 }
@@ -11,9 +12,9 @@ mouse_event_handler::~mouse_event_handler()
 	// Destructor
 }
 
-void mouse_event_handler::add_geometry_ptr(geom_store* geom)
+void mouse_event_handler::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height)
 {
-	mouse_click.add_geometry_ptr(geom);
+	mouse_click.add_geometry_ptr(geom, window_width, window_height);
 }
 
 // Mouse button callback function
@@ -74,8 +75,8 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 
 			if (isCtrlDown == true)
 			{
-				// Rotate operation start
-				mouse_click.rotation_operation_start(xpos, ypos);
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_click.rotation_operation_start(loc);
 			}
 		}
 		else if (action == GLFW_RELEASE)
@@ -91,7 +92,8 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (deltaX == 0.0 && deltaY == 0.0 && currentTime - lastClickTime < 0.2)
 			{
 				// Left Mouse click
-				mouse_click.left_mouse_click(xpos, ypos);
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_click.left_mouse_click(loc);
 			}
 
 			// Update last position
@@ -102,7 +104,8 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (currentTime - lastClickTime < 0.5 && lastButton == GLFW_MOUSE_BUTTON_LEFT)
 			{
 				// Left Mouse double click
-				mouse_click.left_mouse_doubleclick(xpos, ypos);
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_click.left_mouse_doubleclick(loc);
 			}
 		}
 	}
@@ -119,7 +122,8 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (isCtrlDown == true)
 			{
 				// Pan operation start
-				mouse_click.pan_operation_start(xpos, ypos);
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_click.pan_operation_start(loc);
 			}
 		}
 		else if (action == GLFW_RELEASE)
@@ -135,7 +139,8 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (deltaX == 0.0 && deltaY == 0.0 && currentTime - lastClickTime < 0.2)
 			{
 				// Right Mouse click
-				mouse_click.right_mouse_click(xpos, ypos);
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_click.right_mouse_click(loc);
 			}
 
 			// Update last position
@@ -146,7 +151,8 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			if (currentTime - lastClickTime < 0.5 && lastButton == GLFW_MOUSE_BUTTON_RIGHT)
 			{
 				// Right Mouse double click
-				mouse_click.right_mouse_doubleclick(xpos, ypos);
+				glm::vec2 loc = glm::vec2(xpos, ypos);
+				mouse_click.right_mouse_doubleclick(loc);
 			}
 		}
 	}
@@ -160,14 +166,20 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 void mouse_event_handler::handleMouseMove(double xpos, double ypos)
 {
 	// Mouse move operation
-	mouse_click.mouse_location(xpos, ypos);
+	if (isCtrlDown == true)
+	{
+		glm::vec2 loc = glm::vec2(xpos, ypos);
+		mouse_click.mouse_location(loc);
+	}
 }
 
 void mouse_event_handler::handleMouseScroll(double xoffset, double yoffset, double xpos, double ypos)
 {
+	// Mouse scroll operation
 	if (isCtrlDown == true)
 	{
-		mouse_click.zoom_operation(yoffset, xpos, ypos);
+		glm::vec2 loc = glm::vec2(xpos, ypos);
+		mouse_click.zoom_operation(yoffset, loc);
 	}
 }
 
@@ -191,4 +203,11 @@ void mouse_event_handler::handleKeyDown(int key, int scancode, int action, int m
 		// Perform zoom to fit
 		mouse_click.zoom_to_fit();
 	}
+}
+
+void  mouse_event_handler::zoom_to_fit()
+{
+	// Used during window resize
+	// Perform zoom to fit 
+	mouse_click.zoom_to_fit();
 }

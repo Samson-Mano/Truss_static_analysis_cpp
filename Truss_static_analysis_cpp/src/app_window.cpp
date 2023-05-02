@@ -26,7 +26,7 @@ app_window::app_window()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
 	// Create a window
-	window = glfwCreateWindow(800, 600, "Plane Truss Finite Element Solver", nullptr, nullptr);
+	window = glfwCreateWindow(window_width, window_height, "Plane Truss Finite Element Solver", nullptr, nullptr);
 
 	if (!window) {
 		log = "Failed to create GLFW window";
@@ -46,6 +46,9 @@ app_window::app_window()
 		return;
 	}
 
+	//// Maximize the window
+	//glfwMaximizeWindow(window);
+
 	// Set viewport size and register framebuffer resize callback
 	glfwGetFramebufferSize(window, &window_width, &window_height);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
@@ -59,7 +62,10 @@ app_window::app_window()
 
 	// Set the mouse button callback function with the user pointer pointing to the mouseHandler object
 	glfwSetWindowUserPointer(window, &mouse_Handler);
-	mouse_Handler.add_geometry_ptr(&geom);
+
+	// Passing the address of geom and window dimensions 
+	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height);
+
 	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
 
 	// Set the mouse move callback function with the user pointer pointing to the mouseHandler object
@@ -76,6 +82,9 @@ app_window::app_window()
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+
+
+	framebufferSizeCallback(window, window_width, window_height);
 }
 
 app_window::~app_window()
@@ -96,7 +105,6 @@ void app_window::app_render()
 	ImGuiIO& io = ImGui::GetIO();
 	imgui_font = io.Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
 
-
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -116,11 +124,13 @@ void app_window::app_render()
 		if (isWindowSizeChanging == true)
 		{
 			geom.updateWindowDimension(window_width, window_height);
+			mouse_Handler.zoom_to_fit();
 		}
 		isWindowSizeChanging = false;
 
 		// Paint the geometry
 		geom.paint_geometry();
+
 
 		// Render ImGui UI
 		ImGui::Render();
@@ -150,6 +160,7 @@ void app_window::menu_events()
 			{
 				// Handle menu Import varai2D
 				menu_click.update_event(import_varai2d, geom);
+				isWindowSizeChanging = true;
 			}
 			if (ImGui::MenuItem("Import raw data"))
 			{
@@ -255,7 +266,6 @@ void app_window::framebufferSizeCallback(GLFWwindow* window, int window_width, i
 	isWindowSizeChanging = true;
 	// glViewport(0, 0, max_size, max_size);
 }
-
 
 void app_window::GLFWwindow_set_icon(GLFWwindow* window)
 {
