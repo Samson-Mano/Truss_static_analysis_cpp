@@ -35,6 +35,7 @@ private:
 	glm::vec3 max_b; // (max_x, max_y,0)
 	glm::vec3 geom_bound; // Bound magnitude
 	glm::vec3 center; // center of the geometry
+	float geom_scale; // Scale of the geometry
 
 	// Store the openGL buffers
 	gBuffers line_buffer;
@@ -50,7 +51,10 @@ private:
 	bool is_geometry_loaded;
 	bool is_geometry_set;
 	void set_geometry();
-	std::pair<glm::vec3, glm::vec3> findMinMaxXY(const std::unordered_map<int, nodes_store>& nodeMap);
+	void set_line_vertices(float* line_vertices, unsigned int& line_v_index, nodes_store& node);
+	void set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node);
+	void set_node_indices(unsigned int* node_indices, unsigned int& node_i_index);
+;	std::pair<glm::vec3, glm::vec3> findMinMaxXY(const std::unordered_map<int, nodes_store>& nodeMap);
 	glm::vec3 findGeometricCenter(const std::unordered_map<int, nodes_store>& nodeMap);
 	void set_model_matrix();
 };

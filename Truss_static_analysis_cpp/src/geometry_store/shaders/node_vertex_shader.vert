@@ -10,6 +10,7 @@ layout(location = 1) in vec3 vertexColor;
 layout(location = 2) in vec2 textureCoord;
 
 out vec2 v_textureCoord;
+out vec3 v_textureColor;
 
 void main()
 {
@@ -24,5 +25,6 @@ void main()
 	vec4 finalPosition = rotatedModelMatrix * vec4(position,1.0f) * panTranslation;
 
 	v_textureCoord = textureCoord;
+	v_textureColor = vertexColor;
 	gl_Position = finalPosition;
 }

@@ -6,7 +6,7 @@ geom_store::geom_store()
 	node_count(0), line_count(0),
 	min_b(glm::vec3(0)),
 	max_b(glm::vec3(0)),
-	geom_bound(glm::vec3(0)),
+	geom_bound(glm::vec3(0)), geom_scale(1.0f),
 	center(glm::vec3(0)), window_width(0), window_height(0),
 	line_buffer(), node_buffer(), node_texture(), node_sh(), model_sh()
 {
@@ -115,71 +115,82 @@ void geom_store::set_geometry()
 	if (is_geometry_loaded == false)
 		return;
 
-	// Set the geometry
-	// Define the vertices of the model
-	const unsigned int vertex_count = 8 * node_count;
-	unsigned int vertex_indices_count = node_count;
+	// Set the model matrix
+	set_model_matrix();
 
-	float* vertices = new float[vertex_count]; //dynamic array
-	unsigned int* vertex_indices = new unsigned int[vertex_indices_count];
+	// Set the model to zoom fit (No pan, No rotation, No zoom scale)
+	zoomfit_geometry();
+
+
+	// Set the geometry
+	// Define the line vertices of the model (3 node position & 3 color)
+	const unsigned int line_vertex_count = 6 * node_count;
+	float* line_vertices = new float[line_vertex_count];
+
+	// Define the node vertices of the model (4 vertex (to form a triangle) for a node (2 position & 2 texture coordinate) 
+	const unsigned int node_vertex_count = 4 * 8 * node_count;
+	float* node_vertices = new float[node_vertex_count];
+
+	unsigned int node_indices_count = 6 * node_count;
+	unsigned int* node_vertex_indices = new unsigned int[node_indices_count];
 
 	std::unordered_map<int, int> node_id_map;
 
 	// Assuming you have an index variable to keep track of the array position
-	int index = 0;
+	unsigned int line_v_index = 0;
+	unsigned int node_v_index = 0;
+	unsigned int node_i_index = 0;
 	int v_id = 0;
 
-	for (const auto& node : nodeMap)
+	for (auto& node : nodeMap)
 	{
 		// node_store
 		// Add the node id to map
 		node_id_map[node.first] = v_id;
-		// Add the node point
-		vertices[index + 0] = node.second.node_pt.x;
-		vertices[index + 1] = node.second.node_pt.y;
-		vertices[index + 2] = node.second.node_pt.z;
 
-		// Node default color
-		vertices[index + 3] = node.second.default_color.x;
-		vertices[index + 4] = node.second.default_color.y;
-		vertices[index + 5] = node.second.default_color.z;
+		// Add the line point
+		set_line_vertices(line_vertices, line_v_index, node.second);
 
-		// Node Texture
-		vertices[index + 6] = 0.0f;
-		vertices[index + 7] = 0.0f;
-
-		vertex_indices[v_id] = v_id;
+		// Add 4 corner points for triangle in place of nodes
+		set_node_vertices(node_vertices, node_v_index, node.second);
+		// Add the indices
+		set_node_indices(node_vertex_indices, node_i_index);
 		v_id++;
-		index = index + 8;
 	}
 
 	// Define the indices of the lines of the model
 	unsigned int line_indices_count = 2 * line_count;
 
 	unsigned int* line_indices = new unsigned int[line_indices_count];
-	index = 0;
+	unsigned int line_i_index = 0;
 
 	for (const auto& line : lineMap)
 	{
 		// Add the node point
-		line_indices[index + 0] = node_id_map[line.second.s_nd.node_id];
-		line_indices[index + 1] = node_id_map[line.second.e_nd.node_id];
+		line_indices[line_i_index + 0] = node_id_map[line.second.s_nd.node_id];
+		line_indices[line_i_index + 1] = node_id_map[line.second.e_nd.node_id];
 
-		index = index + 2;
+		line_i_index = line_i_index + 2;
 	}
 
-	unsigned int vertex_size = vertex_count * sizeof(float);
+	unsigned int line_vertex_size = line_vertex_count * sizeof(float);
 
-	VertexBufferLayout layout;
-	layout.AddFloat(3);  // Position
-	layout.AddFloat(3);  // Color
-	layout.AddFloat(2);  // Texture co-ordinate
+	VertexBufferLayout line_layout;
+	line_layout.AddFloat(3);  // Position
+	line_layout.AddFloat(3);  // Color
 
 	// Create the Line buffers
-	line_buffer.CreateBuffers((void*)vertices, vertex_size, (unsigned int*)line_indices, line_indices_count, layout);
+	line_buffer.CreateBuffers((void*)line_vertices, line_vertex_size, (unsigned int*)line_indices, line_indices_count, line_layout);
+
+	unsigned int node_vertex_size = node_vertex_count * sizeof(float);
+
+	VertexBufferLayout node_layout;
+	node_layout.AddFloat(3);  // Position
+	node_layout.AddFloat(3);  // Color
+	node_layout.AddFloat(2);  // Texture co-ordinate
 
 	// Create the Node buffers
-	node_buffer.CreateBuffers((void*)vertices, vertex_size, (unsigned int*)vertex_indices, vertex_indices_count, layout);
+	node_buffer.CreateBuffers((void*)node_vertices, node_vertex_size, (unsigned int*)node_vertex_indices, node_indices_count, node_layout);
 
 	// Create shader
 	std::filesystem::path currentDirPath = std::filesystem::current_path();
@@ -200,22 +211,125 @@ void geom_store::set_geometry()
 	node_texture.Bind();
 	node_sh.setUniform("u_Texture", 0);
 
-
-	// Set the model matrix
-	set_model_matrix();
-
-	// Set the model to zoom fit (No pan, No rotation, No zoom scale)
-	zoomfit_geometry();
-
-
 	// Geometry is set
 	is_geometry_set = true;
 
 	// Delete the Dynamic arrays
-	delete[] vertices;
-	delete[] vertex_indices;
+	delete[] line_vertices;
+	delete[] node_vertices;
+	delete[] node_vertex_indices;
 	delete[] line_indices;
 }
+
+void geom_store::set_line_vertices(float* line_vertices, unsigned int& line_v_index, nodes_store& node)
+{
+	// Set the line vertices
+	line_vertices[line_v_index + 0] = node.node_pt.x;
+	line_vertices[line_v_index + 1] = node.node_pt.y;
+	line_vertices[line_v_index + 2] = node.node_pt.z;
+
+	// line default color
+	line_vertices[line_v_index + 3] = node.default_color.x;
+	line_vertices[line_v_index + 4] = node.default_color.y;
+	line_vertices[line_v_index + 5] = node.default_color.z;
+
+	// Increment
+	line_v_index = line_v_index + 6;
+}
+
+void  geom_store::set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node)
+{
+	// Set the node vertices
+	float node_size = 0.01f/geom_scale;
+
+	// Set the node vertices Corner 1
+	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
+	node_vertices[node_v_index + 1] = node.node_pt.y - node_size;
+	node_vertices[node_v_index + 2] = 0.0f;
+
+	// Set the node color
+	node_vertices[node_v_index + 3] = node.default_color.x;
+	node_vertices[node_v_index + 4] = node.default_color.y * 0.0f;
+	node_vertices[node_v_index + 5] = node.default_color.z;
+
+	// Set the Texture co-ordinates
+	node_vertices[node_v_index + 6] = 0.0f;
+	node_vertices[node_v_index + 7] = 0.0f;
+
+	// Increment
+	node_v_index = node_v_index + 8;
+
+	// Set the node vertices Corner 2
+	node_vertices[node_v_index + 0] = node.node_pt.x + node_size;
+	node_vertices[node_v_index + 1] = node.node_pt.y - node_size;
+	node_vertices[node_v_index + 2] = 0.0f;
+
+	// Set the node color
+	node_vertices[node_v_index + 3] = node.default_color.x;
+	node_vertices[node_v_index + 4] = node.default_color.y;
+	node_vertices[node_v_index + 5] = node.default_color.z;
+
+	// Set the Texture co-ordinates
+	node_vertices[node_v_index + 6] = 1.0f;
+	node_vertices[node_v_index + 7] = 0.0f;
+
+	// Increment
+	node_v_index = node_v_index + 8;
+
+	// Set the node vertices Corner 3
+	node_vertices[node_v_index + 0] = node.node_pt.x + node_size;
+	node_vertices[node_v_index + 1] = node.node_pt.y + node_size;
+	node_vertices[node_v_index + 2] = 0.0f;
+
+	// Set the node color
+	node_vertices[node_v_index + 3] = node.default_color.x;
+	node_vertices[node_v_index + 4] = node.default_color.y;
+	node_vertices[node_v_index + 5] = node.default_color.z;
+
+	// Set the Texture co-ordinates
+	node_vertices[node_v_index + 6] = 1.0f;
+	node_vertices[node_v_index + 7] = 1.0f;
+
+	// Increment
+	node_v_index = node_v_index + 8;
+
+	// Set the node vertices Corner 3
+	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
+	node_vertices[node_v_index + 1] = node.node_pt.y + node_size;
+	node_vertices[node_v_index + 2] = 0.0f;
+
+	// Set the node color
+	node_vertices[node_v_index + 3] = node.default_color.x;
+	node_vertices[node_v_index + 4] = node.default_color.y;
+	node_vertices[node_v_index + 5] = node.default_color.z;
+
+	// Set the Texture co-ordinates
+	node_vertices[node_v_index + 6] = 0.0f;
+	node_vertices[node_v_index + 7] = 1.0f;
+
+	// Increment
+	node_v_index = node_v_index + 8;
+}
+
+void geom_store::set_node_indices(unsigned int* node_indices, unsigned int& node_i_index)
+{
+	// Set the node indices
+	unsigned int t_id = ((node_i_index / 6) * 4);
+	// Triangle 0,1,2
+	node_indices[node_i_index + 0] = t_id + 0;
+	node_indices[node_i_index + 1] = t_id + 1;
+	node_indices[node_i_index + 2] = t_id + 2;
+
+	// Triangle 2,3,0
+	node_indices[node_i_index + 3] = t_id + 2;
+	node_indices[node_i_index + 4] = t_id + 3;
+	node_indices[node_i_index + 5] = t_id + 0;
+
+	// Increment
+	node_i_index = node_i_index + 6;
+}
+
+
 
 void geom_store::paint_geometry()
 {
@@ -236,8 +350,8 @@ void geom_store::paint_geometry()
 	// Paint the Nodes
 	node_sh.Bind();
 	node_buffer.Bind();
-	glPointSize(8.0f);
-	glDrawElements(GL_POINTS, node_count, GL_UNSIGNED_INT, 0);
+	// glPointSize(8.0f);
+	glDrawElements(GL_TRIANGLES, 6 * node_count, GL_UNSIGNED_INT, 0);
 	node_buffer.UnBind();
 	node_sh.UnBind();
 
@@ -258,7 +372,7 @@ void geom_store::set_model_matrix()
 	float normalized_screen_height = 1.8f * (float(window_height) / float(max_dim));
 
 
-	float geom_scale = std::min(normalized_screen_width / geom_bound.x,
+	geom_scale = std::min(normalized_screen_width / geom_bound.x,
 		normalized_screen_height / geom_bound.y);
 
 	// Translation
@@ -325,7 +439,7 @@ void geom_store::pan_geometry(glm::vec2& transl)
 	// Pan the geometry
 	glm::mat4 panTranslation(1.0f);
 
-	panTranslation[0][3] = -1.0f*transl.x;
+	panTranslation[0][3] = -1.0f * transl.x;
 	panTranslation[1][3] = transl.y;
 
 	model_sh.setUniform("panTranslation", panTranslation, false);

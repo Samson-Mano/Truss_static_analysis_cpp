@@ -105,6 +105,9 @@ void app_window::app_render()
 	ImGuiIO& io = ImGui::GetIO();
 	imgui_font = io.Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window))
 	{
