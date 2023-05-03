@@ -8,11 +8,14 @@
 - ~~Create a basic vertex & fragment shader~~
 - ~~Define the model matrix as well as translate, zoom and rotate matrix for vertex shader~~
 - ~~Paint the truss model with basic elements (as points and lines)~~
-- Fit the imported geometry with proper geometry scale
+- ~~Fit the imported geometry with proper geometry scale~~
+- ~~Pan, zoom and zoom to fit operation~~
 - Implement circle for nodes (instead of points)
 - Implement rectangle for lines (instead of primitive line)
 - UI for adding constraint
-
+- UI for adding load
+- UI for updating material
+- Build solver
 
 # Plane truss finite element solver
 
