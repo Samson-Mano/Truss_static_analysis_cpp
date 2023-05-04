@@ -9,5 +9,5 @@ out vec4 f_Color; // fragment's final color (out to the fragment shader)
 void main()
 {
 	vec4 texColor = texture(u_Texture,v_textureCoord);
-	f_Color = vec4(v_textureColor,0.5f)*texColor;
+	f_Color = vec4(v_textureColor,1.0f)*texColor;
 }

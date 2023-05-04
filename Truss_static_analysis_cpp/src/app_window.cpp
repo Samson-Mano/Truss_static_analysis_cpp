@@ -185,21 +185,26 @@ void app_window::menu_events()
 		// Constraint menu item
 		if (ImGui::BeginMenu("Constraints"))
 		{
-			if (ImGui::MenuItem("Add Constraint"))
-			{
-				// Handle menu Add constraint
-				menu_click.update_event(Add_Constraint, geom);
-			}
-			if (ImGui::MenuItem("Delete Constraint"))
-			{
-				// Handle menu Delete constraint
-				menu_click.update_event(Delete_Constraint, geom);
-			}
-			if (ImGui::MenuItem("Edit Constraint"))
-			{
-				// Handle menu Edit Constraint
-				menu_click.update_event(Edit_Constraint, geom);
-			}
+			// render your GUI
+			ImGui::Begin("Demo window");
+			ImGui::Button("Hello!");
+			ImGui::End();
+
+			//if (ImGui::MenuItem("Add Constraint"))
+			//{
+			//	// Handle menu Add constraint
+			//	menu_click.update_event(Add_Constraint, geom);
+			//}
+			//if (ImGui::MenuItem("Delete Constraint"))
+			//{
+			//	// Handle menu Delete constraint
+			//	menu_click.update_event(Delete_Constraint, geom);
+			//}
+			//if (ImGui::MenuItem("Edit Constraint"))
+			//{
+			//	// Handle menu Edit Constraint
+			//	menu_click.update_event(Edit_Constraint, geom);
+			//}
 			ImGui::EndMenu();
 		}
 		// Load menu item

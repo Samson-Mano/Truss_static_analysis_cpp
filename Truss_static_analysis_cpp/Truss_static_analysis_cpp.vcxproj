@@ -196,6 +196,8 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png" />
+    <Image Include="src\geometry_store\shaders\3d_circle.png" />
+    <Image Include="src\geometry_store\shaders\3D_circle_paint.png" />
     <Image Include="src\geometry_store\shaders\node_texture.png" />
     <Image Include="src\geometry_store\shaders\node_texture2.png" />
   </ItemGroup>

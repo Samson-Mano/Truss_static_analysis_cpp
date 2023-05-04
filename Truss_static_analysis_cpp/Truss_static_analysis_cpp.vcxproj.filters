@@ -179,6 +179,12 @@
     <Image Include="src\geometry_store\shaders\node_texture2.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="src\geometry_store\shaders\3d_circle.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\3D_circle_paint.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Images\font\FreeSans.ttf" />

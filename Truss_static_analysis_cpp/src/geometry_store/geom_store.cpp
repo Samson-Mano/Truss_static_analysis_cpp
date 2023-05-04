@@ -207,7 +207,7 @@ void geom_store::set_geometry()
 	node_sh.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
 		(shadersPath.string() + "/node_frag_shader.frag").c_str());
 
-	node_texture.LoadTexture((shadersPath.string() + "/node_texture2.png").c_str());
+	node_texture.LoadTexture((shadersPath.string() + "/3d_circle_paint.png").c_str());
 	node_texture.Bind();
 	node_sh.setUniform("u_Texture", 0);
 
@@ -240,7 +240,7 @@ void geom_store::set_line_vertices(float* line_vertices, unsigned int& line_v_in
 void  geom_store::set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node)
 {
 	// Set the node vertices
-	float node_size = 0.01f/geom_scale;
+	float node_size = 0.005f/geom_scale;
 
 	// Set the node vertices Corner 1
 	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
@@ -249,7 +249,7 @@ void  geom_store::set_node_vertices(float* node_vertices, unsigned int& node_v_i
 
 	// Set the node color
 	node_vertices[node_v_index + 3] = node.default_color.x;
-	node_vertices[node_v_index + 4] = node.default_color.y * 0.0f;
+	node_vertices[node_v_index + 4] = node.default_color.y;
 	node_vertices[node_v_index + 5] = node.default_color.z;
 
 	// Set the Texture co-ordinates
@@ -343,6 +343,7 @@ void geom_store::paint_geometry()
 	// Paint the Lines
 	model_sh.Bind();
 	line_buffer.Bind();
+	// glLineWidth(8.0f);
 	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
 	line_buffer.UnBind();
 	model_sh.UnBind();
