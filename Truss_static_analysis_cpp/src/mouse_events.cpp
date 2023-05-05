@@ -136,9 +136,9 @@ glm::vec2 mouse_events::intellizoom_normalized_screen_pt(glm::vec2 loc)
 {
 	// Function returns normalized screen point for zoom operation
 	glm::vec2 mid_pt = glm::vec2((*window_width), (*window_height)) * 0.5f;
-	float min_size = std::min((*window_width), (*window_height));
+	int min_size = std::min((*window_width), (*window_height));
 
-	glm::vec2 mouse_pt = (-1.0f * (loc - mid_pt)) / (min_size * 0.5f);
+	glm::vec2 mouse_pt = (-1.0f * (loc - mid_pt)) / (static_cast<float>(min_size) * 0.5f);
 
 	return (mouse_pt - (2.0f * prev_translation))/zoom_val;
 }

@@ -206,6 +206,7 @@ void geom_store::set_geometry()
 	// Node shader
 	node_sh.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
 		(shadersPath.string() + "/node_frag_shader.frag").c_str());
+	node_sh.setUniform("node_size", node_circle_radii);
 
 	node_texture.LoadTexture((shadersPath.string() + "/3d_circle_paint.png").c_str());
 	node_texture.Bind();
@@ -240,7 +241,7 @@ void geom_store::set_line_vertices(float* line_vertices, unsigned int& line_v_in
 void  geom_store::set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node)
 {
 	// Set the node vertices
-	float node_size = 0.005f/geom_scale;
+	float node_size = node_circle_radii /geom_scale;
 
 	// Set the node vertices Corner 1
 	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
@@ -338,12 +339,11 @@ void geom_store::paint_geometry()
 
 	// Clean the back buffer and assign the new color to it
 	glClear(GL_COLOR_BUFFER_BIT);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Paint the Lines
 	model_sh.Bind();
 	line_buffer.Bind();
-	// glLineWidth(8.0f);
 	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
 	line_buffer.UnBind();
 	model_sh.UnBind();
@@ -351,7 +351,6 @@ void geom_store::paint_geometry()
 	// Paint the Nodes
 	node_sh.Bind();
 	node_buffer.Bind();
-	// glPointSize(8.0f);
 	glDrawElements(GL_TRIANGLES, 6 * node_count, GL_UNSIGNED_INT, 0);
 	node_buffer.UnBind();
 	node_sh.UnBind();
@@ -419,10 +418,10 @@ void geom_store::zoomfit_geometry()
 	node_sh.setUniform("panTranslation", panTranslation, false);
 
 	// Set the zoom matrix
-	float zoomscale = 1.0f;
+	float zoom_scale = 1.0f;
 
-	model_sh.setUniform("zoomscale", zoomscale);
-	node_sh.setUniform("zoomscale", zoomscale);
+	model_sh.setUniform("zoomscale", zoom_scale);
+	node_sh.setUniform("zoomscale", zoom_scale);
 }
 
 

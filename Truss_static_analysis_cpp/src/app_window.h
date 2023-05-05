@@ -7,15 +7,16 @@
 #include "../ImGui/imgui_impl_opengl3.h"
 #include "../ImGui/stb_implement.h"
 #include "geometry_store/geom_store.h"
-#include "menu_events.h"
+#include "file_events.h"
 #include "mouse_event_handler.h"
+#include "loadconstraint_window.h"
 
 class app_window
 {
 private:
 	GLFWwindow* window = nullptr;
 	ImFont* imgui_font = nullptr;
-	menu_events menu_click;
+	file_events menu_click;
 	// mouse_events mouse_click;
 	mouse_event_handler mouse_Handler;
 public:
@@ -23,8 +24,11 @@ public:
 	static int window_width;
 	static int window_height;
 	static bool isWindowSizeChanging;
+	bool show_constraint_window = false;
+	bool show_load_window = false;
 	const char* log = "";
 	geom_store geom;
+	loadconstraint_window ct_window;
 
 	// Constructor and Destructor
 	app_window();
@@ -33,6 +37,7 @@ public:
 	// Functions
 	void app_render();
 	void menu_events();
+	void constraint_window_events(bool& is_window_open);
 	static void framebufferSizeCallback(GLFWwindow* window, int window_width, int window_height);
 	void GLFWwindow_set_icon(GLFWwindow* window);
 };

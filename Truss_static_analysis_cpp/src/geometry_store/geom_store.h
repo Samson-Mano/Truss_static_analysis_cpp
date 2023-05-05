@@ -23,6 +23,7 @@ public:
 	void pan_geometry(glm::vec2& transl);
 	void zoom_geometry(float& z_scale);
 private:
+	const float node_circle_radii = 0.005f;
 	// Create an unordered_map to store nodes with ID as key
 	std::unordered_map<int, nodes_store> nodeMap;
 	// Create an unordered_map to store lines with ID as key

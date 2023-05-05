@@ -1,15 +1,17 @@
-#include "menu_events.h"
+#include "file_events.h"
 
 
-menu_events::menu_events()
+file_events::file_events()
 {
+	// Empty Constructor
 }
 
-menu_events::~menu_events()
+file_events::~file_events()
 {
+	// Destructor
 }
 
-void menu_events::update_event(menu_item m_ck, geom_store& geom)
+void file_events::update_event(menu_item m_ck, geom_store& geom)
 {
 	// Menu item m is clicked
 	switch (m_ck)
@@ -23,24 +25,6 @@ void menu_events::update_event(menu_item m_ck, geom_store& geom)
 		break;
 	case exit_p:
 		break;
-	case Add_Constraint:
-		break;
-	case Delete_Constraint:
-		break;
-	case Edit_Constraint:
-		break;
-	case Add_Load:
-		break;
-	case Delete_Load:
-		break;
-	case Edit_Load:
-		break;
-	case FE_Solve:
-		break;
-	case Displacement:
-		break;
-	case Member_force:
-		break;
 	default:
 		break;
 	}
@@ -49,7 +33,7 @@ void menu_events::update_event(menu_item m_ck, geom_store& geom)
 
 
 // Function to show a file dialog and return the selected file name as std::string
-std::string menu_events::ShowFileDialog()
+std::string file_events::ShowFileDialog()
 {
 	OPENFILENAMEW ofn;                         // Structure to store the file dialog options (wide-character version)
 	wchar_t fileName[MAX_PATH];                // Buffer to store the selected file path (wide-character version)
@@ -82,7 +66,7 @@ std::string menu_events::ShowFileDialog()
 }
 
 
-void menu_events::import_varai2d_geometry(geom_store& geom)
+void file_events::import_varai2d_geometry(geom_store& geom)
 {
 	std::string file_path = ShowFileDialog();
 	std::cout << "Selected File: " << file_path << std::endl;

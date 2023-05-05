@@ -9,7 +9,7 @@ int app_window::window_height = 600;
 bool app_window::isWindowSizeChanging = false;
 
 app_window::app_window()
-	:geom()
+	:geom(), ct_window()
 {
 	// Main constructor
 	// Initialize GLFW
@@ -107,6 +107,7 @@ void app_window::app_render()
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glLineWidth(2.0f);
 
 	// Main rendering loop
 	while (!glfwWindowShouldClose(window))
@@ -153,6 +154,7 @@ void app_window::menu_events()
 	// Change the font for the menu bar
 	ImGui::PushFont(imgui_font);
 
+	
 	// Create a menu bar
 	if (ImGui::BeginMainMenuBar(), ImGuiWindowFlags_MenuBar)
 	{
@@ -182,48 +184,19 @@ void app_window::menu_events()
 			}
 			ImGui::EndMenu();
 		}
-		// Constraint menu item
-		if (ImGui::BeginMenu("Constraints"))
+		// Edit menu item
+		if (ImGui::BeginMenu("Edit"))
 		{
-			// render your GUI
-			ImGui::Begin("Demo window");
-			ImGui::Button("Hello!");
-			ImGui::End();
+			if (ImGui::MenuItem("Constraints/ Loads"))
+			{
+				// Handle menu Add Load & Add Constraint
+				ct_window.is_show_window = true;
 
-			//if (ImGui::MenuItem("Add Constraint"))
-			//{
-			//	// Handle menu Add constraint
-			//	menu_click.update_event(Add_Constraint, geom);
-			//}
-			//if (ImGui::MenuItem("Delete Constraint"))
-			//{
-			//	// Handle menu Delete constraint
-			//	menu_click.update_event(Delete_Constraint, geom);
-			//}
-			//if (ImGui::MenuItem("Edit Constraint"))
-			//{
-			//	// Handle menu Edit Constraint
-			//	menu_click.update_event(Edit_Constraint, geom);
-			//}
-			ImGui::EndMenu();
-		}
-		// Load menu item
-		if (ImGui::BeginMenu("Loads"))
-		{
-			if (ImGui::MenuItem("Add Load"))
-			{
-				// Handle menu Add Load
-				menu_click.update_event(Add_Load, geom);
 			}
-			if (ImGui::MenuItem("Delete Load"))
+			if (ImGui::MenuItem("Material"))
 			{
-				// Handle menu Delete Load
-				menu_click.update_event(Delete_Load, geom);
-			}
-			if (ImGui::MenuItem("Edit Load"))
-			{
-				// Handle menu Edit Load
-				menu_click.update_event(Edit_Load, geom);
+				// Handle menu Edit Materials
+
 			}
 			ImGui::EndMenu();
 		}
@@ -233,17 +206,17 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("FE Solve"))
 			{
 				// Handle menu FE Solve
-				menu_click.update_event(FE_Solve, geom);
+				
 			}
 			if (ImGui::MenuItem("Displacement"))
 			{
 				// Handle menu Displacement
-				menu_click.update_event(Displacement, geom);
+
 			}
 			if (ImGui::MenuItem("Member force"))
 			{
 				// Handle menu Member force
-				menu_click.update_event(Member_force, geom);
+	
 			}
 			ImGui::EndMenu();
 		}
@@ -251,8 +224,27 @@ void app_window::menu_events()
 		ImGui::EndMainMenuBar();
 	}
 
+	// Execute constraint window operation
+	ct_window.render_window();
+		// constraint_window_events(show_constraint_window);
+		
 	// Pop the custom font after using it
 	ImGui::PopFont();
+}
+
+void app_window::constraint_window_events(bool& show_constraint_window)
+{
+	if (show_constraint_window == true)
+	{
+		// Manage constriant window operation
+		ImGui::Begin("My Window");
+		ImGui::Text("Hello, world!");
+		if (ImGui::Button("Exit"))
+		{
+			show_constraint_window = false;
+		}
+		ImGui::End();
+	}
 }
 
 // Static callback function for framebuffer size changes
