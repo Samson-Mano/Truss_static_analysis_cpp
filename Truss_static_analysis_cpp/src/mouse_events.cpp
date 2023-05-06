@@ -55,7 +55,7 @@ void mouse_events::pan_operation_start(glm::vec2& loc)
 	is_pan = true;
 	// Note the click point when the pan operation start
 	click_pt = loc;
-	std::cout << "Pan Operation Start" << std::endl;
+	//std::cout << "Pan Operation Start" << std::endl;
 }
 
 void mouse_events::pan_operation(glm::vec2& current_translataion)
@@ -72,7 +72,7 @@ void mouse_events::pan_operation_ends()
 	// Pan operation complete
 	prev_translation = total_translation;
 	is_pan = false;
-	std::cout << "Pan Operation End" << std::endl;
+	//std::cout << "Pan Operation End" << std::endl;
 }
 
 void mouse_events::rotation_operation_start(glm::vec2& loc)
@@ -81,7 +81,7 @@ void mouse_events::rotation_operation_start(glm::vec2& loc)
 	is_rotate = true;
 	// Note the click point when the pan operation start
 	click_pt = loc;
-	std::cout << "Rotate Operation Start" << std::endl;
+	//std::cout << "Rotate Operation Start" << std::endl;
 }
 
 void mouse_events::rotate_operation(glm::vec2& delta_d)
@@ -94,7 +94,7 @@ void mouse_events::rotation_operation_ends()
 {
 	// Rotate operation complete
 	is_rotate = false;
-	std::cout << "Rotate Operation End" << std::endl;
+	//std::cout << "Rotate Operation End" << std::endl;
 }
 
 void mouse_events::zoom_operation(double& e_delta, glm::vec2& loc)
@@ -149,29 +149,29 @@ void  mouse_events::zoom_to_fit()
 	prev_translation = glm::vec2(0);
 	zoom_val = 1.0f;
 	geom->zoomfit_geometry();
-	std::cout << "Zoom val: " << zoom_val << std::endl;
+	// std::cout << "Zoom val: " << zoom_val << std::endl;
 }
 
 void mouse_events::left_mouse_click(glm::vec2& loc)
 {
 	// Left mouse single click
-	std::cout << "Left mouse single click" << std::endl;
+	//std::cout << "Left mouse single click" << std::endl;
 }
 
 void mouse_events::left_mouse_doubleclick(glm::vec2& loc)
 {
 	// Left mouse double click
-	std::cout << "Left mouse double click" << std::endl;
+	//std::cout << "Left mouse double click" << std::endl;
 }
 
 void mouse_events::right_mouse_click(glm::vec2& loc)
 {
 	// Right mouse single click
-	std::cout << "Right mouse single click" << std::endl;
+	//std::cout << "Right mouse single click" << std::endl;
 }
 
 void mouse_events::right_mouse_doubleclick(glm::vec2& loc)
 {
 	// Right mouse double click
-	std::cout << "Right mouse double click" << std::endl;
+	//std::cout << "Right mouse double click" << std::endl;
 }

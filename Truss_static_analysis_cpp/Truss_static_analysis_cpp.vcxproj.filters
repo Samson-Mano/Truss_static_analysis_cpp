@@ -191,6 +191,15 @@
     <Image Include="src\geometry_store\shaders\3D_circle_paint.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="src\geometry_store\shaders\pin_support.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\roller_support.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\load_img.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Font Include="Images\font\FreeSans.ttf" />
