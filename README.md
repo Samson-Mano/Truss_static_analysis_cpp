@@ -10,10 +10,11 @@
 - ~~Paint the truss model with basic elements (as points and lines)~~
 - ~~Fit the imported geometry with proper geometry scale~~
 - ~~Pan, zoom and zoom to fit operation~~
-- Implement circle for nodes (instead of points)
-- Implement rectangle for lines (instead of primitive line)
-- UI for adding constraint
-- UI for adding load
+- ~~Implement circle for nodes (instead of points) texture for nodes ~~
+- ~~UI for adding constraint~~
+- ~~UI for adding load~~
+- Add load and constraint to the model by clicking on the node
+- import/export model in native format
 - UI for updating material
 - Build solver
 
