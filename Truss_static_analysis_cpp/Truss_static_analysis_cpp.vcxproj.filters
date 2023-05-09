@@ -84,6 +84,15 @@
     <ClCompile Include="src\loadconstraint_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\geometry_store\bst_sorted_list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\mconstraints.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\mloads.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -164,6 +173,15 @@
     <ClInclude Include="src\loadconstraint_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\geometry_store\bst_sorted_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\mconstraints.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\mloads.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\glew32.dll" />
@@ -174,6 +192,10 @@
     <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\node_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\node_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\constraint_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\constraint_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\load_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\load_vertex_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png">
@@ -198,6 +220,27 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="src\geometry_store\shaders\load_img.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_3d_circle.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_3D_circle_paint.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_load_img.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_node_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_node_texture2.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_pin_support.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="src\geometry_store\shaders\pic_roller_support.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

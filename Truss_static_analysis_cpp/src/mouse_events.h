@@ -2,6 +2,7 @@
 #include <iostream>
 #include <glm/vec2.hpp>
 #include "geometry_store/geom_store.h"
+#include "loadconstraint_window.h"
 
 class mouse_events
 {
@@ -19,11 +20,13 @@ public:
 	void left_mouse_doubleclick(glm::vec2& loc);
 	void right_mouse_click(glm::vec2& loc);
 	void right_mouse_doubleclick(glm::vec2& loc);
-	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height);
+	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,loadconstraint_window* ct_window);
 private:
 	geom_store* geom;
 	int* window_width;
 	int* window_height;
+	loadconstraint_window* ct_window;
+
 	glm::vec2 click_pt;
 	glm::vec2 curr_pt;
 	glm::vec2 prev_translation;

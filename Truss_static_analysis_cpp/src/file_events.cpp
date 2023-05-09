@@ -131,7 +131,8 @@ void file_events::import_varai2d_geometry(geom_store& geom)
 				y = std::stof(token);
 
 				// Create nodes_store object and store in nodeMap
-				nodes_store node(node_id, glm::vec3(x, y, 0.0f));
+				nodes_store node;
+				node.add_node(node_id, glm::vec3(x, y, 0.0f));
 				nodeMap[node_id] = node;
 				j++;
 			}
@@ -163,7 +164,8 @@ void file_events::import_varai2d_geometry(geom_store& geom)
 				end_node_id = std::stoi(token);
 
 				// Create lines_store object using references to startNode and endNode
-				lines_store line(line_id, nodeMap[start_node_id], nodeMap[end_node_id]);
+				lines_store line;
+				line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id]);
 				lineMap[line_id] = line;
 				j++;
 			}

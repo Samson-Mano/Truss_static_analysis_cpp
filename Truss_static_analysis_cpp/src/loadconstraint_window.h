@@ -30,11 +30,11 @@ public:
 	bool is_show_window = false;
 	bool is_add_constraint = false;
 	bool is_add_load = false;
-	int selectedOptionIndex = 0;
+	int constraint_selectedOptionIndex = 0;
 	float constraint_angleDegrees = 0.0f;
 	float load_angleDegrees = 0.0f;
 	float square_size = 50.0f;
-	int loadValue = 0;
+	float loadValue = 0.0f;
 private:
 	my_image_data pin_image;
 	my_image_data roller_image;

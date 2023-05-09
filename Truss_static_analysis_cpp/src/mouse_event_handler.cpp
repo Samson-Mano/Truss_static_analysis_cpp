@@ -2,7 +2,7 @@
 
 mouse_event_handler::mouse_event_handler()
 	:isCtrlDown(false),
-	mouse_click()
+	mouse_click(), last_pt(0), lastClickTime(0.0), lastButton(-1), clickCount(0)
 {
 	// Constructor
 }
@@ -12,9 +12,10 @@ mouse_event_handler::~mouse_event_handler()
 	// Destructor
 }
 
-void mouse_event_handler::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height)
+void mouse_event_handler::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,
+	loadconstraint_window* ct_window)
 {
-	mouse_click.add_geometry_ptr(geom, window_width, window_height);
+	mouse_click.add_geometry_ptr(geom, window_width, window_height, ct_window);
 }
 
 // Mouse button callback function
@@ -57,19 +58,23 @@ void mouse_event_handler::keyDownCallback(GLFWwindow* window, int key, int scanc
 
 void mouse_event_handler::handleMouseButton(int button, int action, int mods, double xpos, double ypos)
 {
-	double lastClickTime = 0.0;
-	int lastButton = -1;
-	double lastX = 0.0;
-	double lastY = 0.0;
-
 	// Get current time
 	double currentTime = glfwGetTime();
 	if (button == GLFW_MOUSE_BUTTON_LEFT)
 	{
 		if (action == GLFW_PRESS)
 		{
+			if ((currentTime - lastClickTime) < 0.5)
+			{
+				clickCount++;
+			}
+			else
+			{
+				clickCount = 1;
+			}
+
 			// Left Mouse down
-			lastX = lastY = 0.0;
+			last_pt = glm::vec2(xpos,ypos);
 			lastClickTime = currentTime;
 			lastButton = GLFW_MOUSE_BUTTON_LEFT;
 
@@ -85,27 +90,27 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			mouse_click.rotation_operation_ends();
 
 			// Calculate mouse move distance
-			double deltaX = xpos - lastX;
-			double deltaY = ypos - lastY;
+			double deltaX = xpos - last_pt.x;
+			double deltaY = ypos - last_pt.y;
+			
+			// Update last position
+			last_pt = glm::vec2(xpos, ypos);
 
 			// Check if it's a click or drag
-			if (deltaX == 0.0 && deltaY == 0.0 && currentTime - lastClickTime < 0.2)
+			if (deltaX == 0.0 && deltaY == 0.0 && (currentTime - lastClickTime) < 0.5 && lastButton == GLFW_MOUSE_BUTTON_LEFT)
 			{
 				// Left Mouse click
-				glm::vec2 loc = glm::vec2(xpos, ypos);
-				mouse_click.left_mouse_click(loc);
-			}
-
-			// Update last position
-			lastX = xpos;
-			lastY = ypos;
-
-			// Check for double click
-			if (currentTime - lastClickTime < 0.5 && lastButton == GLFW_MOUSE_BUTTON_LEFT)
-			{
-				// Left Mouse double click
-				glm::vec2 loc = glm::vec2(xpos, ypos);
-				mouse_click.left_mouse_doubleclick(loc);
+					glm::vec2 loc = glm::vec2(xpos, ypos);
+				if (clickCount == 2)
+				{
+					// Double click
+					mouse_click.left_mouse_doubleclick(loc);
+				}
+				else if (clickCount == 1)
+				{
+					// Single click
+					mouse_click.left_mouse_click(loc);
+				}
 			}
 		}
 	}
@@ -114,8 +119,17 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 	{
 		if (action == GLFW_PRESS)
 		{
+			if ((currentTime - lastClickTime) < 0.5)
+			{
+				clickCount++;
+			}
+			else
+			{
+				clickCount = 1;
+			}
+
 			// Right Mouse down
-			lastX = lastY = 0.0;
+			last_pt = glm::vec2(xpos, ypos);
 			lastClickTime = currentTime;
 			lastButton = GLFW_MOUSE_BUTTON_RIGHT;
 
@@ -132,27 +146,26 @@ void mouse_event_handler::handleMouseButton(int button, int action, int mods, do
 			mouse_click.pan_operation_ends();
 
 			// Calculate mouse move distance
-			double deltaX = xpos - lastX;
-			double deltaY = ypos - lastY;
+			double deltaX = xpos - last_pt.x;
+			double deltaY = ypos - last_pt.y;
+			// Update last position
+			last_pt = glm::vec2(xpos, ypos);
 
 			// Check if it's a click or drag
-			if (deltaX == 0.0 && deltaY == 0.0 && currentTime - lastClickTime < 0.2)
+			if (deltaX == 0.0 && deltaY == 0.0 && (currentTime - lastClickTime) < 0.5 && lastButton == GLFW_MOUSE_BUTTON_RIGHT)
 			{
 				// Right Mouse click
 				glm::vec2 loc = glm::vec2(xpos, ypos);
-				mouse_click.right_mouse_click(loc);
-			}
-
-			// Update last position
-			lastX = xpos;
-			lastY = ypos;
-
-			// Check for double click
-			if (currentTime - lastClickTime < 0.5 && lastButton == GLFW_MOUSE_BUTTON_RIGHT)
-			{
-				// Right Mouse double click
-				glm::vec2 loc = glm::vec2(xpos, ypos);
-				mouse_click.right_mouse_doubleclick(loc);
+				if (clickCount == 2)
+				{
+					// Double click
+					mouse_click.right_mouse_doubleclick(loc);
+				}
+				else if (clickCount == 1)
+				{
+					// Single click
+					mouse_click.right_mouse_click(loc);
+				}
 			}
 		}
 	}

@@ -143,6 +143,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="src\app_window.cpp" />
     <ClCompile Include="ImGui\stb_implement.cpp" />
+    <ClCompile Include="src\geometry_store\bst_sorted_list.cpp" />
+    <ClCompile Include="src\geometry_store\mconstraints.cpp" />
+    <ClCompile Include="src\geometry_store\mloads.cpp" />
     <ClCompile Include="src\loadconstraint_window.cpp" />
     <ClCompile Include="src\geometry_store\buffers\gBuffers.cpp" />
     <ClCompile Include="src\geometry_store\buffers\IndexBuffer.cpp" />
@@ -171,6 +174,9 @@
     <ClInclude Include="ImGui\stb_image.h" />
     <ClInclude Include="src\app_window.h" />
     <ClInclude Include="ImGui\stb_implement.h" />
+    <ClInclude Include="src\geometry_store\bst_sorted_list.h" />
+    <ClInclude Include="src\geometry_store\mconstraints.h" />
+    <ClInclude Include="src\geometry_store\mloads.h" />
     <ClInclude Include="src\loadconstraint_window.h" />
     <ClInclude Include="src\geometry_store\buffers\gBuffers.h" />
     <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h" />
@@ -191,8 +197,12 @@
     <None Include="dlls\glfw3.dll" />
     <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\basic_vert_shader.vert" />
+    <None Include="src\geometry_store\shaders\constraint_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\constraint_vertex_shader.vert" />
     <None Include="src\geometry_store\shaders\geom_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\geom_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\load_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\load_vertex_shader.vert" />
     <None Include="src\geometry_store\shaders\node_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\node_vertex_shader.vert" />
   </ItemGroup>
@@ -203,6 +213,13 @@
     <Image Include="src\geometry_store\shaders\load_img.png" />
     <Image Include="src\geometry_store\shaders\node_texture.png" />
     <Image Include="src\geometry_store\shaders\node_texture2.png" />
+    <Image Include="src\geometry_store\shaders\pic_3d_circle.png" />
+    <Image Include="src\geometry_store\shaders\pic_3D_circle_paint.png" />
+    <Image Include="src\geometry_store\shaders\pic_load_img.png" />
+    <Image Include="src\geometry_store\shaders\pic_node_texture.png" />
+    <Image Include="src\geometry_store\shaders\pic_node_texture2.png" />
+    <Image Include="src\geometry_store\shaders\pic_pin_support.png" />
+    <Image Include="src\geometry_store\shaders\pic_roller_support.png" />
     <Image Include="src\geometry_store\shaders\pin_support.png" />
     <Image Include="src\geometry_store\shaders\roller_support.png" />
   </ItemGroup>

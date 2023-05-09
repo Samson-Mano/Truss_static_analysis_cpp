@@ -4,12 +4,13 @@ mouse_events::mouse_events()
 	:geom(nullptr),
 	window_width(nullptr),
 	window_height(nullptr),
-	click_pt(0), 
+	ct_window(nullptr),
+	click_pt(0),
 	curr_pt(0),
 	prev_translation(0),
 	total_translation(0),
-	is_pan(false), 
-	is_rotate(false), 
+	is_pan(false),
+	is_rotate(false),
 	zoom_val(1.0f)
 {
 	// Constructor
@@ -20,11 +21,14 @@ mouse_events::~mouse_events()
 	// Destructor
 }
 
-void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height)
+void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,loadconstraint_window* ct_window)
 {
 	this->geom = geom;
 	this->window_width = window_width;
 	this->window_height = window_height;
+
+	// constraints and Loads
+	this->ct_window = ct_window;
 }
 
 void mouse_events::mouse_location(glm::vec2& loc)
@@ -101,7 +105,7 @@ void mouse_events::zoom_operation(double& e_delta, glm::vec2& loc)
 {
 	// Screen point before zoom
 	glm::vec2 screen_pt_b4_scale = intellizoom_normalized_screen_pt(loc);
-	
+
 	// Zoom operation
 	if ((e_delta) > 0)
 	{
@@ -126,7 +130,7 @@ void mouse_events::zoom_operation(double& e_delta, glm::vec2& loc)
 
 	// Set the zoom
 	geom->zoom_geometry(zoom_val);
-	
+
 	// Perform Translation for Intelli Zoom
 	pan_operation(g_tranl);
 	pan_operation_ends();
@@ -140,7 +144,7 @@ glm::vec2 mouse_events::intellizoom_normalized_screen_pt(glm::vec2 loc)
 
 	glm::vec2 mouse_pt = (-1.0f * (loc - mid_pt)) / (static_cast<float>(min_size) * 0.5f);
 
-	return (mouse_pt - (2.0f * prev_translation))/zoom_val;
+	return (mouse_pt - (2.0f * prev_translation)) / zoom_val;
 }
 
 void  mouse_events::zoom_to_fit()
@@ -155,23 +159,45 @@ void  mouse_events::zoom_to_fit()
 void mouse_events::left_mouse_click(glm::vec2& loc)
 {
 	// Left mouse single click
-	//std::cout << "Left mouse single click" << std::endl;
+	if ((ct_window->is_add_load) == true)
+	{
+		// Add Loads
+		geom->set_nodal_loads(loc,ct_window->loadValue,ct_window->load_angleDegrees, true);
+	}
+
+	if ((ct_window->is_add_constraint) == true)
+	{
+		// Add constraint
+		geom->set_nodal_constraints(loc, ct_window->constraint_selectedOptionIndex, ct_window->constraint_angleDegrees, true);
+	}
+	// std::cout << "Left mouse single click" << std::endl;
 }
 
 void mouse_events::left_mouse_doubleclick(glm::vec2& loc)
 {
 	// Left mouse double click
-	//std::cout << "Left mouse double click" << std::endl;
+	// std::cout << "Left mouse double click" << std::endl;
 }
 
 void mouse_events::right_mouse_click(glm::vec2& loc)
 {
 	// Right mouse single click
-	//std::cout << "Right mouse single click" << std::endl;
+	if ((ct_window->is_add_load) == true)
+	{
+		// Remove Loads
+		geom->set_nodal_loads(loc, ct_window->loadValue, ct_window->load_angleDegrees, false);
+	}
+
+	if ((ct_window->is_add_constraint) == true)
+	{
+		// Remove constraint
+		geom->set_nodal_constraints(loc, ct_window->constraint_selectedOptionIndex, ct_window->constraint_angleDegrees, false);
+	}
+	// std::cout << "Right mouse single click" << std::endl;
 }
 
 void mouse_events::right_mouse_doubleclick(glm::vec2& loc)
 {
 	// Right mouse double click
-	//std::cout << "Right mouse double click" << std::endl;
+	// std::cout << "Right mouse double click" << std::endl;
 }

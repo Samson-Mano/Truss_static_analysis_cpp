@@ -6,11 +6,11 @@ geom_store::geom_store()
 	node_count(0), line_count(0),
 	min_b(glm::vec3(0)),
 	max_b(glm::vec3(0)),
-	geom_bound(glm::vec3(0)), geom_scale(1.0f),
-	center(glm::vec3(0)), window_width(0), window_height(0),
-	line_buffer(), node_buffer(), node_texture(), node_sh(), model_sh()
+	geom_bound(glm::vec3(0)), modelMatrix(glm::mat4(0)), geom_scale(1.0f), panTranslation(glm::mat4(0)),
+	center(glm::vec3(0)), window_width(0), window_height(0), zoom_scale(1.0f)
 {
 	// Empty constructor
+	// ,line_buffer(), node_buffer(), node_texture(), node_sh(), model_sh()
 }
 
 void geom_store::create_geometry(const std::unordered_map<int, nodes_store>& nodeMap,
@@ -128,7 +128,7 @@ void geom_store::set_geometry()
 	float* line_vertices = new float[line_vertex_count];
 
 	// Define the node vertices of the model (4 vertex (to form a triangle) for a node (2 position & 2 texture coordinate) 
-	const unsigned int node_vertex_count = 4 * 8 * node_count;
+	const unsigned int node_vertex_count = 4 * 11 * node_count;
 	float* node_vertices = new float[node_vertex_count];
 
 	unsigned int node_indices_count = 6 * node_count;
@@ -167,8 +167,8 @@ void geom_store::set_geometry()
 	for (const auto& line : lineMap)
 	{
 		// Add the node point
-		line_indices[line_i_index + 0] = node_id_map[line.second.s_nd.node_id];
-		line_indices[line_i_index + 1] = node_id_map[line.second.e_nd.node_id];
+		line_indices[line_i_index + 0] = node_id_map[line.second.startNode.node_id];
+		line_indices[line_i_index + 1] = node_id_map[line.second.endNode.node_id];
 
 		line_i_index = line_i_index + 2;
 	}
@@ -186,6 +186,7 @@ void geom_store::set_geometry()
 
 	VertexBufferLayout node_layout;
 	node_layout.AddFloat(3);  // Position
+	node_layout.AddFloat(3);  // Node center
 	node_layout.AddFloat(3);  // Color
 	node_layout.AddFloat(2);  // Texture co-ordinate
 
@@ -200,17 +201,31 @@ void geom_store::set_geometry()
 	std::cout << "Parent path: " << parentString << std::endl;
 
 	// Model shader
-	model_sh.create_shader((shadersPath.string() + "/geom_vertex_shader.vert").c_str(),
+	line_shader.create_shader((shadersPath.string() + "/geom_vertex_shader.vert").c_str(),
 		(shadersPath.string() + "/geom_frag_shader.frag").c_str());
 
 	// Node shader
-	node_sh.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
+	node_shader.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
 		(shadersPath.string() + "/node_frag_shader.frag").c_str());
-	node_sh.setUniform("node_size", node_circle_radii);
 
-	node_texture.LoadTexture((shadersPath.string() + "/3d_circle_paint.png").c_str());
-	node_texture.Bind();
-	node_sh.setUniform("u_Texture", 0);
+	node_texture.LoadTexture((shadersPath.string() + "/pic_3d_circle_paint.png").c_str());
+	node_shader.setUniform("u_Texture", 0);
+
+	// Constraint shader
+	constraint_shader.create_shader((shadersPath.string() + "/constraint_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/constraint_frag_shader.frag").c_str());
+
+	// Load textures
+	constraint_texture_pin.LoadTexture((shadersPath.string() + "/pic_pin_support.png").c_str());
+	constraint_texture_roller.LoadTexture((shadersPath.string() + "/pic_roller_support.png").c_str());
+
+	// Set texture uniform variables
+	constraint_shader.setUniform("u_Textures[0]", 0);
+	constraint_shader.setUniform("u_Textures[1]", 1);
+
+	// Load shader
+	load_shader.create_shader((shadersPath.string() + "/load_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/load_frag_shader.frag").c_str());
 
 	// Geometry is set
 	is_geometry_set = true;
@@ -241,75 +256,95 @@ void geom_store::set_line_vertices(float* line_vertices, unsigned int& line_v_in
 void  geom_store::set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node)
 {
 	// Set the node vertices
-	float node_size = node_circle_radii /geom_scale;
+	float node_size = node_circle_radii / geom_scale;
 
 	// Set the node vertices Corner 1
 	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
 	node_vertices[node_v_index + 1] = node.node_pt.y - node_size;
 	node_vertices[node_v_index + 2] = 0.0f;
 
+	// node center
+	node_vertices[node_v_index + 3] = node.node_pt.x;
+	node_vertices[node_v_index + 4] = node.node_pt.y;
+	node_vertices[node_v_index + 5] = 0.0f;
+
 	// Set the node color
-	node_vertices[node_v_index + 3] = node.default_color.x;
-	node_vertices[node_v_index + 4] = node.default_color.y;
-	node_vertices[node_v_index + 5] = node.default_color.z;
+	node_vertices[node_v_index + 6] = node.default_color.x;
+	node_vertices[node_v_index + 7] = node.default_color.y;
+	node_vertices[node_v_index + 8] = node.default_color.z;
 
 	// Set the Texture co-ordinates
-	node_vertices[node_v_index + 6] = 0.0f;
-	node_vertices[node_v_index + 7] = 0.0f;
+	node_vertices[node_v_index + 9] = 0.0f;
+	node_vertices[node_v_index + 10] = 0.0f;
 
 	// Increment
-	node_v_index = node_v_index + 8;
+	node_v_index = node_v_index + 11;
 
 	// Set the node vertices Corner 2
 	node_vertices[node_v_index + 0] = node.node_pt.x + node_size;
 	node_vertices[node_v_index + 1] = node.node_pt.y - node_size;
 	node_vertices[node_v_index + 2] = 0.0f;
 
+	// node center
+	node_vertices[node_v_index + 3] = node.node_pt.x;
+	node_vertices[node_v_index + 4] = node.node_pt.y;
+	node_vertices[node_v_index + 5] = 0.0f;
+
 	// Set the node color
-	node_vertices[node_v_index + 3] = node.default_color.x;
-	node_vertices[node_v_index + 4] = node.default_color.y;
-	node_vertices[node_v_index + 5] = node.default_color.z;
+	node_vertices[node_v_index + 6] = node.default_color.x;
+	node_vertices[node_v_index + 7] = node.default_color.y;
+	node_vertices[node_v_index + 8] = node.default_color.z;
 
 	// Set the Texture co-ordinates
-	node_vertices[node_v_index + 6] = 1.0f;
-	node_vertices[node_v_index + 7] = 0.0f;
+	node_vertices[node_v_index + 9] = 1.0f;
+	node_vertices[node_v_index + 10] = 0.0f;
 
 	// Increment
-	node_v_index = node_v_index + 8;
+	node_v_index = node_v_index + 11;
 
 	// Set the node vertices Corner 3
 	node_vertices[node_v_index + 0] = node.node_pt.x + node_size;
 	node_vertices[node_v_index + 1] = node.node_pt.y + node_size;
 	node_vertices[node_v_index + 2] = 0.0f;
 
+	// node center
+	node_vertices[node_v_index + 3] = node.node_pt.x;
+	node_vertices[node_v_index + 4] = node.node_pt.y;
+	node_vertices[node_v_index + 5] = 0.0f;
+
 	// Set the node color
-	node_vertices[node_v_index + 3] = node.default_color.x;
-	node_vertices[node_v_index + 4] = node.default_color.y;
-	node_vertices[node_v_index + 5] = node.default_color.z;
+	node_vertices[node_v_index + 6] = node.default_color.x;
+	node_vertices[node_v_index + 7] = node.default_color.y;
+	node_vertices[node_v_index + 8] = node.default_color.z;
 
 	// Set the Texture co-ordinates
-	node_vertices[node_v_index + 6] = 1.0f;
-	node_vertices[node_v_index + 7] = 1.0f;
+	node_vertices[node_v_index + 9] = 1.0f;
+	node_vertices[node_v_index + 10] = 1.0f;
 
 	// Increment
-	node_v_index = node_v_index + 8;
+	node_v_index = node_v_index + 11;
 
 	// Set the node vertices Corner 3
 	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
 	node_vertices[node_v_index + 1] = node.node_pt.y + node_size;
 	node_vertices[node_v_index + 2] = 0.0f;
 
+	// node center
+	node_vertices[node_v_index + 3] = node.node_pt.x;
+	node_vertices[node_v_index + 4] = node.node_pt.y;
+	node_vertices[node_v_index + 5] = 0.0f;
+
 	// Set the node color
-	node_vertices[node_v_index + 3] = node.default_color.x;
-	node_vertices[node_v_index + 4] = node.default_color.y;
-	node_vertices[node_v_index + 5] = node.default_color.z;
+	node_vertices[node_v_index + 6] = node.default_color.x;
+	node_vertices[node_v_index + 7] = node.default_color.y;
+	node_vertices[node_v_index + 8] = node.default_color.z;
 
 	// Set the Texture co-ordinates
-	node_vertices[node_v_index + 6] = 0.0f;
-	node_vertices[node_v_index + 7] = 1.0f;
+	node_vertices[node_v_index + 9] = 0.0f;
+	node_vertices[node_v_index + 10] = 1.0f;
 
 	// Increment
-	node_v_index = node_v_index + 8;
+	node_v_index = node_v_index + 11;
 }
 
 void geom_store::set_node_indices(unsigned int* node_indices, unsigned int& node_i_index)
@@ -330,8 +365,6 @@ void geom_store::set_node_indices(unsigned int* node_indices, unsigned int& node
 	node_i_index = node_i_index + 6;
 }
 
-
-
 void geom_store::paint_geometry()
 {
 	if (is_geometry_set == false)
@@ -342,30 +375,63 @@ void geom_store::paint_geometry()
 	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Paint the Lines
-	model_sh.Bind();
+	line_shader.Bind();
 	line_buffer.Bind();
 	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
 	line_buffer.UnBind();
-	model_sh.UnBind();
+	line_shader.UnBind();
 
 	// Paint the Nodes
-	node_sh.Bind();
+	node_shader.Bind();
 	node_buffer.Bind();
+	node_texture.Bind();
 	glDrawElements(GL_TRIANGLES, 6 * node_count, GL_UNSIGNED_INT, 0);
+	node_texture.UnBind();
 	node_buffer.UnBind();
-	node_sh.UnBind();
+	node_shader.UnBind();
 
-	//model_sh.UnBind();
+	// Paint the Constraints
+	if (constraintMap.constraint_count != 0)
+	{
+		constraint_shader.Bind();
+		constraint_buffer.Bind();
 
-	// GL.DrawElements(PrimitiveType.Points, this._point_indices.Length, DrawElementsType.UnsignedInt, 0);
+		// Activate textures (pin and roller support)
+		constraint_texture_pin.Bind();
+		constraint_texture_roller.Bind(1);
 
+		glDrawElements(GL_TRIANGLES, 6 * constraintMap.constraint_count, GL_UNSIGNED_INT, 0);
+
+		constraint_texture_pin.UnBind();
+		constraint_texture_roller.UnBind();
+
+		constraint_buffer.UnBind();
+		constraint_shader.UnBind();
+	}
+
+	// Paint the Loads
+	if (loadMap.load_count != 0)
+	{
+		load_shader.Bind();
+		// Arrow head
+		loadarrowhead_buffer.Bind();
+		glDrawElements(GL_TRIANGLES, 3 * loadMap.load_count, GL_UNSIGNED_INT, 0);
+		loadarrowhead_buffer.UnBind();
+
+		// Arrow tail
+		loadarrowtail_buffer.Bind();
+		glDrawElements(GL_LINES, 2 * loadMap.load_count, GL_UNSIGNED_INT, 0);
+		loadarrowtail_buffer.UnBind();
+
+		load_shader.UnBind();
+	}
 
 }
 
 void geom_store::set_model_matrix()
 {
 	// Set the model matrix for the model shader
-	// Find the scale of the model (with 0.5 being the maximum used)
+	// Find the scale of the model (with 0.9 being the maximum used)
 	int max_dim = window_width > window_height ? window_width : window_height;
 
 	float normalized_screen_width = 1.8f * (float(window_width) / float(max_dim));
@@ -382,10 +448,12 @@ void geom_store::set_model_matrix()
 
 	glm::mat4 g_transl = glm::translate(glm::mat4(1.0f), geom_translation);
 
-	glm::mat4 modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(geom_scale));
+	modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(geom_scale));
 
-	model_sh.setUniform("modelMatrix", modelMatrix, false);
-	node_sh.setUniform("modelMatrix", modelMatrix, false);
+	line_shader.setUniform("modelMatrix", modelMatrix, false);
+	node_shader.setUniform("modelMatrix", modelMatrix, false);
+	constraint_shader.setUniform("modelMatrix", modelMatrix, false);
+	load_shader.setUniform("modelMatrix", modelMatrix, false);
 }
 
 void geom_store::updateWindowDimension(const int& window_width, const int& window_height)
@@ -408,49 +476,611 @@ void geom_store::zoomfit_geometry()
 	// Set the rotation matrix
 	glm::mat4 rotationMatrix(1.0f);
 
-	model_sh.setUniform("rotationMatrix", rotationMatrix, false);
-	node_sh.setUniform("rotationMatrix", rotationMatrix, false);
+	line_shader.setUniform("rotationMatrix", rotationMatrix, false);
+	node_shader.setUniform("rotationMatrix", rotationMatrix, false);
+	constraint_shader.setUniform("rotationMatrix", rotationMatrix, false);
+	load_shader.setUniform("rotationMatrix", rotationMatrix, false);
 
 	// Set the pan translation matrix
-	glm::mat4 panTranslation(1.0f);
+	panTranslation = glm::mat4(1.0f);
 
-	model_sh.setUniform("panTranslation", panTranslation, false);
-	node_sh.setUniform("panTranslation", panTranslation, false);
+	line_shader.setUniform("panTranslation", panTranslation, false);
+	node_shader.setUniform("panTranslation", panTranslation, false);
+	constraint_shader.setUniform("panTranslation", panTranslation, false);
+	load_shader.setUniform("panTranslation", panTranslation, false);
 
 	// Set the zoom matrix
-	float zoom_scale = 1.0f;
+	zoom_scale = 1.0f;
 
-	model_sh.setUniform("zoomscale", zoom_scale);
-	node_sh.setUniform("zoomscale", zoom_scale);
+	line_shader.setUniform("zoomscale", zoom_scale);
+	node_shader.setUniform("zoomscale", zoom_scale);
+	constraint_shader.setUniform("zoomscale", zoom_scale);
+	load_shader.setUniform("zoomscale", zoom_scale);
 }
-
 
 void geom_store::pan_geometry(glm::vec2& transl)
 {
-	//// Pan the geometry
-	//int max_dim = window_width > window_height ? window_width : window_height;
-
-	//// Pan Translation
-	//float x_transl = 2 * ((-transl.x) / float(max_dim));
-	//float y_transl = 2 * ((-transl.y) / float(max_dim));
-
-	// std::cout << "Pan translation " << x_transl << ", " << y_transl << std::endl;
-
 	// Pan the geometry
-	glm::mat4 panTranslation(1.0f);
+	panTranslation = glm::mat4(1.0f);
 
 	panTranslation[0][3] = -1.0f * transl.x;
 	panTranslation[1][3] = transl.y;
 
-	model_sh.setUniform("panTranslation", panTranslation, false);
-	node_sh.setUniform("panTranslation", panTranslation, false);
-
+	line_shader.setUniform("panTranslation", panTranslation, false);
+	node_shader.setUniform("panTranslation", panTranslation, false);
+	constraint_shader.setUniform("panTranslation", panTranslation, false);
+	load_shader.setUniform("panTranslation", panTranslation, false);
 }
-
 
 void geom_store::zoom_geometry(float& z_scale)
 {
+	zoom_scale = z_scale;
+
 	// Zoom the geometry
-	model_sh.setUniform("zoomscale", z_scale);
-	node_sh.setUniform("zoomscale", z_scale);
+	line_shader.setUniform("zoomscale", zoom_scale);
+	node_shader.setUniform("zoomscale", zoom_scale);
+	constraint_shader.setUniform("zoomscale", zoom_scale);
+	load_shader.setUniform("zoomscale", zoom_scale);
 }
+
+void geom_store::set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add)
+{
+	int node_hit_id = -1;
+	// Set the nodal loads
+	if (is_geometry_set == true)
+	{
+		if (is_add == true)
+		{
+			// Add load
+			node_hit_id = is_node_hit(loc);
+			if (node_hit_id != -1)
+			{
+				loadMap.add_load(node_hit_id, &nodeMap[node_hit_id], load_value, load_angle);
+				// Node hit == True
+				std::cout << "Node Hit: " << node_hit_id << std::endl;
+			}
+		}
+		else
+		{
+			// Remove load
+			node_hit_id = is_node_hit(loc);
+			if (node_hit_id != -1)
+			{
+				loadMap.delete_load(node_hit_id);
+				// Node hit == True
+				std::cout << "Node Hit: " << node_hit_id << std::endl;
+			}
+		}
+	}
+
+	// Update the load vertices
+	if (node_hit_id != -1)
+	{
+		update_load();
+	}
+}
+
+void geom_store::set_nodal_constraints(glm::vec2& loc, int& constraint_type, float& constraint_angle, bool is_add)
+{
+	int node_hit_id = -1;
+	// Set the nodal constraints
+	if (is_geometry_set == true)
+	{
+		if (is_add == true)
+		{
+			// Add constraints
+			node_hit_id = is_node_hit(loc);
+			if (node_hit_id != -1)
+			{
+				constraintMap.add_constraint(node_hit_id, &nodeMap[node_hit_id], constraint_type, constraint_angle);
+				// Node hit == True
+				std::cout << "Node Hit: " << node_hit_id << std::endl;
+			}
+		}
+		else
+		{
+			// Remove constraints
+			node_hit_id = is_node_hit(loc);
+			if (node_hit_id != -1)
+			{
+				constraintMap.delete_constraint(node_hit_id);
+				// Node hit == True
+				std::cout << "Node Hit: " << node_hit_id << std::endl;
+			}
+		}
+	}
+
+	// Update the constraint vertices
+	if (node_hit_id != -1)
+	{
+		update_constraint();
+	}
+}
+
+int geom_store::is_node_hit(glm::vec2& loc)
+{
+	// Return the node id of node which is clicked
+
+	// Covert mouse location to screen location
+	int max_dim = window_width > window_height ? window_width : window_height;
+
+	// Transform the mouse location to openGL screen coordinates
+	float screen_x = 2.0f * ((loc.x - (window_width * 0.5f)) / max_dim);
+	float screen_y = 2.0f * (((window_height * 0.5f) - loc.y) / max_dim);
+
+
+	// Nodal location
+	glm::mat4 scaling_matrix = glm::mat4(1.0) * zoom_scale;
+	scaling_matrix[3][3] = 1.0f;
+
+	glm::mat4 scaledModelMatrix = scaling_matrix * modelMatrix;
+
+	// Loop through all nodes in map and update min and max values
+	for (auto it = nodeMap.begin(); it != nodeMap.end(); ++it)
+	{
+		const auto& node = it->second.node_pt;
+		glm::vec4 finalPosition = scaledModelMatrix * glm::vec4(node.x, node.y, 0, 1.0f) * panTranslation;
+
+		float node_position_x = finalPosition.x;
+		float node_position_y = finalPosition.y;
+
+		if ((((node_position_x - screen_x) * (node_position_x - screen_x)) +
+			((node_position_y - screen_y) * (node_position_y - screen_y))) < (16 * node_circle_radii * node_circle_radii))
+		{
+			// Return the id of the node
+			// 4 x Radius is the threshold of hit (2 * Diameter)
+			return it->first;
+		}
+	}
+
+	// None found
+	return -1;
+}
+
+void geom_store::update_constraint()
+{
+	// Update the constraint
+	if (constraintMap.constraint_count != 0)
+	{
+		// Constraint vertices
+		const unsigned int constraint_vertex_count = 4 * 12 * constraintMap.constraint_count;
+		float* constraint_vertices = new float[constraint_vertex_count];
+
+		unsigned int constraint_indices_count = 6 * constraintMap.constraint_count;
+		unsigned int* constraint_vertex_indices = new unsigned int[constraint_indices_count];
+
+		unsigned int constraint_v_index = 0;
+		unsigned int constraint_i_index = 0;
+
+		for (auto& constraint : constraintMap.c_data)
+		{
+			// Add the constraint point
+			set_constraint_vertices(constraint_vertices, constraint_v_index, constraint.second.node, constraint.second.constraint_angle, unsigned int(constraint.second.constraint_type));
+
+			// Add the indices
+			set_constraint_indices(constraint_vertex_indices, constraint_i_index);
+		}
+
+		VertexBufferLayout constraint_layout;
+		constraint_layout.AddFloat(3);  // Position
+		constraint_layout.AddFloat(3);  // Center
+		constraint_layout.AddFloat(3);  // Color
+		constraint_layout.AddFloat(2);  // Texture co-ordinate
+		constraint_layout.AddFloat(1);  // Texture  type
+
+		unsigned int constraint_vertex_size = constraint_vertex_count * sizeof(float);
+
+		// Create the Constraint buffers
+		constraint_buffer.CreateBuffers((void*)constraint_vertices, constraint_vertex_size,
+			(unsigned int*)constraint_vertex_indices, constraint_indices_count, constraint_layout);
+
+
+
+		// Delete the Dynamic arrays
+		delete[] constraint_vertices;
+		delete[] constraint_vertex_indices;
+	}
+
+}
+
+void geom_store::update_load()
+{
+	// Update the load
+	if (loadMap.load_count != 0)
+	{
+		// Load Arrow Head vertices
+		const unsigned int load_arrowhead_vertex_count = 3 * 9 * loadMap.load_count;
+		float* load_arrowhead_vertices = new float[load_arrowhead_vertex_count];
+
+		// Load Arrow Head indices
+		unsigned int load_arrowhead_indices_count = 3 * loadMap.load_count;
+		unsigned int* load_arrowhead_vertex_indices = new unsigned int[load_arrowhead_indices_count];
+
+		unsigned int load_arrowhead_v_index = 0;
+		unsigned int load_arrowhead_i_index = 0;
+
+		// Load Arrow tail vertices
+		const unsigned int load_arrowtail_vertex_count = 2 * 9 * loadMap.load_count;
+		float* load_arrowtail_vertices = new float[load_arrowtail_vertex_count];
+
+		// Load Arrow tail indices
+		unsigned int load_arrowtail_indices_count = 2 * loadMap.load_count;
+		unsigned int* load_arrowtail_vertex_indices = new unsigned int[load_arrowtail_indices_count];
+
+		unsigned int load_arrowtail_v_index = 0;
+		unsigned int load_arrowtail_i_index = 0;
+
+		// Load Max
+		float load_max = 0.0f;
+
+		// Find the load maximum
+		for (auto& load : loadMap.l_data)
+		{
+			if (load_max < std::abs(load.second.load_value))
+			{
+				load_max = std::abs(load.second.load_value);
+			}
+		}
+
+
+		for (auto& load : loadMap.l_data)
+		{
+			// Add the load point arrow head
+			set_load_arrowhead_vertices(load_arrowhead_vertices, load_arrowhead_v_index, load.second.node, 
+				load.second.load_angle, load.second.load_value);
+
+			// Add the arrow head indices
+			set_load_arrowhead_indices(load_arrowhead_vertex_indices, load_arrowhead_i_index);
+
+			// Add the load arrow tail
+			set_load_arrowtail_vertices(load_arrowtail_vertices, load_arrowtail_v_index, load.second.node, 
+				load.second.load_angle, load.second.load_value, load_max);
+
+			// Add the arrow tail indices
+			set_load_arrowtail_indices(load_arrowtail_vertex_indices, load_arrowtail_i_index);
+		}
+
+		VertexBufferLayout load_arrowhead_layout;
+		load_arrowhead_layout.AddFloat(3);  // Position
+		load_arrowhead_layout.AddFloat(3);  // Center
+		load_arrowhead_layout.AddFloat(3);  // Color
+
+		unsigned int load_arrowhead_vertex_size = load_arrowhead_vertex_count * sizeof(float);
+
+		// Create the Load Arrow Head buffers
+		loadarrowhead_buffer.CreateBuffers((void*)load_arrowhead_vertices, load_arrowhead_vertex_size,
+			(unsigned int*)load_arrowhead_vertex_indices, load_arrowhead_indices_count, load_arrowhead_layout);
+
+		VertexBufferLayout load_arrowtail_layout;
+		load_arrowtail_layout.AddFloat(3);  // Position
+		load_arrowtail_layout.AddFloat(3);  // Center
+		load_arrowtail_layout.AddFloat(3);  // Color
+
+		unsigned int load_arrowtail_vertex_size = load_arrowtail_vertex_count * sizeof(float);
+
+		// Create the Load Arrow Tail buffers
+		loadarrowtail_buffer.CreateBuffers((void*)load_arrowtail_vertices, load_arrowtail_vertex_size,
+			(unsigned int*)load_arrowtail_vertex_indices, load_arrowtail_indices_count, load_arrowtail_layout);
+
+		// Delete the Dynamic arrays
+		delete[] load_arrowhead_vertices;
+		delete[] load_arrowhead_vertex_indices;
+		delete[] load_arrowtail_vertices;
+		delete[] load_arrowtail_vertex_indices;
+	}
+}
+
+void geom_store::set_constraint_vertices(float* constraint_vertices, unsigned int& constraint_v_index, nodes_store* node, float constraint_angle, unsigned int constraint_type)
+{
+	// Set the Constraint vertices
+	float constraint_size = (6.0f * node_circle_radii) / geom_scale;
+
+	// Rotate the corner points
+	glm::vec2 bot_left = glm::vec2(-constraint_size, -constraint_size); // 0 0
+	glm::vec2 bot_right = glm::vec2(constraint_size, -constraint_size); // 1 0
+	glm::vec2 top_right = glm::vec2(constraint_size, constraint_size); // 1 1
+	glm::vec2 top_left = glm::vec2(-constraint_size, constraint_size); // 0 1
+
+
+	float radians = ((constraint_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
+	float cos_theta = cos(radians);
+	float sin_theta = sin(radians);
+
+	// Rotated point of the corners
+	glm::vec2 rotated_pt_bot_left = glm::vec2((bot_left.x * cos_theta) + (bot_left.y * sin_theta),
+		-(bot_left.x * sin_theta) + (bot_left.y * cos_theta));
+
+	glm::vec2 rotated_pt_bot_right = glm::vec2((bot_right.x * cos_theta) + (bot_right.y * sin_theta),
+		-(bot_right.x * sin_theta) + (bot_right.y * cos_theta));
+
+	glm::vec2 rotated_pt_top_right = glm::vec2((top_right.x * cos_theta) + (top_right.y * sin_theta),
+		-(top_right.x * sin_theta) + (top_right.y * cos_theta));
+
+	glm::vec2 rotated_pt_top_left = glm::vec2((top_left.x * cos_theta) + (top_left.y * sin_theta),
+		-(top_left.x * sin_theta) + (top_left.y * cos_theta));
+
+
+	nodes_store node_value = (*node);
+
+	// Set the Constraint vertices Corner 1
+	constraint_vertices[constraint_v_index + 0] = node_value.node_pt.x + rotated_pt_bot_left.x;
+	constraint_vertices[constraint_v_index + 1] = node_value.node_pt.y + rotated_pt_bot_left.y;
+	constraint_vertices[constraint_v_index + 2] = 0.0f;
+
+	// Set the node center
+	constraint_vertices[constraint_v_index + 3] = node_value.node_pt.x;
+	constraint_vertices[constraint_v_index + 4] = node_value.node_pt.y;
+	constraint_vertices[constraint_v_index + 5] = 0.0f;
+
+	// Set the node color
+	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
+	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
+	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+
+	// Set the Texture co-ordinates
+	constraint_vertices[constraint_v_index + 9] = 0.0f;
+	constraint_vertices[constraint_v_index + 10] = 0.0f;
+
+	// Texture type
+	constraint_vertices[constraint_v_index + 11] = constraint_type;
+
+	// Increment
+	constraint_v_index = constraint_v_index + 12;
+
+	// Set the Constraint vertices Corner 2
+	constraint_vertices[constraint_v_index + 0] = node_value.node_pt.x + rotated_pt_bot_right.x;
+	constraint_vertices[constraint_v_index + 1] = node_value.node_pt.y + rotated_pt_bot_right.y;
+	constraint_vertices[constraint_v_index + 2] = 0.0f;
+
+	// Set the node center
+	constraint_vertices[constraint_v_index + 3] = node_value.node_pt.x;
+	constraint_vertices[constraint_v_index + 4] = node_value.node_pt.y;
+	constraint_vertices[constraint_v_index + 5] = 0.0f;
+
+	// Set the node color
+	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
+	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
+	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+
+	// Set the Texture co-ordinates
+	constraint_vertices[constraint_v_index + 9] = 1.0f;
+	constraint_vertices[constraint_v_index + 10] = 0.0f;
+
+	// Texture type
+	constraint_vertices[constraint_v_index + 11] = constraint_type;
+
+	// Increment
+	constraint_v_index = constraint_v_index + 12;
+
+	// Set the Constraint vertices Corner 3
+	constraint_vertices[constraint_v_index + 0] = node_value.node_pt.x + rotated_pt_top_right.x;
+	constraint_vertices[constraint_v_index + 1] = node_value.node_pt.y + rotated_pt_top_right.y;
+	constraint_vertices[constraint_v_index + 2] = 0.0f;
+
+	// Set the node center
+	constraint_vertices[constraint_v_index + 3] = node_value.node_pt.x;
+	constraint_vertices[constraint_v_index + 4] = node_value.node_pt.y;
+	constraint_vertices[constraint_v_index + 5] = 0.0f;
+
+	// Set the node color
+	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
+	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
+	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+
+	// Set the Texture co-ordinates
+	constraint_vertices[constraint_v_index + 9] = 1.0f;
+	constraint_vertices[constraint_v_index + 10] = 1.0f;
+
+	// Texture type
+	constraint_vertices[constraint_v_index + 11] = constraint_type;
+
+	// Increment
+	constraint_v_index = constraint_v_index + 12;
+
+	// Set the Constraint vertices Corner 4
+	constraint_vertices[constraint_v_index + 0] = node_value.node_pt.x + rotated_pt_top_left.x;
+	constraint_vertices[constraint_v_index + 1] = node_value.node_pt.y + rotated_pt_top_left.y;
+	constraint_vertices[constraint_v_index + 2] = 0.0f;
+
+	// Set the node center
+	constraint_vertices[constraint_v_index + 3] = node_value.node_pt.x;
+	constraint_vertices[constraint_v_index + 4] = node_value.node_pt.y;
+	constraint_vertices[constraint_v_index + 5] = 0.0f;
+
+	// Set the node color
+	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
+	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
+	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+
+	// Set the Texture co-ordinates
+	constraint_vertices[constraint_v_index + 9] = 0.0f;
+	constraint_vertices[constraint_v_index + 10] = 1.0f;
+
+	// Texture type
+	constraint_vertices[constraint_v_index + 11] = constraint_type;
+
+	// Increment
+	constraint_v_index = constraint_v_index + 12;
+}
+
+void geom_store::set_constraint_indices(unsigned int* constraint_vertex_indices, unsigned int& constraint_i_index)
+{
+	// Set the node indices
+	unsigned int t_id = ((constraint_i_index / 6) * 4);
+	// Triangle 0,1,2
+	constraint_vertex_indices[constraint_i_index + 0] = t_id + 0;
+	constraint_vertex_indices[constraint_i_index + 1] = t_id + 1;
+	constraint_vertex_indices[constraint_i_index + 2] = t_id + 2;
+
+	// Triangle 2,3,0
+	constraint_vertex_indices[constraint_i_index + 3] = t_id + 2;
+	constraint_vertex_indices[constraint_i_index + 4] = t_id + 3;
+	constraint_vertex_indices[constraint_i_index + 5] = t_id + 0;
+
+	// Increment
+	constraint_i_index = constraint_i_index + 6;
+}
+
+void geom_store::set_load_arrowhead_vertices(float* load_arrowhead_vertices, unsigned int& load_arrowhead_v_index, nodes_store* node, float load_angle, float load_value)
+{
+	// Load arrow head vertices
+	float load_arrowhead_size = (6.0f * node_circle_radii) / geom_scale;
+
+	// Rotate the corner points
+	glm::vec2 arrow_pt = glm::vec2(0, -(node_circle_radii / geom_scale)); // 0 0
+	glm::vec2 arrow_hd_left = glm::vec2(-1.5f*(node_circle_radii / geom_scale), -5.0f * (node_circle_radii / geom_scale)); // -1 1
+	glm::vec2 arrow_hd_right = glm::vec2(1.5f*(node_circle_radii / geom_scale), -5.0f * (node_circle_radii / geom_scale)); // 1 1
+
+	float radians = ((load_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
+	float cos_theta = cos(radians);
+	float sin_theta = sin(radians);
+
+	// Rotated point of the corners
+	glm::vec2 rotated_arrow_pt = glm::vec2((arrow_pt.x * cos_theta) + (arrow_pt.y * sin_theta),
+		 -(arrow_pt.x * sin_theta) + (arrow_pt.y * cos_theta));
+
+	glm::vec2 rotated_arrow_hd_left = glm::vec2((arrow_hd_left.x * cos_theta) + (arrow_hd_left.y * sin_theta),
+		 -(arrow_hd_left.x * sin_theta) + (arrow_hd_left.y * cos_theta));
+
+	glm::vec2 rotated_arrow_hd_right = glm::vec2((arrow_hd_right.x * cos_theta) + (arrow_hd_right.y * sin_theta),
+		 -(arrow_hd_right.x * sin_theta) + (arrow_hd_right.y * cos_theta));
+
+	nodes_store node_value = (*node);
+
+	// Set the load vertices Arrow point
+	load_arrowhead_vertices[load_arrowhead_v_index + 0] = node_value.node_pt.x + rotated_arrow_pt.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 1] = node_value.node_pt.y + rotated_arrow_pt.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 2] = 0.0f;
+
+	// Set the node center
+	load_arrowhead_vertices[load_arrowhead_v_index + 3] = node_value.node_pt.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 4] = node_value.node_pt.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 5] = 0.0f;
+
+	// Set the node color
+	load_arrowhead_vertices[load_arrowhead_v_index + 6] = node_value.default_color.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 7] = node_value.default_color.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 8] = node_value.default_color.z;
+
+	// Increment
+	load_arrowhead_v_index = load_arrowhead_v_index + 9;
+
+	// Set the load vertices Arrow head left pt
+	load_arrowhead_vertices[load_arrowhead_v_index + 0] = node_value.node_pt.x + rotated_arrow_hd_left.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 1] = node_value.node_pt.y + rotated_arrow_hd_left.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 2] = 0.0f;
+
+	// Set the node center
+	load_arrowhead_vertices[load_arrowhead_v_index + 3] = node_value.node_pt.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 4] = node_value.node_pt.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 5] = 0.0f;
+
+	// Set the node color
+	load_arrowhead_vertices[load_arrowhead_v_index + 6] = node_value.default_color.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 7] = node_value.default_color.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 8] = node_value.default_color.z;
+
+	// Increment
+	load_arrowhead_v_index = load_arrowhead_v_index + 9;
+
+	// Set the load vertices Arrow head right pt
+	load_arrowhead_vertices[load_arrowhead_v_index + 0] = node_value.node_pt.x + rotated_arrow_hd_right.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 1] = node_value.node_pt.y + rotated_arrow_hd_right.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 2] = 0.0f;
+
+	// Set the node center
+	load_arrowhead_vertices[load_arrowhead_v_index + 3] = node_value.node_pt.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 4] = node_value.node_pt.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 5] = 0.0f;
+
+	// Set the node color
+	load_arrowhead_vertices[load_arrowhead_v_index + 6] = node_value.default_color.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 7] = node_value.default_color.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 8] = node_value.default_color.z;
+
+	// Increment
+	load_arrowhead_v_index = load_arrowhead_v_index + 9;
+}
+
+void geom_store::set_load_arrowhead_indices(unsigned int* load_arrowhead_vertex_indices, unsigned int& load_arrowhead_i_index)
+{
+	// Load arrow head indices
+	// Triangle 0,1,2
+	load_arrowhead_vertex_indices[load_arrowhead_i_index + 0] = load_arrowhead_i_index + 0;
+	load_arrowhead_vertex_indices[load_arrowhead_i_index + 1] = load_arrowhead_i_index + 1;
+	load_arrowhead_vertex_indices[load_arrowhead_i_index + 2] = load_arrowhead_i_index + 2;
+
+	// Increment
+	load_arrowhead_i_index = load_arrowhead_i_index + 3;
+}
+
+void geom_store::set_load_arrowtail_vertices(float* load_arrowtail_vertices, unsigned int& load_arrowtail_v_index, nodes_store* node, float load_angle, float load_value, float load_max)
+{
+
+	int load_sign = load_value > 0 ? 1 : -1;
+	// Rotate the corner points
+	glm::vec2 arrow_tail_startpt = glm::vec2(0, -2.0f* load_sign* (node_circle_radii / geom_scale)); // 0 0
+	glm::vec2 arrow_tail_endpt = glm::vec2(0, -20.0f *(load_value/load_max)* (node_circle_radii / geom_scale)); // -1 1
+
+	float radians = ((load_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
+	float cos_theta = cos(radians);
+	float sin_theta = sin(radians);
+
+	// Rotated point of the arrow tail
+	glm::vec2 rotated_arrow_tail_startpt = glm::vec2((arrow_tail_startpt.x * cos_theta) + (arrow_tail_startpt.y * sin_theta),
+		-(arrow_tail_startpt.x * sin_theta) + (arrow_tail_startpt.y * cos_theta));
+
+	glm::vec2 rotated_arrow_tail_endpt = glm::vec2((arrow_tail_endpt.x * cos_theta) + (arrow_tail_endpt.y * sin_theta),
+		-(arrow_tail_endpt.x * sin_theta) + (arrow_tail_endpt.y * cos_theta));
+
+
+	nodes_store node_value = (*node);
+
+	// Set the load vertices Arrow tail start pt
+	load_arrowtail_vertices[load_arrowtail_v_index + 0] = node_value.node_pt.x + rotated_arrow_tail_startpt.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 1] = node_value.node_pt.y + rotated_arrow_tail_startpt.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 2] = 0.0f;
+
+	// Set the node center
+	load_arrowtail_vertices[load_arrowtail_v_index + 3] = node_value.node_pt.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 4] = node_value.node_pt.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 5] = 0.0f;
+
+	// Set the node color
+	load_arrowtail_vertices[load_arrowtail_v_index + 6] = node_value.default_color.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 7] = node_value.default_color.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 8] = node_value.default_color.z;
+
+	// Increment
+	load_arrowtail_v_index = load_arrowtail_v_index + 9;
+
+	// Set the load vertices Arrow tail end pt
+	load_arrowtail_vertices[load_arrowtail_v_index + 0] = node_value.node_pt.x + rotated_arrow_tail_endpt.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 1] = node_value.node_pt.y + rotated_arrow_tail_endpt.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 2] = 0.0f;
+
+	// Set the node center
+	load_arrowtail_vertices[load_arrowtail_v_index + 3] = node_value.node_pt.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 4] = node_value.node_pt.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 5] = 0.0f;
+
+	// Set the node color
+	load_arrowtail_vertices[load_arrowtail_v_index + 6] = node_value.default_color.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 7] = node_value.default_color.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 8] = node_value.default_color.z;
+
+	// Increment
+	load_arrowtail_v_index = load_arrowtail_v_index + 9;
+}
+
+void geom_store::set_load_arrowtail_indices(unsigned int* load_arrowtail_vertex_indices, unsigned int& load_arrowtail_i_index)
+{
+	// Load arrow tail indices
+	// Line 0,1
+	load_arrowtail_vertex_indices[load_arrowtail_i_index + 0] = load_arrowtail_i_index + 0;
+	load_arrowtail_vertex_indices[load_arrowtail_i_index + 1] = load_arrowtail_i_index + 1;
+
+	// Increment
+	load_arrowtail_i_index = load_arrowtail_i_index + 2;
+}
+

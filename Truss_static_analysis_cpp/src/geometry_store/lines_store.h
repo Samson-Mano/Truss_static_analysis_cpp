@@ -8,9 +8,9 @@ private:
 
 public:
 	int line_id; // ID of the line
-	nodes_store s_nd; // start node
-	nodes_store e_nd; // end node
+	nodes_store startNode; // start node
+	nodes_store endNode; // end node
 	lines_store();
-	lines_store(int id, const nodes_store& startNode, const nodes_store& endNode); // Constructor overload to initialize line_id, s_nd, and e_nd directly
 	~lines_store();
+	void add_line(int& id, const nodes_store& startNode, const nodes_store& endNode); // Constructor overload to initialize line_id, s_nd, and e_nd directly
 };

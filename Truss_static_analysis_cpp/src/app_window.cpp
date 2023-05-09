@@ -64,7 +64,7 @@ app_window::app_window()
 	glfwSetWindowUserPointer(window, &mouse_Handler);
 
 	// Passing the address of geom and window dimensions 
-	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height);
+	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window);
 
 	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
 
@@ -156,7 +156,7 @@ void app_window::menu_events()
 	// Change the font for the menu bar
 	ImGui::PushFont(imgui_font);
 
-	
+
 	// Create a menu bar
 	if (ImGui::BeginMainMenuBar(), ImGuiWindowFlags_MenuBar)
 	{
@@ -208,7 +208,7 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("FE Solve"))
 			{
 				// Handle menu FE Solve
-				
+
 			}
 			if (ImGui::MenuItem("Displacement"))
 			{
@@ -218,7 +218,7 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Member force"))
 			{
 				// Handle menu Member force
-	
+
 			}
 			ImGui::EndMenu();
 		}
@@ -228,9 +228,9 @@ void app_window::menu_events()
 
 	// Execute constraint window operation
 	ct_window.render_window();
-		// constraint_window_events(show_constraint_window);
-		
-	// Pop the custom font after using it
+	// constraint_window_events(show_constraint_window);
+
+// Pop the custom font after using it
 	ImGui::PopFont();
 }
 

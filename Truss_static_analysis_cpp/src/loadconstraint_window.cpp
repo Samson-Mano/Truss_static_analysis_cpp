@@ -2,7 +2,7 @@
 
 loadconstraint_window::loadconstraint_window()
 	: is_show_window(false), is_add_constraint(false), is_add_load(false),
-	constraint_angleDegrees(90.0f), load_angleDegrees(0.0f), selectedOptionIndex(0), loadValue(100),
+	constraint_angleDegrees(90.0f), load_angleDegrees(0.0f), constraint_selectedOptionIndex(0), loadValue(100.0f),
 	square_size(50.0f)
 {
 
@@ -24,19 +24,19 @@ void loadconstraint_window::bind_images()
 	unsigned int my_image_texture = 0;
 
 	// Bind the pin image
-	img_path = "src/geometry_store/shaders/pin_support.png";
+	img_path = "src/geometry_store/shaders/pic_pin_support.png";
 	LoadTextureFromFile(img_path.c_str(), &my_image_texture, pin_image.is_loaded);
 
 	pin_image.image_texture = my_image_texture;
 
 	// Bind the roller image
-	img_path = "src/geometry_store/shaders/roller_support.png";
+	img_path = "src/geometry_store/shaders/pic_roller_support.png";
 	LoadTextureFromFile(img_path.c_str(), &my_image_texture, roller_image.is_loaded);
 
 	roller_image.image_texture = my_image_texture;
 
 	// Bind the Load image
-	img_path = "src/geometry_store/shaders/load_img.png";
+	img_path = "src/geometry_store/shaders/pic_load_img.png";
 	LoadTextureFromFile(img_path.c_str(), &my_image_texture, load_image.is_loaded);
 
 	load_image.image_texture = my_image_texture;
@@ -101,7 +101,7 @@ void loadconstraint_window::render_constraint_tab()
 	// Define a string to hold the label for the popup select button
 	std::string popupLabel = "Support: ";
 
-	if (ImGui::Button((popupLabel + options[selectedOptionIndex]).c_str())) {
+	if (ImGui::Button((popupLabel + options[constraint_selectedOptionIndex]).c_str())) {
 		ImGui::OpenPopup("Select an option");
 	}
 
@@ -110,8 +110,8 @@ void loadconstraint_window::render_constraint_tab()
 		ImGui::Separator();
 
 		for (int i = 0; i < options_count; i++) {
-			if (ImGui::Selectable(options[i], selectedOptionIndex == i)) {
-				selectedOptionIndex = i;
+			if (ImGui::Selectable(options[i], constraint_selectedOptionIndex == i)) {
+				constraint_selectedOptionIndex = i;
 			}
 		}
 
@@ -204,7 +204,7 @@ void loadconstraint_window::render_constraint_tab()
 	
 
 	// Render reference image
-	if (selectedOptionIndex == 0)
+	if (constraint_selectedOptionIndex == 0)
 	{
 		// Draw pin support
 		draw_pin_support();
@@ -231,7 +231,7 @@ void loadconstraint_window::render_load_tab()
 	// Input box to give input via text
 	static bool loadval_input_mode = false;
 	static char load_str[16] = ""; // buffer to store input load string
-	static int load_input = 0; // buffer to store input load value
+	static float load_input = 0; // buffer to store input load value
 
 	// Button to switch to input mode
 	if (!loadval_input_mode)
@@ -239,7 +239,7 @@ void loadconstraint_window::render_load_tab()
 		if (ImGui::Button("Input Load"))
 		{
 			loadval_input_mode = true;
-			snprintf(load_str, 16, "%d", loadValue); // set the buffer to current load value
+			snprintf(load_str, 16, "%.1f", loadValue); // set the buffer to current load value
 		}
 	}
 	else // input mode
@@ -264,7 +264,7 @@ void loadconstraint_window::render_load_tab()
 
 	// Text for load value
 	ImGui::SameLine();
-	ImGui::Text("Load = %d", loadValue);
+	ImGui::Text("Load = %.1f", loadValue);
 	//_________________________________________________________________________________________
 
 	// Input box to give input via text
