@@ -106,14 +106,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\openGL\glfw-3.3.8.bin.WIN64\include\;C:\openGL\glew-2.2.0\include\;C:\openGL\glm;C:\openGL\freetype-windows-binaries\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32.lib;glfw3.lib;opengl32.lib;</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\openGL\glew-2.2.0\lib\Release\x64;C:\openGL\glfw-3.3.8.bin.WIN64\lib-vc2022;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glew32.lib;glfw3.lib;opengl32.lib;freetype.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\openGL\glew-2.2.0\lib\Release\x64;C:\openGL\glfw-3.3.8.bin.WIN64\lib-vc2022;C:\openGL\freetype-windows-binaries\release dll\win64</AdditionalLibraryDirectories>
       <AdditionalOptions>/NODEFAULTLIB:MSVCRT %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -144,6 +144,8 @@
     <ClCompile Include="src\app_window.cpp" />
     <ClCompile Include="ImGui\stb_implement.cpp" />
     <ClCompile Include="src\geometry_store\bst_sorted_list.cpp" />
+    <ClCompile Include="src\geometry_store\buffers\font_atlas.cpp" />
+    <ClCompile Include="src\geometry_store\label_text_store.cpp" />
     <ClCompile Include="src\geometry_store\mconstraints.cpp" />
     <ClCompile Include="src\geometry_store\mloads.cpp" />
     <ClCompile Include="src\loadconstraint_window.cpp" />
@@ -160,6 +162,7 @@
     <ClCompile Include="src\file_events.cpp" />
     <ClCompile Include="src\mouse_events.cpp" />
     <ClCompile Include="src\mouse_event_handler.cpp" />
+    <ClCompile Include="src\options_window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h" />
@@ -175,8 +178,10 @@
     <ClInclude Include="src\app_window.h" />
     <ClInclude Include="ImGui\stb_implement.h" />
     <ClInclude Include="src\geometry_store\bst_sorted_list.h" />
+    <ClInclude Include="src\geometry_store\buffers\font_atlas.h" />
     <ClInclude Include="src\geometry_store\mconstraints.h" />
     <ClInclude Include="src\geometry_store\mloads.h" />
+    <ClInclude Include="src\geometry_store\label_text_store.h" />
     <ClInclude Include="src\loadconstraint_window.h" />
     <ClInclude Include="src\geometry_store\buffers\gBuffers.h" />
     <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h" />
@@ -191,8 +196,10 @@
     <ClInclude Include="src\file_events.h" />
     <ClInclude Include="src\mouse_events.h" />
     <ClInclude Include="src\mouse_event_handler.h" />
+    <ClInclude Include="src\options_window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dlls\freetype.dll" />
     <None Include="dlls\glew32.dll" />
     <None Include="dlls\glfw3.dll" />
     <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
@@ -205,6 +212,8 @@
     <None Include="src\geometry_store\shaders\load_vertex_shader.vert" />
     <None Include="src\geometry_store\shaders\node_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\node_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\text_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\text_vert_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png" />
@@ -226,6 +235,10 @@
   <ItemGroup>
     <Font Include="Images\font\FreeSans.ttf" />
     <Font Include="Images\font\HyperFont.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_CanadaDBNormal.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_CenturyGothic.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_FreeSans.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_HyperFont.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

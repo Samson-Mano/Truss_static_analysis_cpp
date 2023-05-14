@@ -20,6 +20,7 @@ public:
 	~mconstraints();
 	void add_constraint(int& node_id, nodes_store* node, int& constraint_type,float& constraint_angle);
 	void delete_constraint(int& node_id);
+	void delete_all();
 private:
 
 };

@@ -59,3 +59,10 @@ void mloads::delete_load(int& node_id)
 		}
 	}
 }
+
+void mloads::delete_all()
+{
+	// Delete all the resources
+	load_count = 0;
+	l_data.clear();
+}

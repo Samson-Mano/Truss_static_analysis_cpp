@@ -20,6 +20,7 @@ public:
 	~mloads();
 	void add_load(int& node_id, nodes_store* node, float& load_value, float& load_angle);
 	void delete_load(int& node_id);
+	void delete_all();
 private:
 
 };

@@ -93,6 +93,15 @@
     <ClCompile Include="src\geometry_store\mloads.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\options_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\label_text_store.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\buffers\font_atlas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -182,6 +191,15 @@
     <ClInclude Include="src\geometry_store\mloads.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\options_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\label_text_store.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\buffers\font_atlas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\glew32.dll" />
@@ -196,6 +214,9 @@
     <None Include="src\geometry_store\shaders\constraint_vertex_shader.vert" />
     <None Include="src\geometry_store\shaders\load_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\load_vertex_shader.vert" />
+    <None Include="dlls\freetype.dll" />
+    <None Include="src\geometry_store\shaders\text_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\text_vert_shader.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png">
@@ -247,5 +268,9 @@
   <ItemGroup>
     <Font Include="Images\font\FreeSans.ttf" />
     <Font Include="Images\font\HyperFont.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_FreeSans.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_HyperFont.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_CenturyGothic.ttf" />
+    <Font Include="src\geometry_store\shaders\ttf_CanadaDBNormal.ttf" />
   </ItemGroup>
 </Project>

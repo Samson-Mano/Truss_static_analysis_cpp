@@ -10,6 +10,7 @@
 #include "file_events.h"
 #include "mouse_event_handler.h"
 #include "loadconstraint_window.h"
+#include "options_window.h"
 
 class app_window
 {
@@ -29,6 +30,7 @@ public:
 	const char* log = "";
 	geom_store geom;
 	loadconstraint_window ct_window;
+	options_window op_window;
 
 	// Constructor and Destructor
 	app_window();

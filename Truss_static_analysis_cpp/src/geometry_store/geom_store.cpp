@@ -37,6 +37,13 @@ void geom_store::create_geometry(const std::unordered_map<int, nodes_store>& nod
 	is_geometry_loaded = true;
 
 	set_geometry();
+
+	// Create the geometry labels (Node ID, Node Coord, Line ID, Line Length)
+	create_geometry_labels();
+
+	// Clear the constraints and loads from previous model
+	constraintMap.delete_all();
+	loadMap.delete_all();
 }
 
 geom_store::~geom_store()
@@ -45,18 +52,27 @@ geom_store::~geom_store()
 	deleteResources();
 }
 
+void geom_store::add_options_window_ptr(options_window* op_window)
+{
+	this->op_window = op_window;
+}
+
 void geom_store::deleteResources()
 {
 	is_geometry_loaded = false;
 	is_geometry_set = false;
 	// Call the destructor for each nodes_store object in the nodeMap
-	for (auto& node : nodeMap) {
+	for (auto& node : nodeMap)
+	{
 		node.second.~nodes_store();
 	}
 	// Call the destructor for each lines_store object in the lineMap
-	for (auto& line : lineMap) {
+	for (auto& line : lineMap)
+	{
 		line.second.~lines_store();
 	}
+
+
 	// Clear the nodeMap and lineMap
 	nodeMap.clear();
 	lineMap.clear();
@@ -127,7 +143,7 @@ void geom_store::set_geometry()
 	const unsigned int line_vertex_count = 6 * node_count;
 	float* line_vertices = new float[line_vertex_count];
 
-	// Define the node vertices of the model (4 vertex (to form a triangle) for a node (2 position & 2 texture coordinate) 
+	// Define the node vertices of the model (4 vertex (to form a triangle) for a node (3 position, 3 color, 3 center & 2 texture coordinate) 
 	const unsigned int node_vertex_count = 4 * 11 * node_count;
 	float* node_vertices = new float[node_vertex_count];
 
@@ -227,6 +243,13 @@ void geom_store::set_geometry()
 	load_shader.create_shader((shadersPath.string() + "/load_vertex_shader.vert").c_str(),
 		(shadersPath.string() + "/load_frag_shader.frag").c_str());
 
+	// Text shader
+	text_shader.create_shader((shadersPath.string() + "/text_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/text_frag_shader.frag").c_str());
+
+	// Set texture uniform variables
+	text_shader.setUniform("u_Texture", 0);
+
 	// Geometry is set
 	is_geometry_set = true;
 
@@ -324,7 +347,7 @@ void  geom_store::set_node_vertices(float* node_vertices, unsigned int& node_v_i
 	// Increment
 	node_v_index = node_v_index + 11;
 
-	// Set the node vertices Corner 3
+	// Set the node vertices Corner 4
 	node_vertices[node_v_index + 0] = node.node_pt.x - node_size;
 	node_vertices[node_v_index + 1] = node.node_pt.y + node_size;
 	node_vertices[node_v_index + 2] = 0.0f;
@@ -426,6 +449,40 @@ void geom_store::paint_geometry()
 		load_shader.UnBind();
 	}
 
+	// Paint the labels
+	text_shader.Bind();
+
+	if (op_window->is_show_nodenumber == true)
+	{
+		// Show node ids
+		node_id_labels.paint_text();
+	}
+
+	if (op_window->is_show_nodecoord == true)
+	{
+		// Show node coordinate
+		node_coord_labels.paint_text();
+	}
+
+	if (op_window->is_show_linenumber == true)
+	{
+		// Show line id
+		line_id_labels.paint_text();
+	}
+
+	if (op_window->is_show_linelength == true)
+	{
+		// Show line length
+		line_length_labels.paint_text();
+	}
+
+	if (op_window->is_show_loadvalue == true && loadMap.load_count != 0)
+	{
+		// Show the load value
+		load_value_labels.paint_text();
+	}
+
+	text_shader.UnBind();
 }
 
 void geom_store::set_model_matrix()
@@ -454,6 +511,7 @@ void geom_store::set_model_matrix()
 	node_shader.setUniform("modelMatrix", modelMatrix, false);
 	constraint_shader.setUniform("modelMatrix", modelMatrix, false);
 	load_shader.setUniform("modelMatrix", modelMatrix, false);
+	text_shader.setUniform("modelMatrix", modelMatrix, false);
 }
 
 void geom_store::updateWindowDimension(const int& window_width, const int& window_height)
@@ -480,6 +538,7 @@ void geom_store::zoomfit_geometry()
 	node_shader.setUniform("rotationMatrix", rotationMatrix, false);
 	constraint_shader.setUniform("rotationMatrix", rotationMatrix, false);
 	load_shader.setUniform("rotationMatrix", rotationMatrix, false);
+	text_shader.setUniform("rotationMatrix", rotationMatrix, false);
 
 	// Set the pan translation matrix
 	panTranslation = glm::mat4(1.0f);
@@ -488,6 +547,7 @@ void geom_store::zoomfit_geometry()
 	node_shader.setUniform("panTranslation", panTranslation, false);
 	constraint_shader.setUniform("panTranslation", panTranslation, false);
 	load_shader.setUniform("panTranslation", panTranslation, false);
+	text_shader.setUniform("panTranslation", panTranslation, false);
 
 	// Set the zoom matrix
 	zoom_scale = 1.0f;
@@ -496,6 +556,7 @@ void geom_store::zoomfit_geometry()
 	node_shader.setUniform("zoomscale", zoom_scale);
 	constraint_shader.setUniform("zoomscale", zoom_scale);
 	load_shader.setUniform("zoomscale", zoom_scale);
+	text_shader.setUniform("zoomscale", zoom_scale);
 }
 
 void geom_store::pan_geometry(glm::vec2& transl)
@@ -510,6 +571,7 @@ void geom_store::pan_geometry(glm::vec2& transl)
 	node_shader.setUniform("panTranslation", panTranslation, false);
 	constraint_shader.setUniform("panTranslation", panTranslation, false);
 	load_shader.setUniform("panTranslation", panTranslation, false);
+	text_shader.setUniform("panTranslation", panTranslation, false);
 }
 
 void geom_store::zoom_geometry(float& z_scale)
@@ -521,6 +583,7 @@ void geom_store::zoom_geometry(float& z_scale)
 	node_shader.setUniform("zoomscale", zoom_scale);
 	constraint_shader.setUniform("zoomscale", zoom_scale);
 	load_shader.setUniform("zoomscale", zoom_scale);
+	text_shader.setUniform("zoomscale", zoom_scale);
 }
 
 void geom_store::set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add)
@@ -537,7 +600,7 @@ void geom_store::set_nodal_loads(glm::vec2& loc, float& load_value, float& load_
 			{
 				loadMap.add_load(node_hit_id, &nodeMap[node_hit_id], load_value, load_angle);
 				// Node hit == True
-				std::cout << "Node Hit: " << node_hit_id << std::endl;
+				// std::cout << "Node Hit: " << node_hit_id << std::endl;
 			}
 		}
 		else
@@ -548,7 +611,7 @@ void geom_store::set_nodal_loads(glm::vec2& loc, float& load_value, float& load_
 			{
 				loadMap.delete_load(node_hit_id);
 				// Node hit == True
-				std::cout << "Node Hit: " << node_hit_id << std::endl;
+				// std::cout << "Node Hit: " << node_hit_id << std::endl;
 			}
 		}
 	}
@@ -574,7 +637,7 @@ void geom_store::set_nodal_constraints(glm::vec2& loc, int& constraint_type, flo
 			{
 				constraintMap.add_constraint(node_hit_id, &nodeMap[node_hit_id], constraint_type, constraint_angle);
 				// Node hit == True
-				std::cout << "Node Hit: " << node_hit_id << std::endl;
+				// std::cout << "Node Hit: " << node_hit_id << std::endl;
 			}
 		}
 		else
@@ -585,7 +648,7 @@ void geom_store::set_nodal_constraints(glm::vec2& loc, int& constraint_type, flo
 			{
 				constraintMap.delete_constraint(node_hit_id);
 				// Node hit == True
-				std::cout << "Node Hit: " << node_hit_id << std::endl;
+				// std::cout << "Node Hit: " << node_hit_id << std::endl;
 			}
 		}
 	}
@@ -686,6 +749,8 @@ void geom_store::update_constraint()
 void geom_store::update_load()
 {
 	// Update the load
+	load_value_labels.init(&main_font);
+
 	if (loadMap.load_count != 0)
 	{
 		// Load Arrow Head vertices
@@ -722,18 +787,53 @@ void geom_store::update_load()
 			}
 		}
 
+		// Set all the load labels
+		for (auto& load : loadMap.l_data)
+		{
+			// Update the load Labels
+			load_data load_val = load.second;
+
+			glm::vec3 temp_color = glm::vec3(1.0f);
+			std::string	temp_str = std::to_string(load_val.load_value);
+			float load_angle = load_val.load_angle;
+
+
+			glm::vec2 load_endpt = glm::vec2(0,
+				-20.0f * (load_val.load_value / load_max) * (node_circle_radii / geom_scale));
+
+			float radians = ((load_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
+			float cos_theta = cos(radians);
+			float sin_theta = sin(radians);
+
+			// Rotated point of the arrow tail
+			glm::vec2 rotated_load_endpt = glm::vec2((load_endpt.x * cos_theta) + (load_endpt.y * sin_theta),
+				-(load_endpt.x * sin_theta) + (load_endpt.y * cos_theta));
+
+			nodes_store node_value = *load_val.node;
+			glm::vec2 final_load_endpt = glm::vec2(node_value.node_pt.x + rotated_load_endpt.x,
+				node_value.node_pt.y + rotated_load_endpt.y);
+
+			float load_angle_rad = ((90 - load_angle) * 3.14159365f) / 180.0f;
+
+			// std::cout << node_value.node_id << "->" << load_angle_rad << std::endl;
+
+			load_value_labels.add_text(temp_str.c_str(), node_value.node_pt, temp_color, geom_scale, load_angle_rad, font_size, true);
+		}
+
+		load_value_labels.set_buffers();
+
 
 		for (auto& load : loadMap.l_data)
 		{
 			// Add the load point arrow head
-			set_load_arrowhead_vertices(load_arrowhead_vertices, load_arrowhead_v_index, load.second.node, 
+			set_load_arrowhead_vertices(load_arrowhead_vertices, load_arrowhead_v_index, load.second.node,
 				load.second.load_angle, load.second.load_value);
 
 			// Add the arrow head indices
 			set_load_arrowhead_indices(load_arrowhead_vertex_indices, load_arrowhead_i_index);
 
 			// Add the load arrow tail
-			set_load_arrowtail_vertices(load_arrowtail_vertices, load_arrowtail_v_index, load.second.node, 
+			set_load_arrowtail_vertices(load_arrowtail_vertices, load_arrowtail_v_index, load.second.node,
 				load.second.load_angle, load.second.load_value, load_max);
 
 			// Add the arrow tail indices
@@ -928,8 +1028,8 @@ void geom_store::set_load_arrowhead_vertices(float* load_arrowhead_vertices, uns
 
 	// Rotate the corner points
 	glm::vec2 arrow_pt = glm::vec2(0, -(node_circle_radii / geom_scale)); // 0 0
-	glm::vec2 arrow_hd_left = glm::vec2(-1.5f*(node_circle_radii / geom_scale), -5.0f * (node_circle_radii / geom_scale)); // -1 1
-	glm::vec2 arrow_hd_right = glm::vec2(1.5f*(node_circle_radii / geom_scale), -5.0f * (node_circle_radii / geom_scale)); // 1 1
+	glm::vec2 arrow_hd_left = glm::vec2(-1.5f * (node_circle_radii / geom_scale), -5.0f * (node_circle_radii / geom_scale)); // -1 1
+	glm::vec2 arrow_hd_right = glm::vec2(1.5f * (node_circle_radii / geom_scale), -5.0f * (node_circle_radii / geom_scale)); // 1 1
 
 	float radians = ((load_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
 	float cos_theta = cos(radians);
@@ -937,13 +1037,13 @@ void geom_store::set_load_arrowhead_vertices(float* load_arrowhead_vertices, uns
 
 	// Rotated point of the corners
 	glm::vec2 rotated_arrow_pt = glm::vec2((arrow_pt.x * cos_theta) + (arrow_pt.y * sin_theta),
-		 -(arrow_pt.x * sin_theta) + (arrow_pt.y * cos_theta));
+		-(arrow_pt.x * sin_theta) + (arrow_pt.y * cos_theta));
 
 	glm::vec2 rotated_arrow_hd_left = glm::vec2((arrow_hd_left.x * cos_theta) + (arrow_hd_left.y * sin_theta),
-		 -(arrow_hd_left.x * sin_theta) + (arrow_hd_left.y * cos_theta));
+		-(arrow_hd_left.x * sin_theta) + (arrow_hd_left.y * cos_theta));
 
 	glm::vec2 rotated_arrow_hd_right = glm::vec2((arrow_hd_right.x * cos_theta) + (arrow_hd_right.y * sin_theta),
-		 -(arrow_hd_right.x * sin_theta) + (arrow_hd_right.y * cos_theta));
+		-(arrow_hd_right.x * sin_theta) + (arrow_hd_right.y * cos_theta));
 
 	nodes_store node_value = (*node);
 
@@ -1019,8 +1119,8 @@ void geom_store::set_load_arrowtail_vertices(float* load_arrowtail_vertices, uns
 
 	int load_sign = load_value > 0 ? 1 : -1;
 	// Rotate the corner points
-	glm::vec2 arrow_tail_startpt = glm::vec2(0, -2.0f* load_sign* (node_circle_radii / geom_scale)); // 0 0
-	glm::vec2 arrow_tail_endpt = glm::vec2(0, -20.0f *(load_value/load_max)* (node_circle_radii / geom_scale)); // -1 1
+	glm::vec2 arrow_tail_startpt = glm::vec2(0, -2.0f * load_sign * (node_circle_radii / geom_scale)); // 0 0
+	glm::vec2 arrow_tail_endpt = glm::vec2(0, -20.0f * (load_value / load_max) * (node_circle_radii / geom_scale)); // -1 1
 
 	float radians = ((load_angle + 90.0f) * 3.14159365f) / 180.0f; // convert degrees to radians
 	float cos_theta = cos(radians);
@@ -1084,3 +1184,77 @@ void geom_store::set_load_arrowtail_indices(unsigned int* load_arrowtail_vertex_
 	load_arrowtail_i_index = load_arrowtail_i_index + 2;
 }
 
+void geom_store::create_geometry_labels()
+{
+	main_font.create_atlas();
+
+	// Create the labels
+	node_id_labels.init(&main_font);
+	line_id_labels.init(&main_font);
+	node_coord_labels.init(&main_font);
+	line_length_labels.init(&main_font);
+	//load_value_labels.init(&main_font);
+
+	glm::vec3 temp_color;
+	std::string temp_str;
+
+	// Add the node texts
+	for (auto& node : nodeMap)
+	{
+		glm::vec2 node_pt = node.second.node_pt;
+
+		// Add the node id
+		temp_color = glm::vec3(1.0f);
+		temp_str = std::to_string(node.first);
+
+
+		node_id_labels.add_text(temp_str.c_str(), node_pt, temp_color, geom_scale, 0.0f, font_size, true);
+
+		// Add the node coord
+		temp_color = glm::vec3(1.0f);
+		temp_str = "(" + std::to_string(node_pt.x) + ", " + std::to_string(node_pt.y) + ")";
+
+		node_coord_labels.add_text(temp_str.c_str(), node_pt, temp_color, geom_scale, 0, font_size, false);
+	}
+
+	// Add the line texts
+	glm::vec2 line_mid_pt;
+	float line_angle;
+	float line_length;
+
+	for (auto& line : lineMap)
+	{
+		// Add the line id
+		glm::vec2 start_pt = line.second.startNode.node_pt;
+		glm::vec2 end_pt = line.second.endNode.node_pt;
+
+		// Calculate the midpoint of the line segment
+		glm::vec2 line_mid_pt = glm::vec2((start_pt.x + end_pt.x) * 0.5f, (start_pt.y + end_pt.y) * 0.5f);
+
+		// Calculate the angle between the line segment and the x-axis
+		float line_angle = atan2(end_pt.y - start_pt.y, end_pt.x - start_pt.x);
+
+		// Calculate the length of the line segment
+		float line_length = sqrt(pow(end_pt.x - start_pt.x, 2) + pow(end_pt.y - start_pt.y, 2));
+
+		temp_color = glm::vec3(1.0f);
+		temp_str = "[" + std::to_string(line.first) + "]";
+
+		line_id_labels.add_text(temp_str.c_str(), line_mid_pt, temp_color, geom_scale, line_angle, font_size, true);
+
+		// std::cout << line.first << "->" << line_angle << std::endl;
+
+		// Add the Line Length
+		temp_color = glm::vec3(1.0f);
+		temp_str = std::to_string(line_length);
+
+		line_length_labels.add_text(temp_str.c_str(), line_mid_pt, temp_color, geom_scale, line_angle, font_size, false);
+	}
+
+	// Set all the buffers
+	node_id_labels.set_buffers();
+	line_id_labels.set_buffers();
+	node_coord_labels.set_buffers();
+	line_length_labels.set_buffers();
+
+}

@@ -21,7 +21,8 @@ mouse_events::~mouse_events()
 	// Destructor
 }
 
-void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,loadconstraint_window* ct_window)
+void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,
+	loadconstraint_window* ct_window)
 {
 	this->geom = geom;
 	this->window_width = window_width;

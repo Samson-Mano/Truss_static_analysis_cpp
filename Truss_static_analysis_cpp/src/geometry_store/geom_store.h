@@ -6,12 +6,16 @@
 #include "lines_store.h"
 #include "buffers/gBuffers.h"
 #include "buffers/Texture.h"
+#include "buffers/font_atlas.h"
 #include "shaders/shader.h"
 #include "../../ImGui/stb_image.h"
 #include <filesystem>
 #include "bst_sorted_list.h"
 #include "mconstraints.h"
 #include "mloads.h"
+#include "../options_window.h"
+#include "label_text_store.h";
+
 
 class geom_store
 {
@@ -19,6 +23,7 @@ public:
 	geom_store();
 	~geom_store();
 	void create_geometry(const std::unordered_map<int, nodes_store>& nodeMap, std::unordered_map<int, lines_store>& lineMap);
+	void add_options_window_ptr(options_window* op_window);
 	void paint_geometry();
 	void updateWindowDimension(const int& window_width, const int& window_height);
 	void deleteResources();
@@ -28,6 +33,7 @@ public:
 	void set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add);
 	void set_nodal_constraints(glm::vec2& loc, int& constraint_type, float& constraint_angle, bool is_add);
 private:
+	const float font_size = 16.0f* std::pow(10, -5);
 	const float node_circle_radii = 0.005f;
 	// Create an unordered_map to store nodes with ID as key
 	std::unordered_map<int, nodes_store> nodeMap;
@@ -37,6 +43,16 @@ private:
 	mconstraints constraintMap;
 	// Load data store
 	mloads loadMap;
+	// Text store
+	font_atlas main_font;
+	label_text_store node_id_labels;
+	label_text_store line_id_labels;
+	label_text_store node_coord_labels;
+	label_text_store line_length_labels;
+	label_text_store load_value_labels;
+
+	// View options ptr
+	options_window* op_window;
 
 	// Count
 	unsigned int node_count;
@@ -68,6 +84,7 @@ private:
 	shader line_shader;
 	shader constraint_shader;
 	shader load_shader;
+	shader text_shader;
 
 	// Functions to set the geometry
 	int window_width;
@@ -75,6 +92,7 @@ private:
 	bool is_geometry_loaded;
 	bool is_geometry_set;
 	void set_geometry();
+	void create_geometry_labels();
 	void set_line_vertices(float* line_vertices, unsigned int& line_v_index, nodes_store& node);
 	void set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node);
 	void set_node_indices(unsigned int* node_indices, unsigned int& node_i_index);

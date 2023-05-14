@@ -18,8 +18,6 @@ struct my_image_data
 	bool is_loaded = false;
 };
 
-
-
 class loadconstraint_window
 {
 public:

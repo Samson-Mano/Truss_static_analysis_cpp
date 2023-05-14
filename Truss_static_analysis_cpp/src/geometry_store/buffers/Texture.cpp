@@ -22,21 +22,6 @@ void Texture::Bind(unsigned int slot) const
 	// Activate a texture slot
 	glActiveTexture(GL_TEXTURE0 + slot);
 
-	/*
-	if (slot == 0)
-	{
-		glActiveTexture(GL_TEXTURE0);
-	}
-	else if (slot == 1)
-	{
-		glActiveTexture(GL_TEXTURE1);
-	}
-	else if (slot == 2)
-	{
-		glActiveTexture(GL_TEXTURE2);
-	}
-	*/
-
 	// Bind the texture to the slot
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 }

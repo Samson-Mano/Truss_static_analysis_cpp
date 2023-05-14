@@ -20,7 +20,8 @@ public:
 	void left_mouse_doubleclick(glm::vec2& loc);
 	void right_mouse_click(glm::vec2& loc);
 	void right_mouse_doubleclick(glm::vec2& loc);
-	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,loadconstraint_window* ct_window);
+	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,
+		loadconstraint_window* ct_window);
 private:
 	geom_store* geom;
 	int* window_width;

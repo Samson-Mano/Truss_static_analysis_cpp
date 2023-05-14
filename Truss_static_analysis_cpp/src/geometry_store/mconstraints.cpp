@@ -56,3 +56,10 @@ void mconstraints::delete_constraint(int& node_id)
 		}
 	}
 }
+
+void mconstraints::delete_all()
+{
+	// Delete all the resources
+	constraint_count = 0;
+	c_data.clear();
+}

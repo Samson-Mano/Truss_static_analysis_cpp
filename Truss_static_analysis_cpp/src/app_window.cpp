@@ -65,6 +65,8 @@ app_window::app_window()
 
 	// Passing the address of geom and window dimensions 
 	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window);
+	// Pass the address of options window
+	geom.add_options_window_ptr(&op_window);
 
 	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
 
@@ -200,6 +202,11 @@ void app_window::menu_events()
 				// Handle menu Edit Materials
 
 			}
+			if (ImGui::MenuItem("View Options"))
+			{
+				// Handle menu View Options of the app
+				op_window.is_show_window = true;
+			}
 			ImGui::EndMenu();
 		}
 		// Solve menu item
@@ -228,6 +235,7 @@ void app_window::menu_events()
 
 	// Execute constraint window operation
 	ct_window.render_window();
+	op_window.render_window();
 	// constraint_window_events(show_constraint_window);
 
 // Pop the custom font after using it
