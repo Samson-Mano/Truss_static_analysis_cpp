@@ -13,12 +13,291 @@ geom_store::geom_store()
 	// ,line_buffer(), node_buffer(), node_texture(), node_sh(), model_sh()
 }
 
-void geom_store::create_geometry(const std::unordered_map<int, nodes_store>& nodeMap,
-	std::unordered_map<int, lines_store>& lineMap)
+void geom_store::write_rawdata(std::ofstream& file)
+{
+	// Write all the nodes
+	for (auto& node : nodeMap)
+	{
+		// Print the node details
+		nodes_store nd_val = node.second;
+
+		file << "node, " 
+			<< nd_val.node_id << ", "
+			<< nd_val.node_pt.x << ", "
+			<<nd_val.node_pt.y<< std::endl;
+	}
+
+	// Write all the lines
+	for (auto& line : lineMap)
+	{
+		// Print the line details
+		lines_store ln_val = line.second;
+
+		file << "line, "
+			<< ln_val.line_id << ", "
+			<< ln_val.startNode.node_id << ", "
+			<< ln_val.endNode.node_id << std::endl;
+	}
+
+	// Write all the constraints
+	for (auto& cnst : constraintMap.c_data)
+	{
+		// Print the constraint details
+		constraint_data cn_val = cnst.second;
+
+		file << "cnst, "
+			<< cn_val.node_id << ", "
+			<< cn_val.constraint_type << ", "
+			<< cn_val.constraint_angle << std::endl;
+	}
+
+	// Write all the loads
+	for (auto& ld : loadMap.l_data)
+	{
+		// Print the load details
+		load_data ld_val = ld.second;
+
+		file << "load, "
+			<< ld_val.node_id << ", "
+			<< ld_val.load_value << ", "
+			<< ld_val.load_angle << std::endl;
+	}
+
+	// Write all the material property
+
+}
+
+void geom_store::read_rawdata(std::ifstream& input_file)
+{
+	// Read the Raw Data
+	// Read the entire file into a string
+	std::string file_contents((std::istreambuf_iterator<char>(input_file)),
+		std::istreambuf_iterator<char>());
+
+	// Split the string into lines
+	std::istringstream iss(file_contents);
+	std::string line;
+	std::vector<std::string> lines;
+	while (std::getline(iss, line))
+	{
+		lines.push_back(line);
+	}
+
+	int j = 0, i = 0;
+
+	// Create an unordered_map to store nodes with ID as key
+	std::unordered_map<int, nodes_store> nodeMap;
+	// Create an unordered_map to store lines with ID as key
+	std::unordered_map<int, lines_store> lineMap;
+	// Constraint data store
+	mconstraints constraintMap;
+	// Load data store
+	mloads loadMap;
+
+
+	// Process the lines
+	while (j < lines.size())
+	{
+		std::string line = lines[j];
+		std::string type = line.substr(0, 4);  // Extract the first 4 characters of the line
+
+		// Split the line into comma-separated fields
+		std::istringstream iss(line);
+		std::string field;
+		std::vector<std::string> fields;
+		while (std::getline(iss, field, ','))
+		{
+			fields.push_back(field);
+		}
+
+		if (type == "node")
+		{
+			// Read the nodes
+			int node_id = std::stoi(fields[1]); // node ID
+			float x = std::stof(fields[2]); // Node coordinate x
+			float y = std::stof(fields[3]); // Node coordinate y
+
+			// Add to node Map
+			nodes_store node;
+			node.add_node(node_id, glm::vec3(x, y, 0.0f));
+			nodeMap[node_id] = node;
+		}
+		else if (type == "line")
+		{
+			int line_id = std::stoi(fields[1]); // line ID
+			int start_node_id = std::stoi(fields[2]); // line id start node
+			int end_node_id = std::stoi(fields[3]); // line id end node
+
+			// Add to line Map (Note that Nodes needed to be added before the start of line addition !!!!)
+			lines_store line;
+			line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id]);
+			lineMap[line_id] = line;
+		}
+		else if (type == "cnst")
+		{
+			int cnst_nd_id = std::stoi(fields[1]); // constraint node ID
+			int cnst_type = std::stoi(fields[2]); // constraint type 
+			float cnst_angle = std::stof(fields[3]); // constraint angle
+
+			// Add to constraint map
+			constraintMap.add_constraint(cnst_nd_id, &nodeMap[cnst_nd_id], cnst_type, cnst_angle);
+		}
+		else if (type == "load")
+		{
+			int load_nd_id = std::stoi(fields[1]); // load node ID
+			float load_val = std::stof(fields[2]); // load value
+			float load_angle = std::stof(fields[3]); // load angle
+
+			// Add to load map
+			loadMap.add_load(load_nd_id, &nodeMap[load_nd_id], load_val, load_angle);
+		}
+
+		// Iterate line
+		j++;
+	}
+
+
+	// Data loaded create the geometry
+
+	if (nodeMap.size() < 1 || lineMap.size() < 1)
+	{
+		// No elements added
+		return;
+	}
+
+	// Re-instantitize geom_store object using the nodeMap and lineMap
+	deleteResources();
+	create_geometry(nodeMap, lineMap,constraintMap,loadMap);
+}
+
+void geom_store::read_varai2d(std::ifstream& input_file)
+{
+	// Read the varai2D
+	// Read the entire file into a string
+	std::string file_contents((std::istreambuf_iterator<char>(input_file)),
+		std::istreambuf_iterator<char>());
+
+	// Split the string into lines
+	std::istringstream iss(file_contents);
+	std::string line;
+	std::vector<std::string> lines;
+	while (std::getline(iss, line))
+	{
+		lines.push_back(line);
+	}
+
+	int j = 0, i = 0;
+
+
+	// Create an unordered_map to store nodes with ID as key
+	std::unordered_map<int, nodes_store> nodeMap;
+	// Create an unordered_map to store lines with ID as key
+	std::unordered_map<int, lines_store> lineMap;
+
+	// Process the lines
+	while (j < lines.size())
+	{
+		std::cout << "Line: " << lines[j] << std::endl;
+		// Check for the start of nodes input
+		if (lines[j].find("[+] End Points") != std::string::npos)
+		{
+			int num_nodes;
+			// Read the number of nodes
+			std::stringstream ss(lines[j]);
+			std::string token;
+			std::getline(ss, token, ','); // Get the string "[+] End Points"
+			std::getline(ss, token, ','); // Get the number of nodes as a string
+			num_nodes = std::stoi(token) + j; // Convert the string to an integer
+
+			// Read and store the nodes
+			for (i = j; i < num_nodes; i++)
+			{
+				int node_id;
+				float x, y;
+
+				std::stringstream ss(lines[i + 1]);
+				std::string token;
+
+				std::getline(ss, token, ','); // read the node ID
+				node_id = std::stoi(token);
+
+				std::getline(ss, token, ','); // read the x-coordinate
+				x = std::stof(token);
+
+				std::getline(ss, token, ','); // read the y-coordinate
+				y = std::stof(token);
+
+				// Create nodes_store object and store in nodeMap
+				nodes_store node;
+				node.add_node(node_id, glm::vec3(x, y, 0.0f));
+				nodeMap[node_id] = node;
+				j++;
+			}
+		}
+		// Check for the start of lines input
+		else if (lines[j].find("[+] Lines") != std::string::npos) {
+			int num_lines;
+			// Read the number of nodes
+			std::stringstream ss(lines[j]);
+			std::string token;
+			std::getline(ss, token, ','); // Get the string "[+] Lines"
+			std::getline(ss, token, ','); // Get the number of nodes as a string
+			num_lines = std::stoi(token) + j; // Convert the string to an integer
+
+			// Read and store the lines
+			for (i = j; i < num_lines; i++)
+			{
+				int line_id, start_node_id, end_node_id;
+				std::stringstream ss(lines[i + 1]);
+				std::string token;
+
+				std::getline(ss, token, ','); // read the line ID
+				line_id = std::stoi(token);
+
+				std::getline(ss, token, ','); // read the start node ID
+				start_node_id = std::stoi(token);
+
+				std::getline(ss, token, ','); // read the end node ID
+				end_node_id = std::stoi(token);
+
+				// Create lines_store object using references to startNode and endNode
+				lines_store line;
+				line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id]);
+				lineMap[line_id] = line;
+				j++;
+			}
+		}
+
+		// iterate line
+		j++;
+	}
+
+	if (nodeMap.size() < 1 || lineMap.size() < 1)
+	{
+		// No elements added
+		return;
+	}
+
+	mconstraints constraintMap;
+	mloads loadMap;
+
+	// Re-instantitize geom_store object using the nodeMap and lineMap
+	deleteResources();
+	create_geometry(nodeMap, lineMap, constraintMap, loadMap);
+}
+
+
+void geom_store::create_geometry(std::unordered_map<int, nodes_store>& nodeMap,
+	std::unordered_map<int, lines_store>& lineMap,
+	mconstraints& constraintMap,
+	mloads& loadMap)
 {
 	// Constructor
 	this->nodeMap = nodeMap;
 	this->lineMap = lineMap;
+
+	this->constraintMap = constraintMap;
+	this->loadMap = loadMap;
 
 	// Set the number of nodes and lines
 	node_count = static_cast<unsigned int>(nodeMap.size());
@@ -40,10 +319,8 @@ void geom_store::create_geometry(const std::unordered_map<int, nodes_store>& nod
 
 	// Create the geometry labels (Node ID, Node Coord, Line ID, Line Length)
 	create_geometry_labels();
-
-	// Clear the constraints and loads from previous model
-	constraintMap.delete_all();
-	loadMap.delete_all();
+	update_constraint();
+	update_load();
 }
 
 geom_store::~geom_store()
@@ -72,10 +349,13 @@ void geom_store::deleteResources()
 		line.second.~lines_store();
 	}
 
-
 	// Clear the nodeMap and lineMap
 	nodeMap.clear();
 	lineMap.clear();
+
+	// Clear the constraints and loads from previous model
+	constraintMap.delete_all();
+	loadMap.delete_all();
 }
 
 std::pair<glm::vec3, glm::vec3> geom_store::findMinMaxXY(const std::unordered_map<int, nodes_store>& nodeMap)
@@ -212,7 +492,7 @@ void geom_store::set_geometry()
 	// Create shader
 	std::filesystem::path currentDirPath = std::filesystem::current_path();
 	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
 	std::string parentString = shadersPath.string();
 	std::cout << "Parent path: " << parentString << std::endl;
 

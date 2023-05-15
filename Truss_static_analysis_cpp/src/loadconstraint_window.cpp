@@ -18,7 +18,7 @@ void loadconstraint_window::bind_images()
 	// Load the texture from a file
 	std::filesystem::path currentDirPath = std::filesystem::current_path();
 	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
 
 	std::string img_path = "";
 	unsigned int my_image_texture = 0;
@@ -46,13 +46,7 @@ void loadconstraint_window::render_window()
 {
 	if (is_show_window == false)
 		return;
-	//ImGui::Begin("My Window");
-	//ImGui::Text("Hello, world!");
-	//if (ImGui::Button("Exit"))
-	//{
-	//    show_window = false;
-	//}
-	// ImGui::End();
+
 	ImGui::Begin("Constraint/ Load");
 
 	// Define an array of tab names

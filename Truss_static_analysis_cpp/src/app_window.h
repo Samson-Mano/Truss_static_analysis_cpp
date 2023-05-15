@@ -39,7 +39,6 @@ public:
 	// Functions
 	void app_render();
 	void menu_events();
-	void constraint_window_events(bool& is_window_open);
 	static void framebufferSizeCallback(GLFWwindow* window, int window_width, int window_height);
 	void GLFWwindow_set_icon(GLFWwindow* window);
 };

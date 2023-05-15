@@ -175,6 +175,7 @@ void app_window::menu_events()
 			{
 				// Handle menu Import raw data
 				menu_click.update_event(import_raw_data, geom);
+				isWindowSizeChanging = true;
 			}
 			if (ImGui::MenuItem("Export raw data"))
 			{
@@ -184,6 +185,7 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Exit"))
 			{
 				// Handle menu Exit
+				exit(0);
 				menu_click.update_event(exit_p, geom);
 			}
 			ImGui::EndMenu();
@@ -236,25 +238,9 @@ void app_window::menu_events()
 	// Execute constraint window operation
 	ct_window.render_window();
 	op_window.render_window();
-	// constraint_window_events(show_constraint_window);
 
 // Pop the custom font after using it
 	ImGui::PopFont();
-}
-
-void app_window::constraint_window_events(bool& show_constraint_window)
-{
-	if (show_constraint_window == true)
-	{
-		// Manage constriant window operation
-		ImGui::Begin("My Window");
-		ImGui::Text("Hello, world!");
-		if (ImGui::Button("Exit"))
-		{
-			show_constraint_window = false;
-		}
-		ImGui::End();
-	}
 }
 
 // Static callback function for framebuffer size changes

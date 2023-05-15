@@ -27,6 +27,9 @@ public:
 	void update_event(menu_item m_ck, geom_store& geom);
 private:
 	std::string fileNameStr = "";  // Initialize with an empty string
-	std::string ShowFileDialog();
+	std::string ShowOpenFileDialog();
+	std::string ShowSaveFileDialog();
 	void import_varai2d_geometry(geom_store& geom);
+	void export_rawdata_geometry(geom_store& geom);
+	void import_rawdata_geometry(geom_store& geom);
 };

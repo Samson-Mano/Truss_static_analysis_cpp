@@ -25,7 +25,7 @@ void font_atlas::create_atlas()
 
 	std::filesystem::path currentDirPath = std::filesystem::current_path();
 	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
 	std::string parentString = shadersPath.string();
 
 	// load font as face

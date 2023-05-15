@@ -14,19 +14,23 @@
 #include "mconstraints.h"
 #include "mloads.h"
 #include "../options_window.h"
-#include "label_text_store.h";
-
+#include "label_text_store.h"
+#include <fstream>
+#include <sstream>
 
 class geom_store
 {
 public:
+	bool is_geometry_loaded;
+	bool is_geometry_set;
 	geom_store();
 	~geom_store();
-	void create_geometry(const std::unordered_map<int, nodes_store>& nodeMap, std::unordered_map<int, lines_store>& lineMap);
+	void write_rawdata(std::ofstream& file);
+	void read_rawdata(std::ifstream& input_file);
+	void read_varai2d(std::ifstream& input_file);
 	void add_options_window_ptr(options_window* op_window);
 	void paint_geometry();
 	void updateWindowDimension(const int& window_width, const int& window_height);
-	void deleteResources();
 	void zoomfit_geometry();
 	void pan_geometry(glm::vec2& transl);
 	void zoom_geometry(float& z_scale);
@@ -89,9 +93,12 @@ private:
 	// Functions to set the geometry
 	int window_width;
 	int window_height;
-	bool is_geometry_loaded;
-	bool is_geometry_set;
+	void deleteResources();
 	void set_geometry();
+	void create_geometry(std::unordered_map<int, nodes_store>& nodeMap, 
+		std::unordered_map<int, lines_store>& lineMap,
+		mconstraints& constraintMap,
+		mloads& loadMap);
 	void create_geometry_labels();
 	void set_line_vertices(float* line_vertices, unsigned int& line_v_index, nodes_store& node);
 	void set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node);
