@@ -13,6 +13,7 @@ public:
 	bool is_show_linelength = false;
 	bool is_show_loadvalue = true;
 	bool is_show_window = false;
+
 	options_window();
 	~options_window();
 	void render_window();

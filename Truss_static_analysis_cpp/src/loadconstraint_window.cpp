@@ -61,13 +61,14 @@ void loadconstraint_window::render_window()
 		// Render the first tab item - Constraint Tab
 		if (ImGui::BeginTabItem(tab_names[0]))
 		{
+			// Render constraint tab
 			render_constraint_tab();
-
 		}
 
 		// Render the second tab item - Add Tab
 		if (ImGui::BeginTabItem(tab_names[1]))
 		{
+			// Render load tab
 			render_load_tab();
 		}
 

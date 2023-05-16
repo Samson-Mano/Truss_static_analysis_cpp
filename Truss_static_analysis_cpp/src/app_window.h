@@ -11,6 +11,7 @@
 #include "mouse_event_handler.h"
 #include "loadconstraint_window.h"
 #include "options_window.h"
+#include "material_window.h"
 
 class app_window
 {
@@ -31,6 +32,7 @@ public:
 	geom_store geom;
 	loadconstraint_window ct_window;
 	options_window op_window;
+	material_window mat_window;
 
 	// Constructor and Destructor
 	app_window();

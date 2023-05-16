@@ -202,7 +202,7 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Material"))
 			{
 				// Handle menu Edit Materials
-
+				mat_window.is_show_window = true;
 			}
 			if (ImGui::MenuItem("View Options"))
 			{
@@ -238,6 +238,7 @@ void app_window::menu_events()
 	// Execute constraint window operation
 	ct_window.render_window();
 	op_window.render_window();
+	mat_window.render_window();
 
 // Pop the custom font after using it
 	ImGui::PopFont();
