@@ -36,7 +36,8 @@ void geom_store::write_rawdata(std::ofstream& file)
 		file << "line, "
 			<< ln_val.line_id << ", "
 			<< ln_val.startNode.node_id << ", "
-			<< ln_val.endNode.node_id << std::endl;
+			<< ln_val.endNode.node_id <<", "
+			<< ln_val.material_id <<std::endl;
 	}
 
 	// Write all the constraints
@@ -64,7 +65,15 @@ void geom_store::write_rawdata(std::ofstream& file)
 	}
 
 	// Write all the material property
-
+	for (auto& mat : mat_window->material_list)
+	{
+		file << "mtrl, " << ", "
+			<< mat.material_id << ", "
+			<< mat.material_name << ", "
+			<< mat.youngs_mod << ", "
+			<< mat.mat_density << ", "
+			<< mat.cs_area << std::endl;
+	}
 }
 
 void geom_store::read_rawdata(std::ifstream& input_file)
@@ -93,7 +102,8 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	mconstraints constraintMap;
 	// Load data store
 	mloads loadMap;
-
+	// Material data list
+	std::vector<material_data> mat_data;
 
 	// Process the lines
 	while (j < lines.size())
@@ -127,10 +137,11 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			int line_id = std::stoi(fields[1]); // line ID
 			int start_node_id = std::stoi(fields[2]); // line id start node
 			int end_node_id = std::stoi(fields[3]); // line id end node
+			int material_id = std::stoi(fields[4]); // materail ID of the line
 
 			// Add to line Map (Note that Nodes needed to be added before the start of line addition !!!!)
 			lines_store line;
-			line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id]);
+			line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id], material_id);
 			lineMap[line_id] = line;
 		}
 		else if (type == "cnst")
@@ -151,6 +162,28 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			// Add to load map
 			loadMap.add_load(load_nd_id, &nodeMap[load_nd_id], load_val, load_angle);
 		}
+		else if (type == "load")
+		{
+			int load_nd_id = std::stoi(fields[1]); // load node ID
+			float load_val = std::stof(fields[2]); // load value
+			float load_angle = std::stof(fields[3]); // load angle
+
+			// Add to load map
+			loadMap.add_load(load_nd_id, &nodeMap[load_nd_id], load_val, load_angle);
+		}
+		else if (type == "mtrl")
+		{
+			// Material data
+			material_data inpt_material;
+			inpt_material.material_id = std::stoi(fields[1]); // Get the material id
+			inpt_material.material_name = fields[2]; // Get the material name
+			inpt_material.mat_density = std::stod(fields[3]); // Get the material youngs modulus
+			inpt_material.youngs_mod = std::stod(fields[4]); // Get the material density
+			inpt_material.cs_area = std::stod(fields[5]); // Get the material cross section area
+
+			// Add to materail list
+			mat_data.push_back(inpt_material);
+		}
 
 		// Iterate line
 		j++;
@@ -165,6 +198,9 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 		return;
 	}
 
+	//Add the materail list
+	mat_window->material_list = mat_data;
+	
 	// Re-instantitize geom_store object using the nodeMap and lineMap
 	deleteResources();
 	create_geometry(nodeMap, lineMap,constraintMap,loadMap);
@@ -262,7 +298,7 @@ void geom_store::read_varai2d(std::ifstream& input_file)
 
 				// Create lines_store object using references to startNode and endNode
 				lines_store line;
-				line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id]);
+				line.add_line(line_id, nodeMap[start_node_id], nodeMap[end_node_id],0);
 				lineMap[line_id] = line;
 				j++;
 			}
@@ -278,9 +314,27 @@ void geom_store::read_varai2d(std::ifstream& input_file)
 		return;
 	}
 
+	// Add a default material to the materail window
+		//default_material.material_name = "Default material";
+	//default_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	//default_material.youngs_mod = 2.07 * std::pow(10, 5); // MPa
+	//default_material.cs_area = 6014; // mm2
+
+
+	material_data inpt_material;
+	inpt_material.material_id = 0; // Get the material id
+	inpt_material.material_name = "Default material"; //Default material name
+	inpt_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	inpt_material.youngs_mod = 2.07 * std::pow(10, 5); //  MPa
+	inpt_material.cs_area = 6014; // mm2
+
+	// Add to materail list
+	mat_window->material_list.clear();
+	mat_window->material_list.push_back(inpt_material);
+
+
 	mconstraints constraintMap;
 	mloads loadMap;
-
 	// Re-instantitize geom_store object using the nodeMap and lineMap
 	deleteResources();
 	create_geometry(nodeMap, lineMap, constraintMap, loadMap);
@@ -329,9 +383,11 @@ geom_store::~geom_store()
 	deleteResources();
 }
 
-void geom_store::add_options_window_ptr(options_window* op_window)
+void geom_store::add_window_ptr(options_window* op_window, material_window* mat_window)
 {
+	// Add the pointer of the windows (material and option window)
 	this->op_window = op_window;
+	this->mat_window = mat_window;
 }
 
 void geom_store::deleteResources()

@@ -12,10 +12,11 @@ lines_store::~lines_store()
 	// Destructor
 }
 
-void lines_store::add_line(int& line_id, const nodes_store& startNode, const nodes_store& endNode)
+void lines_store::add_line(int& line_id, const nodes_store& startNode, const nodes_store& endNode,int material_id)
 {
 	// Add the line
 	this->line_id = line_id;
+	this->material_id = material_id;
 	this->startNode = startNode;
 	this->endNode = endNode;
 }

@@ -14,6 +14,7 @@
 #include "mconstraints.h"
 #include "mloads.h"
 #include "../options_window.h"
+#include "../material_window.h"
 #include "label_text_store.h"
 #include <fstream>
 #include <sstream>
@@ -28,7 +29,7 @@ public:
 	void write_rawdata(std::ofstream& file);
 	void read_rawdata(std::ifstream& input_file);
 	void read_varai2d(std::ifstream& input_file);
-	void add_options_window_ptr(options_window* op_window);
+	void add_window_ptr(options_window* op_window, material_window* mat_window);
 	void paint_geometry();
 	void updateWindowDimension(const int& window_width, const int& window_height);
 	void zoomfit_geometry();
@@ -55,8 +56,9 @@ private:
 	label_text_store line_length_labels;
 	label_text_store load_value_labels;
 
-	// View options ptr
+	// View options ptr and Material window ptr
 	options_window* op_window;
+	material_window* mat_window;
 
 	// Count
 	unsigned int node_count;

@@ -12,6 +12,7 @@
 
 struct material_data
 {
+	unsigned int material_id;
 	std::string material_name;
 	double youngs_mod;
 	double mat_density;
@@ -22,14 +23,13 @@ class material_window
 {
 public:
 	bool is_show_window = false;
+	bool is_assign_material = false;
 	int selected_material_option = 0;
 	std::vector<material_data> material_list;
 
 	material_window();
 	~material_window();
 	void render_window();
-	void render_assignmaterial_tab();
-	void render_creatematerial_tab();
 private:
 
 

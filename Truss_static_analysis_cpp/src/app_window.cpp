@@ -66,7 +66,7 @@ app_window::app_window()
 	// Passing the address of geom and window dimensions 
 	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window);
 	// Pass the address of options window
-	geom.add_options_window_ptr(&op_window);
+	geom.add_window_ptr(&op_window,&mat_window);
 
 	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
 
