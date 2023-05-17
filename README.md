@@ -15,9 +15,10 @@
 - ~~UI for adding load~~
 - ~~Add load and constraint to the model by clicking on the node~~
 - ~~Text in GUI to show load value, length, node number, member number etc.~~
-- import/export model in native format
+- ~~import/export model in native format~~
 - UI for updating material
 - Build solver
+- Color profile for the model environment
 
 # Plane truss finite element solver
 
