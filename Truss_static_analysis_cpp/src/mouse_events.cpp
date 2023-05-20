@@ -22,7 +22,7 @@ mouse_events::~mouse_events()
 }
 
 void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,
-	loadconstraint_window* ct_window)
+	loadconstraint_window* ct_window,material_window* mat_window)
 {
 	this->geom = geom;
 	this->window_width = window_width;
@@ -30,6 +30,9 @@ void mouse_events::add_geometry_ptr(geom_store* geom, int* window_width, int* wi
 
 	// constraints and Loads
 	this->ct_window = ct_window;
+
+	// Material window
+	this->mat_window = mat_window;
 }
 
 void mouse_events::mouse_location(glm::vec2& loc)
@@ -171,6 +174,13 @@ void mouse_events::left_mouse_click(glm::vec2& loc)
 		// Add constraint
 		geom->set_nodal_constraints(loc, ct_window->constraint_selectedOptionIndex, ct_window->constraint_angleDegrees, true);
 	}
+	
+	if ((mat_window->is_assign_material) == true)
+	{
+		// Assign material
+		geom->set_line_material(loc);
+	}
+
 	// std::cout << "Left mouse single click" << std::endl;
 }
 

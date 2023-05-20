@@ -6,6 +6,7 @@
 #include "../ImGui/imgui.h"
 #include "geometry_store/geom_store.h"
 #include "loadconstraint_window.h"
+#include "material_window.h"
 
 class mouse_event_handler {
 private:
@@ -21,7 +22,7 @@ public:
 	~mouse_event_handler();
 
 	void add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,
-		loadconstraint_window* ct_window);
+		loadconstraint_window* ct_window,material_window* mat_window);
 	// Mouse button callback function
 	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 	// Mouse move callback function

@@ -2,7 +2,7 @@
 
 
 label_text_store::label_text_store()
-	:total_char_count(0), geom_scale(1.0f), main_font(nullptr)
+	:total_char_count(0)
 {
 	// Constructor
 }
@@ -12,30 +12,37 @@ label_text_store::~label_text_store()
 	// Destructor
 }
 
-void label_text_store::init(font_atlas* font)
+//void label_text_store::init(font_atlas* font)
+//{
+//	// Clear all the label
+//	main_font = font;
+//	total_char_count = 0;
+//	labels.clear();
+//
+//	////Check the values of the atlas
+//	//for (auto& atlas : main_font.ch_atlas)
+//	//{
+//	//	char ch = atlas.first;
+//	//	Character ch_val = atlas.second;
+//
+//	//	std::cout << ch << "= ("
+//	//		<< ch_val.Bearing.x << ", " << ch_val.Bearing.y << ") ("
+//	//		<< ch_val.Size.x << ", " << ch_val.Size.y << ") "
+//	//		<< ch_val.Advance << " ("
+//	//		<< ch_val.top_left.x << ", " << ch_val.top_left.y << ") ("
+//	//		<< ch_val.bot_right.x << ", " << ch_val.bot_right.y << ")"<< std::endl;
+//	//}
+//}
+
+void label_text_store::delete_all()
 {
-	// Clear all the label
-	main_font = font;
-	total_char_count = 0;
+	// Delete all the labels
 	labels.clear();
-
-	////Check the values of the atlas
-	//for (auto& atlas : main_font.ch_atlas)
-	//{
-	//	char ch = atlas.first;
-	//	Character ch_val = atlas.second;
-
-	//	std::cout << ch << "= ("
-	//		<< ch_val.Bearing.x << ", " << ch_val.Bearing.y << ") ("
-	//		<< ch_val.Size.x << ", " << ch_val.Size.y << ") "
-	//		<< ch_val.Advance << " ("
-	//		<< ch_val.top_left.x << ", " << ch_val.top_left.y << ") ("
-	//		<< ch_val.bot_right.x << ", " << ch_val.bot_right.y << ")"<< std::endl;
-	//}
+	total_char_count = 0;
 }
 
 void label_text_store::add_text(std::string label, glm::vec2 label_loc, glm::vec3 label_color,
-	float geom_scale, float label_angle, float font_size, bool above_point)
+	float label_angle, bool above_point)
 {
 	// Create a temporary element
 	label_text temp_label;
@@ -43,10 +50,10 @@ void label_text_store::add_text(std::string label, glm::vec2 label_loc, glm::vec
 	temp_label.label_loc = label_loc;
 	temp_label.label_color = label_color;
 	temp_label.label_angle = label_angle;
-	temp_label.label_size = font_size;
+	temp_label.label_size = geom_param_ptr->font_size;
 	temp_label.label_above_loc = above_point;
 
-	this->geom_scale = geom_scale;
+	// this->geom_scale = geom_scale;
 
 	// Reserve space for the new element
 	labels.reserve(labels.size() + 1);
@@ -102,7 +109,7 @@ void label_text_store::paint_text()
 
 	glActiveTexture(GL_TEXTURE0);
 	//// Bind the texture to the slot
-	glBindTexture(GL_TEXTURE_2D, main_font->textureID);
+	glBindTexture(GL_TEXTURE_2D, geom_param_ptr->main_font.textureID);
 
 	glDrawElements(GL_TRIANGLES, 6 * total_char_count, GL_UNSIGNED_INT, 0);
 
@@ -115,7 +122,7 @@ void label_text_store::paint_text()
 void label_text_store::get_buffer(label_text& lb,
 	float* vertices, unsigned int& vertex_index, unsigned int* indices, unsigned int& indices_index)
 {
-	float font_scale = lb.label_size / geom_scale;
+	float font_scale = lb.label_size / geom_param_ptr->geom_scale;
 
 	// Find the label total width and total height
 	float total_label_width = 0.0f;
@@ -125,7 +132,7 @@ void label_text_store::get_buffer(label_text& lb,
 	{
 		// get the atlas information
 		char ch = lb.label[i];
-		Character ch_data = main_font->ch_atlas[ch];
+		Character ch_data = geom_param_ptr->main_font.ch_atlas[ch];
 
 		total_label_width += (ch_data.Advance >> 6) * font_scale;
 		total_label_height = std::max(total_label_height, ch_data.Size.y * font_scale);
@@ -154,7 +161,7 @@ void label_text_store::get_buffer(label_text& lb,
 		// get the atlas information
 		char ch = lb.label[i];
 
-		Character ch_data = main_font->ch_atlas[ch];
+		Character ch_data = geom_param_ptr->main_font.ch_atlas[ch];
 
 		float xpos = x + (ch_data.Bearing.x * font_scale);
 		float ypos = y - (ch_data.Size.y - ch_data.Bearing.y) * font_scale;

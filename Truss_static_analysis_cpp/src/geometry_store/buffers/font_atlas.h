@@ -40,7 +40,5 @@ public:
 	font_atlas();
 	~font_atlas();
 	void create_atlas(); // Function to create the atlas
-	void Bind_atlas();
-	void UnBind_atlas();
 };
 

@@ -13,9 +13,9 @@ mouse_event_handler::~mouse_event_handler()
 }
 
 void mouse_event_handler::add_geometry_ptr(geom_store* geom, int* window_width, int* window_height,
-	loadconstraint_window* ct_window)
+	loadconstraint_window* ct_window,material_window* mat_window)
 {
-	mouse_click.add_geometry_ptr(geom, window_width, window_height, ct_window);
+	mouse_click.add_geometry_ptr(geom, window_width, window_height, ct_window, mat_window);
 }
 
 // Mouse button callback function

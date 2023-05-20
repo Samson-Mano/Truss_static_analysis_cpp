@@ -54,10 +54,10 @@
     <ClCompile Include="src\geometry_store\geom_store.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\geometry_store\nodes_store.cpp">
+    <ClCompile Include="src\geometry_store\nodes_store_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\geometry_store\lines_store.cpp">
+    <ClCompile Include="src\geometry_store\lines_store_list.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\geometry_store\shaders\shader.cpp">
@@ -103,6 +103,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\material_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\geom_parameters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -152,10 +155,10 @@
     <ClInclude Include="src\mouse_event_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\geometry_store\nodes_store.h">
+    <ClInclude Include="src\geometry_store\nodes_store_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\geometry_store\lines_store.h">
+    <ClInclude Include="src\geometry_store\lines_store_list.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\shaders\shader.h">
@@ -204,6 +207,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\material_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\geom_parameters.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

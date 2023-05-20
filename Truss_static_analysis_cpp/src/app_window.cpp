@@ -64,7 +64,7 @@ app_window::app_window()
 	glfwSetWindowUserPointer(window, &mouse_Handler);
 
 	// Passing the address of geom and window dimensions 
-	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window);
+	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window,&mat_window);
 	// Pass the address of options window
 	geom.add_window_ptr(&op_window,&mat_window);
 
@@ -107,6 +107,7 @@ void app_window::app_render()
 	ImGuiIO& io = ImGui::GetIO();
 	imgui_font = io.Fonts->AddFontFromFileTTF("./Images/font/FreeSans.ttf", 18);
 
+	geom.init();
 	ct_window.bind_images();
 
 	glEnable(GL_BLEND);

@@ -193,6 +193,8 @@ void loadconstraint_window::render_constraint_tab()
 	// Close button
 	if (ImGui::Button("Close"))
 	{
+		is_add_constraint = false;
+		is_add_load = false;
 		is_show_window = false; // set the flag to close the window
 	}
 	//_________________________________________________________________________________________
@@ -338,6 +340,8 @@ void loadconstraint_window::render_load_tab()
 	// Close button
 	if (ImGui::Button("Close"))
 	{
+		is_add_constraint = false;
+		is_add_load = false;
 		is_show_window = false; // set the flag to close the window
 	}
 

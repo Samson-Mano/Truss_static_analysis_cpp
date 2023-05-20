@@ -6,8 +6,8 @@
 #include <Windows.h>
 #include <Commdlg.h>
 #include <limits>
-#include "geometry_store/nodes_store.h" // header file for the nodes_store class
-#include "geometry_store/lines_store.h" // header file for the lines_store class
+#include "geometry_store/nodes_store_list.h" // header file for the nodes_store class
+#include "geometry_store/lines_store_list.h" // header file for the lines_store class
 #include "geometry_store/geom_store.h" // header file for the geom_store class
 #include <sstream>
 

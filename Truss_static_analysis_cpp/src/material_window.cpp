@@ -17,28 +17,36 @@ void material_window::render_window()
 		return;
 
 	if (material_list.size() == 0)
+	{
+		is_show_window = false;
 		return;
+	}
+
 
 	ImGui::Begin("Materials");
 
 	// Convert material_list to a vector of const char*
 	std::vector<const char*> material_names;
-	for (const auto& mat : material_list) {
+	for (const auto& mat : material_list) 
+	{
 		material_names.push_back(mat.material_name.c_str());
 	}
 
-
-	//// ImGui::Combo("Select Material", &selected_material_option, material_names.data(), material_names.size());
-	ImGui::ListBox(".", &selected_material_option, material_names.data(), material_names.size(),4);
+	ImGui::ListBox("Select Material", &selected_material_option, material_names.data(), material_names.size(),4);
 
 	ImGui::Spacing();
+	
 	// Get selected material
 	const material_data& selected_material_data = material_list[selected_material_option];
 
-	ImGui::Text("Selected Material: %s", selected_material_data.material_name.c_str());
-	ImGui::Text("Young's Modulus: %.3f", selected_material_data.youngs_mod);
-	ImGui::Text("Density: %.3e", selected_material_data.mat_density);
-	ImGui::Text("Cross-Section Area: %.3f", selected_material_data.cs_area);
+	// Get the color for this material
+	glm::vec3 std_color = get_standard_color(selected_material_data.material_id);
+	ImVec4 text_color = ImVec4(std_color.x, std_color.y, std_color.z, 1.0f);
+
+	ImGui::TextColored(text_color,"Selected Material: %s", selected_material_data.material_name.c_str());
+	ImGui::TextColored(text_color,"Young's Modulus: %.3f", selected_material_data.youngs_mod);
+	ImGui::TextColored(text_color,"Density: %.3e", selected_material_data.mat_density);
+	ImGui::TextColored(text_color,"Cross-Section Area: %.3f", selected_material_data.cs_area);
 
 	// Diable delete if the selected option is Default (0)
 	const bool is_delete_button_disabled = selected_material_option ==0?true:false;
@@ -137,4 +145,24 @@ void material_window::render_window()
 	}
 
 	ImGui::End();
+}
+
+glm::vec3 material_window::get_standard_color(int color_index)
+{
+	// Red, Green, Blue, Yellow, Magenta, Cyan, Orange, Purple, Lime, Pink
+	static const std::vector<glm::vec3> colorSet = {
+			glm::vec3(1.0f, 0.0f, 0.0f),         
+			glm::vec3(0.0f, 1.0f, 0.0f),         
+			glm::vec3(0.0f, 0.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 1.0f),
+			glm::vec3(0.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 0.5f, 0.0f),
+			glm::vec3(0.5f, 0.0f, 1.0f),
+			glm::vec3(0.5f, 1.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.5f)
+	};
+
+	int index = color_index % colorSet.size();
+	return colorSet[index];
 }
