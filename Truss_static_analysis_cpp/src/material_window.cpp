@@ -43,6 +43,7 @@ void material_window::render_window()
 	glm::vec3 std_color = get_standard_color(selected_material_data.material_id);
 	ImVec4 text_color = ImVec4(std_color.x, std_color.y, std_color.z, 1.0f);
 
+	ImGui::TextColored(text_color, "Material ID: %i", selected_material_data.material_id);
 	ImGui::TextColored(text_color,"Selected Material: %s", selected_material_data.material_name.c_str());
 	ImGui::TextColored(text_color,"Young's Modulus: %.3f", selected_material_data.youngs_mod);
 	ImGui::TextColored(text_color,"Density: %.3e", selected_material_data.mat_density);
@@ -53,6 +54,7 @@ void material_window::render_window()
 	ImGui::BeginDisabled(is_delete_button_disabled);
 	if (ImGui::Button("Delete Material")) {
 		// Delete material
+		execute_delete_materialid = selected_material_data.material_id;
 		material_list.erase(material_list.begin() + selected_material_option);
 		selected_material_option = 0;
 	}
@@ -122,7 +124,7 @@ void material_window::render_window()
 			// TODO: Add the new material to the material list
 			  // Add the new material to the material list
 			material_data new_material;
-			new_material.material_id = material_list.size();
+			new_material.material_id = get_unique_material_id();
 			new_material.material_name = new_material_name;
 			new_material.mat_density = new_material_density;
 			new_material.youngs_mod = new_material_youngs_modulus;
@@ -165,4 +167,36 @@ glm::vec3 material_window::get_standard_color(int color_index)
 
 	int index = color_index % colorSet.size();
 	return colorSet[index];
+}
+
+int material_window::get_unique_material_id()
+{
+	// Add all the ids to a int list
+	std::vector<int> all_ids;
+	for (auto& mat : material_list)
+	{
+		all_ids.push_back(mat.material_id);
+	}
+
+
+	if (all_ids.size() != 0) 
+	{
+		int i;
+		std::sort(all_ids.begin(), all_ids.end());
+
+		// Find if any of the nodes are missing in an ordered int
+		for (i = 0; i < all_ids.size(); i++) 
+		{
+			if (all_ids[i] != i) 
+			{
+				return i;
+			}
+		}
+
+		// no node id is missing in an ordered list so add to the end
+		return all_ids.size();
+	}
+
+	// id for the first node is 0
+	return 0;
 }

@@ -35,7 +35,8 @@ public:
 	void paint_text();
 	void delete_all();
 private:
-	void get_buffer(label_text& label, float* vertices, unsigned int& vertex_index, unsigned int* indices, unsigned int& indices_index);
+	void get_buffer(label_text& label, float* vertices, 
+		unsigned int& vertex_index, unsigned int* indices, unsigned int& indices_index);
 	glm::vec2 rotate_pt(glm::vec2& rotate_about, glm::vec2 pt, float& rotation_angle);
 
 };

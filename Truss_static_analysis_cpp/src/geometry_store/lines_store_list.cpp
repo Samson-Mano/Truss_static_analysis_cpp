@@ -62,7 +62,7 @@ void lines_store_list::add_line(int& line_id, const nodes_store& startNode, cons
 	float line_angle = atan2(end_pt.y - start_pt.y, end_pt.x - start_pt.x);
 
 	// Add the node id Label
-	temp_color = glm::vec3(1.0f);
+	temp_color = geom_param_ptr->geom_colors.line_color;
 	temp_str = "[" + std::to_string(line_id) + "]";
 
 	line_id_labels.add_text(temp_str.c_str(), line_mid_pt, temp_color, line_angle, true);
@@ -77,7 +77,8 @@ void lines_store_list::add_line(int& line_id, const nodes_store& startNode, cons
 
 void lines_store_list::set_buffer()
 {
-	// Define the line vertices of the model (3 node position & 3 color)
+	// Update the buffer
+		// Define the line vertices of the model (3 node position & 3 color)
 	const unsigned int line_vertex_count = 6 * (*mode_nodes_ptr).size();
 	float* line_vertices = new float[line_vertex_count];
 
@@ -119,6 +120,11 @@ void lines_store_list::set_buffer()
 	// Create the Line buffers
 	line_buffer.CreateBuffers((void*)line_vertices, line_vertex_size, (unsigned int*)line_indices, line_indices_count, line_layout);
 
+
+	// Delete the dynamic array
+	delete[] line_vertices;
+	delete[] line_indices;
+	
 	// Create shader
 	std::filesystem::path currentDirPath = std::filesystem::current_path();
 	std::filesystem::path parentPath = currentDirPath.parent_path();
@@ -131,10 +137,6 @@ void lines_store_list::set_buffer()
 	// Set the buffers for the labels
 	line_id_labels.set_buffers();
 	line_length_labels.set_buffers();
-
-	// Delete the dynamic array
-	delete[] line_vertices;
-	delete[] line_indices;
 }
 
 void lines_store_list::update_material_id_buffer()
@@ -159,7 +161,7 @@ void lines_store_list::update_material_id_buffer()
 		float line_angle = atan2(end_pt.y - start_pt.y, end_pt.x - start_pt.x);
 
 		// Add the material ID
-		temp_color = glm::vec3(1.0f);
+		temp_color = material_window::get_standard_color(ln.material_id);
 		temp_str = "                 M = " + std::to_string(ln.material_id);
 		material_id_labels.add_text(temp_str.c_str(), line_mid_pt, temp_color,  line_angle, true);
 	}
@@ -276,9 +278,9 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 	line_vertices[line_v_index + 2] = node.node_pt.z;
 
 	// line default color
-	line_vertices[line_v_index + 3] = node.default_color.x;
-	line_vertices[line_v_index + 4] = node.default_color.y;
-	line_vertices[line_v_index + 5] = node.default_color.z;
+	line_vertices[line_v_index + 3] = geom_param_ptr->geom_colors.line_color.x;
+	line_vertices[line_v_index + 4] = geom_param_ptr->geom_colors.line_color.y;
+	line_vertices[line_v_index + 5] = geom_param_ptr->geom_colors.line_color.z;
 
 	// Increment
 	line_v_index = line_v_index + 6;

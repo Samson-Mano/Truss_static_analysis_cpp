@@ -65,6 +65,7 @@ app_window::app_window()
 
 	// Passing the address of geom and window dimensions 
 	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window,&mat_window);
+
 	// Pass the address of options window
 	geom.add_window_ptr(&op_window,&mat_window);
 
@@ -126,7 +127,9 @@ void app_window::app_render()
 		menu_events();
 
 		// Render OpenGL graphics here
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  // Set the clear color to black
+		glClearColor(geom.geom_param.geom_colors.background_color.x,
+			geom.geom_param.geom_colors.background_color.y,
+			geom.geom_param.geom_colors.background_color.z, 1.0f);  // Set the clear color to black
 		glClear(GL_COLOR_BUFFER_BIT);  // Clear the color buffer
 
 		// Window size change event

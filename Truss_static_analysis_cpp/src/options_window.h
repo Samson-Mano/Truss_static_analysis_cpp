@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_glfw.h"
 #include "../ImGui/imgui_impl_opengl3.h"
@@ -13,6 +14,7 @@ public:
 	bool is_show_linelength = false;
 	bool is_show_loadvalue = true;
 	bool is_show_window = false;
+
 
 	options_window();
 	~options_window();

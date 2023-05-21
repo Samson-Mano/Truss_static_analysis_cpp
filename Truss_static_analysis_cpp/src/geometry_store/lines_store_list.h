@@ -1,5 +1,6 @@
 #pragma once
 #include "nodes_store_list.h"
+#include "../material_window.h"
 
 struct lines_store
 {

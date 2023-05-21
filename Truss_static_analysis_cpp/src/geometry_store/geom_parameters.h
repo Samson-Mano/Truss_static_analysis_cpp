@@ -3,6 +3,15 @@
 #include <glm/glm.hpp>
 #include "buffers/font_atlas.h"
 
+struct geom_color_theme
+{
+	glm::vec3 background_color;
+	glm::vec3 node_color;
+	glm::vec3 line_color;
+	glm::vec3 constraint_color;
+	glm::vec3 load_color;
+};
+
 class geom_parameters
 {
 public:
@@ -24,6 +33,9 @@ public:
 	// Screen transformations
 	glm::mat4 panTranslation; // Pan translataion
 	float zoom_scale; // Zoom scale
+
+	// Standard colors
+	geom_color_theme geom_colors;
 
 	font_atlas main_font;
 

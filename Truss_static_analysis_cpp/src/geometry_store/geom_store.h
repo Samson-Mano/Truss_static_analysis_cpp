@@ -19,6 +19,9 @@ public:
 	bool is_geometry_loaded;
 	bool is_geometry_set;
 
+	// Main Variable to strore the geometry parameters
+	geom_parameters geom_param;
+
 	geom_store();
 	~geom_store();
 	void init();
@@ -34,6 +37,7 @@ public:
 	void set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add);
 	void set_nodal_constraints(glm::vec2& loc, int& constraint_type, float& constraint_angle, bool is_add);
 	void set_line_material(glm::vec2& loc);
+	void update_delete_material(int& del_material_id);
 private:
 	// Geometry objects
 	nodes_store_list model_nodes;
@@ -46,9 +50,6 @@ private:
 	// View options ptr and Material window ptr
 	options_window* op_window;
 	material_window* mat_window;
-
-	// Main Variable to strore the geometry parameters
-	geom_parameters geom_param;
 
 	// Store the openGL buffers
 	shader text_shader;
@@ -64,4 +65,5 @@ private:
 	std::pair<glm::vec3, glm::vec3> findMinMaxXY(const std::unordered_map<int, nodes_store>& nodeMap);
 	glm::vec3 findGeometricCenter(const std::unordered_map<int, nodes_store>& nodeMap);
 	void set_model_matrix();
+	
 };

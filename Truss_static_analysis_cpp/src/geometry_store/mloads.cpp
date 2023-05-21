@@ -138,7 +138,7 @@ void mloads::update_buffer()
 		// Update the load Labels
 		load_data load_val = load.second;
 
-		glm::vec3 temp_color = glm::vec3(1.0f);
+		glm::vec3 temp_color = geom_param_ptr->geom_colors.load_color;
 		std::string	temp_str = std::to_string(load_val.load_value);
 		float load_angle = load_val.load_angle;
 
@@ -281,10 +281,10 @@ void mloads::set_load_arrowhead_vertices(float* load_arrowhead_vertices, unsigne
 	load_arrowhead_vertices[load_arrowhead_v_index + 4] = node_value.node_pt.y;
 	load_arrowhead_vertices[load_arrowhead_v_index + 5] = 0.0f;
 
-	// Set the node color
-	load_arrowhead_vertices[load_arrowhead_v_index + 6] = node_value.default_color.x;
-	load_arrowhead_vertices[load_arrowhead_v_index + 7] = node_value.default_color.y;
-	load_arrowhead_vertices[load_arrowhead_v_index + 8] = node_value.default_color.z;
+	// Set the Load color
+	load_arrowhead_vertices[load_arrowhead_v_index + 6] = geom_param_ptr->geom_colors.load_color.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 7] = geom_param_ptr->geom_colors.load_color.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 8] = geom_param_ptr->geom_colors.load_color.z;
 
 	// Increment
 	load_arrowhead_v_index = load_arrowhead_v_index + 9;
@@ -299,10 +299,10 @@ void mloads::set_load_arrowhead_vertices(float* load_arrowhead_vertices, unsigne
 	load_arrowhead_vertices[load_arrowhead_v_index + 4] = node_value.node_pt.y;
 	load_arrowhead_vertices[load_arrowhead_v_index + 5] = 0.0f;
 
-	// Set the node color
-	load_arrowhead_vertices[load_arrowhead_v_index + 6] = node_value.default_color.x;
-	load_arrowhead_vertices[load_arrowhead_v_index + 7] = node_value.default_color.y;
-	load_arrowhead_vertices[load_arrowhead_v_index + 8] = node_value.default_color.z;
+	// Set the Load color
+	load_arrowhead_vertices[load_arrowhead_v_index + 6] = geom_param_ptr->geom_colors.load_color.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 7] = geom_param_ptr->geom_colors.load_color.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 8] = geom_param_ptr->geom_colors.load_color.z;
 
 	// Increment
 	load_arrowhead_v_index = load_arrowhead_v_index + 9;
@@ -317,10 +317,10 @@ void mloads::set_load_arrowhead_vertices(float* load_arrowhead_vertices, unsigne
 	load_arrowhead_vertices[load_arrowhead_v_index + 4] = node_value.node_pt.y;
 	load_arrowhead_vertices[load_arrowhead_v_index + 5] = 0.0f;
 
-	// Set the node color
-	load_arrowhead_vertices[load_arrowhead_v_index + 6] = node_value.default_color.x;
-	load_arrowhead_vertices[load_arrowhead_v_index + 7] = node_value.default_color.y;
-	load_arrowhead_vertices[load_arrowhead_v_index + 8] = node_value.default_color.z;
+	// Set the Load color
+	load_arrowhead_vertices[load_arrowhead_v_index + 6] = geom_param_ptr->geom_colors.load_color.x;
+	load_arrowhead_vertices[load_arrowhead_v_index + 7] = geom_param_ptr->geom_colors.load_color.y;
+	load_arrowhead_vertices[load_arrowhead_v_index + 8] = geom_param_ptr->geom_colors.load_color.z;
 
 	// Increment
 	load_arrowhead_v_index = load_arrowhead_v_index + 9;
@@ -371,10 +371,10 @@ void mloads::set_load_arrowtail_vertices(float* load_arrowtail_vertices, unsigne
 	load_arrowtail_vertices[load_arrowtail_v_index + 4] = node_value.node_pt.y;
 	load_arrowtail_vertices[load_arrowtail_v_index + 5] = 0.0f;
 
-	// Set the node color
-	load_arrowtail_vertices[load_arrowtail_v_index + 6] = node_value.default_color.x;
-	load_arrowtail_vertices[load_arrowtail_v_index + 7] = node_value.default_color.y;
-	load_arrowtail_vertices[load_arrowtail_v_index + 8] = node_value.default_color.z;
+	// Set the load color
+	load_arrowtail_vertices[load_arrowtail_v_index + 6] = geom_param_ptr->geom_colors.load_color.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 7] = geom_param_ptr->geom_colors.load_color.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 8] = geom_param_ptr->geom_colors.load_color.z;
 
 	// Increment
 	load_arrowtail_v_index = load_arrowtail_v_index + 9;
@@ -389,10 +389,10 @@ void mloads::set_load_arrowtail_vertices(float* load_arrowtail_vertices, unsigne
 	load_arrowtail_vertices[load_arrowtail_v_index + 4] = node_value.node_pt.y;
 	load_arrowtail_vertices[load_arrowtail_v_index + 5] = 0.0f;
 
-	// Set the node color
-	load_arrowtail_vertices[load_arrowtail_v_index + 6] = node_value.default_color.x;
-	load_arrowtail_vertices[load_arrowtail_v_index + 7] = node_value.default_color.y;
-	load_arrowtail_vertices[load_arrowtail_v_index + 8] = node_value.default_color.z;
+	// Set the load color
+	load_arrowtail_vertices[load_arrowtail_v_index + 6] = geom_param_ptr->geom_colors.load_color.x;
+	load_arrowtail_vertices[load_arrowtail_v_index + 7] = geom_param_ptr->geom_colors.load_color.y;
+	load_arrowtail_vertices[load_arrowtail_v_index + 8] = geom_param_ptr->geom_colors.load_color.z;
 
 	// Increment
 	load_arrowtail_v_index = load_arrowtail_v_index + 9;

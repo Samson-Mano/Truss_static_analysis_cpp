@@ -204,9 +204,9 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 5] = 0.0f;
 
 	// Set the node color
-	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
-	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
-	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+	constraint_vertices[constraint_v_index + 6] = geom_param_ptr->geom_colors.constraint_color.x;
+	constraint_vertices[constraint_v_index + 7] = geom_param_ptr->geom_colors.constraint_color.y;
+	constraint_vertices[constraint_v_index + 8] = geom_param_ptr->geom_colors.constraint_color.z;
 
 	// Set the Texture co-ordinates
 	constraint_vertices[constraint_v_index + 9] = 0.0f;
@@ -229,9 +229,9 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 5] = 0.0f;
 
 	// Set the node color
-	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
-	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
-	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+	constraint_vertices[constraint_v_index + 6] = geom_param_ptr->geom_colors.constraint_color.x;
+	constraint_vertices[constraint_v_index + 7] = geom_param_ptr->geom_colors.constraint_color.y;
+	constraint_vertices[constraint_v_index + 8] = geom_param_ptr->geom_colors.constraint_color.z;
 
 	// Set the Texture co-ordinates
 	constraint_vertices[constraint_v_index + 9] = 1.0f;
@@ -254,9 +254,9 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 5] = 0.0f;
 
 	// Set the node color
-	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
-	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
-	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+	constraint_vertices[constraint_v_index + 6] = geom_param_ptr->geom_colors.constraint_color.x;
+	constraint_vertices[constraint_v_index + 7] = geom_param_ptr->geom_colors.constraint_color.y;
+	constraint_vertices[constraint_v_index + 8] = geom_param_ptr->geom_colors.constraint_color.z;
 
 	// Set the Texture co-ordinates
 	constraint_vertices[constraint_v_index + 9] = 1.0f;
@@ -279,9 +279,9 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 5] = 0.0f;
 
 	// Set the node color
-	constraint_vertices[constraint_v_index + 6] = node_value.default_color.x;
-	constraint_vertices[constraint_v_index + 7] = node_value.default_color.y;
-	constraint_vertices[constraint_v_index + 8] = node_value.default_color.z;
+	constraint_vertices[constraint_v_index + 6] = geom_param_ptr->geom_colors.constraint_color.x;
+	constraint_vertices[constraint_v_index + 7] = geom_param_ptr->geom_colors.constraint_color.y;
+	constraint_vertices[constraint_v_index + 8] = geom_param_ptr->geom_colors.constraint_color.z;
 
 	// Set the Texture co-ordinates
 	constraint_vertices[constraint_v_index + 9] = 0.0f;

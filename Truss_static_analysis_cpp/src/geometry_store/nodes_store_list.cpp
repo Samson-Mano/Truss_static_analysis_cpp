@@ -46,7 +46,7 @@ void nodes_store_list::add_node(const int& node_id,const glm::vec3& node_pt)
 	std::string temp_str;
 
 	// Add the node id Label
-	temp_color = glm::vec3(1.0f);
+	temp_color = geom_param_ptr->geom_colors.node_color;
 	temp_str = std::to_string(node_id);
 
 	node_id_labels.add_text(temp_str.c_str(), node_pt, temp_color, 0.0f,true);
@@ -191,9 +191,9 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 5] = 0.0f;
 
 	// Set the node color
-	node_vertices[node_v_index + 6] = node.default_color.x;
-	node_vertices[node_v_index + 7] = node.default_color.y;
-	node_vertices[node_v_index + 8] = node.default_color.z;
+	node_vertices[node_v_index + 6] = geom_param_ptr->geom_colors.node_color.x;
+	node_vertices[node_v_index + 7] = geom_param_ptr->geom_colors.node_color.y;
+	node_vertices[node_v_index + 8] = geom_param_ptr->geom_colors.node_color.z;
 
 	// Set the Texture co-ordinates
 	node_vertices[node_v_index +9] = 0.0f;
@@ -213,9 +213,9 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 5] = 0.0f;
 
 	// Set the node color
-	node_vertices[node_v_index + 6] = node.default_color.x;
-	node_vertices[node_v_index + 7] = node.default_color.y;
-	node_vertices[node_v_index + 8] = node.default_color.z;
+	node_vertices[node_v_index + 6] = geom_param_ptr->geom_colors.node_color.x;
+	node_vertices[node_v_index + 7] = geom_param_ptr->geom_colors.node_color.y;
+	node_vertices[node_v_index + 8] = geom_param_ptr->geom_colors.node_color.z;
 
 	// Set the Texture co-ordinates
 	node_vertices[node_v_index + 9] = 1.0f;
@@ -235,9 +235,9 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 5] = 0.0f;
 
 	// Set the node color
-	node_vertices[node_v_index + 6] = node.default_color.x;
-	node_vertices[node_v_index + 7] = node.default_color.y;
-	node_vertices[node_v_index + 8] = node.default_color.z;
+	node_vertices[node_v_index + 6] = geom_param_ptr->geom_colors.node_color.x;
+	node_vertices[node_v_index + 7] = geom_param_ptr->geom_colors.node_color.y;
+	node_vertices[node_v_index + 8] = geom_param_ptr->geom_colors.node_color.z;
 
 	// Set the Texture co-ordinates
 	node_vertices[node_v_index + 9] = 1.0f;
@@ -257,9 +257,9 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 5] = 0.0f;
 
 	// Set the node color
-	node_vertices[node_v_index + 6] = node.default_color.x;
-	node_vertices[node_v_index + 7] = node.default_color.y;
-	node_vertices[node_v_index + 8] = node.default_color.z;
+	node_vertices[node_v_index + 6] = geom_param_ptr->geom_colors.node_color.x;
+	node_vertices[node_v_index + 7] = geom_param_ptr->geom_colors.node_color.y;
+	node_vertices[node_v_index + 8] = geom_param_ptr->geom_colors.node_color.z;
 
 	// Set the Texture co-ordinates
 	node_vertices[node_v_index + 9] = 0.0f;

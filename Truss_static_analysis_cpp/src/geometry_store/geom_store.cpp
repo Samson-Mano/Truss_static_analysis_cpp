@@ -557,6 +557,12 @@ void geom_store::paint_geometry()
 	// Show the materials of line member
 	if (mat_window->is_show_window == true)
 	{
+		if (mat_window->execute_delete_materialid != -1)
+		{
+			// Delete material
+			update_delete_material(mat_window->execute_delete_materialid);
+			mat_window->execute_delete_materialid = -1;
+		}
 		// Show the material ID
 		model_lines.paint_line_material_id();
 	}
@@ -749,12 +755,35 @@ void geom_store::set_line_material(glm::vec2& loc)
 		line_hit_id = model_lines.is_line_hit(loc);
 		if (line_hit_id != -1)
 		{
-			model_lines.lineMap[line_hit_id].material_id = mat_window->selected_material_option;
+			int selected_material_option = mat_window->selected_material_option;
+			model_lines.lineMap[line_hit_id].material_id = mat_window->material_list[selected_material_option].material_id;
 		}
 	}
 
-	// Update the material ID
+	// Update the material ID label
 	if (line_hit_id != -1)
+	{
+		model_lines.update_material_id_buffer();
+	}
+}
+
+void geom_store::update_delete_material(int& del_material_id)
+{
+	bool is_del_material_found = false;
+
+	// Delete the material
+	for (int i = 0; i < model_lines.lineMap.size(); i++)
+	{
+		if (model_lines.lineMap[i].material_id == del_material_id)
+		{
+			// Delete material is removed and the material ID of that element to 0
+			model_lines.lineMap[i].material_id = 0;
+			is_del_material_found = true;
+		}
+	}
+
+	// Update the material ID label
+	if (is_del_material_found == true)
 	{
 		model_lines.update_material_id_buffer();
 	}

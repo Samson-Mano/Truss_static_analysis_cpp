@@ -69,7 +69,7 @@ void label_text_store::set_buffers()
 {
 
 	// Define the label vertices of the model (4 vertex (to form a triangle) 2 position, 2 origin, 2 texture coordinate, 1 char ID)
-	unsigned int label_vertex_count = 4 * 6 * total_char_count;
+	unsigned int label_vertex_count = 4 * 9 * total_char_count;
 	float* label_vertices = new float[label_vertex_count];
 
 	// 6 indices to form a triangle
@@ -90,6 +90,7 @@ void label_text_store::set_buffers()
 	label_layout.AddFloat(2);  // Position
 	label_layout.AddFloat(2);  // Origin
 	label_layout.AddFloat(2); // Texture coordinate
+	label_layout.AddFloat(3); // Text color
 
 	unsigned int label_vertex_size = label_vertex_count * sizeof(float);
 
@@ -138,6 +139,8 @@ void label_text_store::get_buffer(label_text& lb,
 		total_label_height = std::max(total_label_height, ch_data.Size.y * font_scale);
 	}
 
+	// store the color of the label
+	glm::vec3 lb_color = lb.label_color;
 
 	// Store the x,y location
 	glm::vec2 loc = lb.label_loc;
@@ -186,8 +189,13 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 4] = ch_data.top_left.x + margin;
 		vertices[vertex_index + 5] = ch_data.top_left.y;
 
+		// Text color
+		vertices[vertex_index + 6] = lb_color.x;
+		vertices[vertex_index + 7] = lb_color.y;
+		vertices[vertex_index + 8] = lb_color.z;
+
 		// Iterate
-		vertex_index = vertex_index + 6;
+		vertex_index = vertex_index + 9;
 
 		//__________________________________________________________________________________________
 
@@ -206,8 +214,13 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 4] = ch_data.top_left.x + margin;
 		vertices[vertex_index + 5] = ch_data.bot_right.y;
 
+		// Text color
+		vertices[vertex_index + 6] = lb_color.x;
+		vertices[vertex_index + 7] = lb_color.y;
+		vertices[vertex_index + 8] = lb_color.z;
+
 		// Iterate
-		vertex_index = vertex_index + 6;
+		vertex_index = vertex_index + 9;
 
 		//__________________________________________________________________________________________
 
@@ -226,8 +239,13 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 4] = ch_data.bot_right.x - margin;
 		vertices[vertex_index + 5] = ch_data.bot_right.y;
 
+		// Text color
+		vertices[vertex_index + 6] = lb_color.x;
+		vertices[vertex_index + 7] = lb_color.y;
+		vertices[vertex_index + 8] = lb_color.z;
+
 		// Iterate
-		vertex_index = vertex_index + 6;
+		vertex_index = vertex_index + 9;
 
 		//__________________________________________________________________________________________
 
@@ -246,8 +264,13 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 4] = ch_data.bot_right.x - margin;
 		vertices[vertex_index + 5] = ch_data.top_left.y;
 
+		// Text color
+		vertices[vertex_index + 6] = lb_color.x;
+		vertices[vertex_index + 7] = lb_color.y;
+		vertices[vertex_index + 8] = lb_color.z;
+
 		// Iterate
-		vertex_index = vertex_index + 6;
+		vertex_index = vertex_index + 9;
 
 		//__________________________________________________________________________________________
 		x += (ch_data.Advance >> 6) * font_scale;

@@ -10,7 +10,6 @@
 #include "../ImGui/imgui_impl_opengl3.h"
 #include "../ImGui/stb_implement.h"
 
-
 struct material_data
 {
 	unsigned int material_id;
@@ -25,7 +24,7 @@ class material_window
 public:
 	bool is_show_window = false;
 	bool is_assign_material = false;
-	bool execute_delete = false;
+	int execute_delete_materialid = -1;
 
 	int selected_material_option = 0;
 	std::vector<material_data> material_list;
@@ -33,8 +32,7 @@ public:
 	material_window();
 	~material_window();
 	void render_window();
-	glm::vec3 get_standard_color(int color_index);
+	static glm::vec3 get_standard_color(int color_index);
 private:
-
-
+	int get_unique_material_id();
 };
