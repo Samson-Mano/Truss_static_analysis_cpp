@@ -287,8 +287,14 @@ void nodes_store_list::set_node_indices(unsigned int* node_indices, unsigned int
 	node_i_index = node_i_index + 6;
 }
 
-void nodes_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation)
+void nodes_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation,bool set_transparency)
 {
+	// Set Transparency
+	if (set_transparency == true)
+	{
+		node_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
+	}
+
 	// Model Matrix
 	if (is_modelmatrix == true)
 	{

@@ -63,11 +63,11 @@ app_window::app_window()
 	// Set the mouse button callback function with the user pointer pointing to the mouseHandler object
 	glfwSetWindowUserPointer(window, &mouse_Handler);
 
-	// Passing the address of geom and window dimensions 
+	// Passing the address of geom and window dimensions to mouse handler
 	mouse_Handler.add_geometry_ptr(&geom, &window_width, &window_height, &ct_window,&mat_window);
 
-	// Pass the address of options window
-	geom.add_window_ptr(&op_window,&mat_window);
+	// Pass the address of options window, material window, solver window
+	geom.add_window_ptr(&op_window,&mat_window,&fe_window);
 
 	glfwSetMouseButtonCallback(window, mouse_event_handler::mouseButtonCallback);
 
@@ -86,6 +86,20 @@ app_window::app_window()
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
+	ImGui::StyleColorsDark();  // Set the default ImGui dark theme colors
+
+	// Modify specific colors
+	ImVec4 background_color = ImVec4(0.32f, 0.32f, 0.32f, 0.8f);  // Background color
+	ImVec4 text_color = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);  // Text color
+	ImVec4 button_color = ImVec4(0.0f, 0.5f, 5.0f, 1.0f);  // Button color
+
+	ImGuiStyle& style = ImGui::GetStyle();
+	style.Colors[ImGuiCol_WindowBg] = background_color;  // Set the background color
+	style.Colors[ImGuiCol_Text] = text_color;  // Set the text color
+	style.Colors[ImGuiCol_Button] = button_color;  // Set the button color
+
+	// Apply the modified style
+	// ImGui::StyleColorsDark();
 
 	framebufferSizeCallback(window, window_width, window_height);
 }
@@ -218,20 +232,11 @@ void app_window::menu_events()
 		// Solve menu item
 		if (ImGui::BeginMenu("Solve"))
 		{
-			if (ImGui::MenuItem("FE Solve"))
+			if (ImGui::MenuItem("FE Analysis"))
 			{
-				// Handle menu FE Solve
-
-			}
-			if (ImGui::MenuItem("Displacement"))
-			{
-				// Handle menu Displacement
-
-			}
-			if (ImGui::MenuItem("Member force"))
-			{
-				// Handle menu Member force
-
+				// Handle menu FE Analysis
+				fe_window.execute_open = true;
+				fe_window.is_show_window = true;
 			}
 			ImGui::EndMenu();
 		}
@@ -239,10 +244,11 @@ void app_window::menu_events()
 		ImGui::EndMainMenuBar();
 	}
 
-	// Execute constraint window operation
+	// Execute window render operation
 	ct_window.render_window();
 	op_window.render_window();
 	mat_window.render_window();
+	fe_window.render_window();
 
 // Pop the custom font after using it
 	ImGui::PopFont();

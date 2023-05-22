@@ -409,8 +409,14 @@ void mloads::set_load_arrowtail_indices(unsigned int* load_arrowtail_vertex_indi
 	load_arrowtail_i_index = load_arrowtail_i_index + 2;
 }
 
-void mloads::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation)
+void mloads::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency)
 {
+	// Set Transparency
+	if (set_transparency == true)
+	{
+		load_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
+	}
+
 	// Model Matrix
 	if (is_modelmatrix == true)
 	{

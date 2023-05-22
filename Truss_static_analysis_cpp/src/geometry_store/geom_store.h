@@ -9,6 +9,8 @@
 #include "mloads.h"
 #include "../options_window.h"
 #include "../material_window.h"
+#include "../solver_window.h"
+#include "solver/fe_solver.h"
 #include "label_text_store.h"
 #include <fstream>
 #include <sstream>
@@ -28,7 +30,7 @@ public:
 	void write_rawdata(std::ofstream& file);
 	void read_rawdata(std::ifstream& input_file);
 	void read_varai2d(std::ifstream& input_file);
-	void add_window_ptr(options_window* op_window, material_window* mat_window);
+	void add_window_ptr(options_window* op_window, material_window* mat_window, solver_window* fe_window);
 	void paint_geometry();
 	void updateWindowDimension(const int& window_width, const int& window_height);
 	void zoomfit_geometry();
@@ -50,11 +52,17 @@ private:
 	// View options ptr and Material window ptr
 	options_window* op_window;
 	material_window* mat_window;
+	solver_window* fe_window;
+
+	// Solver store
+	fe_solver fe_sol;
 
 	// Store the openGL buffers
 	shader text_shader;
 
 	// Functions to set the geometry
+	void paint_model();
+	void update_model_transperency(bool is_transparent);
 	void deleteResources();
 	void set_geometry();
 	void create_geometry(nodes_store_list& model_nodes,

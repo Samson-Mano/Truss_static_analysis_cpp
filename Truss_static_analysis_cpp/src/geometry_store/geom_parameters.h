@@ -29,6 +29,7 @@ public:
 	glm::vec3 center; // center of the geometry
 	glm::mat4 modelMatrix; // Geometry model matrix
 	float geom_scale; // Scale of the geometry
+	float geom_transparency; // Value to control the geometry transparency
 
 	// Screen transformations
 	glm::mat4 panTranslation; // Pan translataion

@@ -177,15 +177,6 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			// Add to load map
 			loadMap.add_load(load_nd_id, &model_nodes.nodeMap[load_nd_id], load_val, load_angle);
 		}
-		else if (type == "load")
-		{
-			int load_nd_id = std::stoi(fields[1]); // load node ID
-			float load_val = std::stof(fields[2]); // load value
-			float load_angle = std::stof(fields[3]); // load angle
-
-			// Add to load map
-			loadMap.add_load(load_nd_id, &model_nodes.nodeMap[load_nd_id], load_val, load_angle);
-		}
 		else if (type == "mtrl")
 		{
 			// Material data
@@ -367,8 +358,25 @@ void geom_store::create_geometry(nodes_store_list& model_nodes,
 	this->model_lines = model_lines;
 	this->model_lines.add_node_list(&this->model_nodes.nodeMap);
 
-	this->constraintMap = constraintMap;
-	this->loadMap = loadMap;
+	// this->constraintMap = constraintMap;
+	// this->loadMap = loadMap;
+
+	// Update the node pointers for loads and constraints
+	// Loads
+	this->loadMap.init(&geom_param);
+	for (auto& ld : loadMap.l_data)
+	{
+		load_data l_data = ld.second;
+		this->loadMap.add_load(l_data.node_id, &this->model_nodes.nodeMap[l_data.node_id], l_data.load_value, l_data.load_angle);
+	}
+
+	// Constraints
+	this->constraintMap.init(&geom_param);
+	for (auto& cnst : constraintMap.c_data)
+	{
+		constraint_data c_data = cnst.second;
+		this->constraintMap.add_constraint(c_data.node_id, &this->model_nodes.nodeMap[c_data.node_id], c_data.constraint_type, c_data.constraint_angle);
+	}
 
 	// Set the boundary of the geometry
 	std::pair<glm::vec3, glm::vec3> result = findMinMaxXY(model_nodes.nodeMap);
@@ -390,11 +398,12 @@ void geom_store::create_geometry(nodes_store_list& model_nodes,
 	this->model_lines.update_material_id_buffer();
 }
 
-void geom_store::add_window_ptr(options_window* op_window, material_window* mat_window)
+void geom_store::add_window_ptr(options_window* op_window, material_window* mat_window, solver_window* fe_window)
 {
 	// Add the pointer of the windows (material and option window)
 	this->op_window = op_window;
 	this->mat_window = mat_window;
+	this->fe_window = fe_window;
 }
 
 void geom_store::deleteResources()
@@ -507,51 +516,84 @@ void geom_store::paint_geometry()
 
 	// Clean the back buffer and assign the new color to it
 	glClear(GL_COLOR_BUFFER_BIT);
-	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// Paint the Lines
-	model_lines.paint_lines();
+	// Analysis solution paint (Analysis complete !!)
+	if (fe_window->is_show_window == true)
+	{
+		// Execute the open window event
+		if (fe_window->execute_open == true)
+		{
+			update_model_transperency(true);
+			// Opening event of solution window done
+			fe_window->execute_open = false;
+		}
 
-	// Paint the Nodes
-	model_nodes.paint_nodes();
+		// Execute the Analysis
+		if (fe_window->execute_solver == true)
+		{
+			fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,fe_window);
+			// Analysis execution complete
+			fe_window->execute_solver = false;
+		}
 
-	// Paint the constraints
-	constraintMap.paint_constraints();
 
-	// Paint the Loads
-	loadMap.paint_loads();
+		if (fe_window->is_analysis_complete == true)
+		{
+			// Analysis complete Paint the results
+
+		}
+	}
+
+	// Execute the closing of solution window
+	if (fe_window->execute_close == true)
+	{
+		update_model_transperency(false);
+		// Closing event of solution window done
+		fe_window->execute_close = false;
+	}
+
+	// Paint the model
+	paint_model();
+}
+
+void geom_store::paint_model()
+{
+	// Paint the model
+
+	model_lines.paint_lines();	// Paint the Lines
+	
+	model_nodes.paint_nodes(); // Paint the Nodes
+
+	constraintMap.paint_constraints();	// Paint the constraints
+
+	loadMap.paint_loads();// Paint the Loads
 
 	// Paint the labels
 	text_shader.Bind();
 
 	if (op_window->is_show_nodenumber == true)
 	{
-		// Show node ids
-		model_nodes.paint_node_ids();
+		model_nodes.paint_node_ids();// Show node ids
 	}
 
 	if (op_window->is_show_nodecoord == true)
 	{
-		// Show node coordinate
-		model_nodes.paint_node_coords();
+		model_nodes.paint_node_coords();// Show node coordinate
 	}
 
 	if (op_window->is_show_linenumber == true)
 	{
-		// Show line id
-		model_lines.paint_line_ids();
+		model_lines.paint_line_ids();// Show line id
 	}
 
 	if (op_window->is_show_linelength == true)
 	{
-		// Show line length
-		model_lines.paint_line_length();
+		model_lines.paint_line_length();// Show line length
 	}
 
 	if (op_window->is_show_loadvalue == true && loadMap.load_count != 0)
 	{
-		// Show the load value
-		loadMap.paint_load_labels();
+		loadMap.paint_load_labels();// Show the load value
 	}
 
 	// Show the materials of line member
@@ -568,6 +610,28 @@ void geom_store::paint_geometry()
 	}
 
 	text_shader.UnBind();
+}
+
+void geom_store::update_model_transperency(bool is_transparent)
+{
+	if (is_transparent == true)
+	{
+		// Set the transparency value
+		text_shader.setUniform("transparency", 0.1f);
+		geom_param.geom_transparency = 0.2f;
+	}
+	else
+	{
+		// remove transparency
+		text_shader.setUniform("transparency", 0.7f);
+		geom_param.geom_transparency = 1.0f;
+	}
+
+	// Update the model matrices
+	model_lines.update_geometry_matrices(false, false, false, true);
+	model_nodes.update_geometry_matrices(false, false, false, true);
+	constraintMap.update_geometry_matrices(false, false, false, true);
+	loadMap.update_geometry_matrices(false, false, false, true);
 }
 
 void geom_store::set_model_matrix()
@@ -593,11 +657,12 @@ void geom_store::set_model_matrix()
 	geom_param.modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(geom_param.geom_scale));
 
 
-	model_lines.update_geometry_matrices(true, false, false);
-	model_nodes.update_geometry_matrices(true, false, false);
-	constraintMap.update_geometry_matrices(true, false, false);
-	loadMap.update_geometry_matrices(true, false, false);
+	model_lines.update_geometry_matrices(true, false, false,true);
+	model_nodes.update_geometry_matrices(true, false, false, true);
+	constraintMap.update_geometry_matrices(true, false, false, true);
+	loadMap.update_geometry_matrices(true, false, false, true);
 
+	text_shader.setUniform("transparency", 0.7f);
 	text_shader.setUniform("modelMatrix", geom_param.modelMatrix, false);
 }
 
@@ -627,10 +692,10 @@ void geom_store::zoomfit_geometry()
 	// Set the zoom matrix
 	geom_param.zoom_scale = 1.0f;
 
-	model_lines.update_geometry_matrices(false, true, true);
-	model_nodes.update_geometry_matrices(false, true, true);
-	constraintMap.update_geometry_matrices(false, true, true);
-	loadMap.update_geometry_matrices(false, true, true);
+	model_lines.update_geometry_matrices(false, true, true, false);
+	model_nodes.update_geometry_matrices(false, true, true, false);
+	constraintMap.update_geometry_matrices(false, true, true, false);
+	loadMap.update_geometry_matrices(false, true, true, false);
 
 	text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 }
@@ -646,10 +711,10 @@ void geom_store::pan_geometry(glm::vec2& transl)
 	geom_param.panTranslation[0][3] = -1.0f * transl.x;
 	geom_param.panTranslation[1][3] = transl.y;
 
-	model_lines.update_geometry_matrices(false, true, false);
-	model_nodes.update_geometry_matrices(false, true, false);
-	constraintMap.update_geometry_matrices(false, true, false);
-	loadMap.update_geometry_matrices(false, true, false);
+	model_lines.update_geometry_matrices(false, true, false,false);
+	model_nodes.update_geometry_matrices(false, true, false, false);
+	constraintMap.update_geometry_matrices(false, true, false, false);
+	loadMap.update_geometry_matrices(false, true, false, false);
 
 	text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
 }
@@ -662,10 +727,10 @@ void geom_store::zoom_geometry(float& z_scale)
 	geom_param.zoom_scale = z_scale;
 
 	// Zoom the geometry
-	model_lines.update_geometry_matrices(false, false, true);
-	model_nodes.update_geometry_matrices(false, false, true);
-	constraintMap.update_geometry_matrices(false, false, true);
-	loadMap.update_geometry_matrices(false, false, true);
+	model_lines.update_geometry_matrices(false, false, true, false);
+	model_nodes.update_geometry_matrices(false, false, true, false);
+	constraintMap.update_geometry_matrices(false, false, true, false);
+	loadMap.update_geometry_matrices(false, false, true, false);
 
 	text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 }

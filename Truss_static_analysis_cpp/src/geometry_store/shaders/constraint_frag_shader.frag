@@ -1,4 +1,5 @@
 #version 330 core
+uniform float transparency;
 uniform sampler2D u_Textures[2];
 
 flat in uint v_textureType;
@@ -12,5 +13,5 @@ void main()
 	// Pin Support [0], Roller Support [1]
 	vec4 texColor = texture(u_Textures[v_textureType],v_textureCoord);
 	
-	f_Color = vec4(v_textureColor,1.0f)*texColor;
+	f_Color = vec4(v_textureColor,transparency)*texColor;
 }

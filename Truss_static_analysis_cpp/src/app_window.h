@@ -12,6 +12,7 @@
 #include "loadconstraint_window.h"
 #include "options_window.h"
 #include "material_window.h"
+#include "solver_window.h"
 
 class app_window
 {
@@ -33,6 +34,7 @@ public:
 	loadconstraint_window ct_window;
 	options_window op_window;
 	material_window mat_window;
+	solver_window fe_window;
 
 	// Constructor and Destructor
 	app_window();

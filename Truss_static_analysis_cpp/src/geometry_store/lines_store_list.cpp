@@ -295,8 +295,14 @@ void lines_store_list::set_line_indices(unsigned int* line_indices, unsigned int
 	line_i_index = line_i_index + 2;
 }
 
-void lines_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation)
+void lines_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency)
 {
+	// Set Transparency
+	if (set_transparency == true)
+	{
+		line_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
+	}
+
 	// Model Matrix
 	if (is_modelmatrix == true)
 	{

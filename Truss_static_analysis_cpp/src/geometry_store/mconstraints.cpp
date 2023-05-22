@@ -314,8 +314,14 @@ void mconstraints::set_constraint_indices(unsigned int* constraint_vertex_indice
 
 
 
-void mconstraints::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation)
+void mconstraints::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency)
 {
+	// Set Transparency
+	if (set_transparency == true)
+	{
+		constraint_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
+	}
+
 	// Model Matrix
 	if (is_modelmatrix == true)
 	{

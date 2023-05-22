@@ -8,7 +8,6 @@
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_glfw.h"
 #include "../ImGui/imgui_impl_opengl3.h"
-#include "../ImGui/stb_implement.h"
 
 struct material_data
 {

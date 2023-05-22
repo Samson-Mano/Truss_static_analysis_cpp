@@ -31,7 +31,7 @@ public:
 	void paint_node_ids();
 	void paint_node_coords();
 	int is_node_hit(glm::vec2& loc);
-	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation);
+	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency);
 
 private:
 	geom_parameters* geom_param_ptr;

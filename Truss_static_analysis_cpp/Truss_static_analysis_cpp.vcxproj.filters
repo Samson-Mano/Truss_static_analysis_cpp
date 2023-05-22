@@ -108,6 +108,12 @@
     <ClCompile Include="src\geometry_store\geom_parameters.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\solver_window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\solver\fe_solver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h">
@@ -210,6 +216,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\geom_parameters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\solver_window.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\solver\fe_solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

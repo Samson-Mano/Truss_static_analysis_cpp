@@ -26,7 +26,7 @@ public:
 	void set_buffer();
 	void update_buffer();
 	void paint_constraints();
-	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation);
+	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency);
 private:
 	geom_parameters* geom_param_ptr;
 	gBuffers constraint_buffer;

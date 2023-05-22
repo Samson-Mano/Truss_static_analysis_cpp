@@ -149,6 +149,7 @@
     <ClCompile Include="src\geometry_store\label_text_store.cpp" />
     <ClCompile Include="src\geometry_store\mconstraints.cpp" />
     <ClCompile Include="src\geometry_store\mloads.cpp" />
+    <ClCompile Include="src\geometry_store\solver\fe_solver.cpp" />
     <ClCompile Include="src\loadconstraint_window.cpp" />
     <ClCompile Include="src\geometry_store\buffers\gBuffers.cpp" />
     <ClCompile Include="src\geometry_store\buffers\IndexBuffer.cpp" />
@@ -165,6 +166,7 @@
     <ClCompile Include="src\mouse_events.cpp" />
     <ClCompile Include="src\mouse_event_handler.cpp" />
     <ClCompile Include="src\options_window.cpp" />
+    <ClCompile Include="src\solver_window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImGui\imconfig.h" />
@@ -185,6 +187,7 @@
     <ClInclude Include="src\geometry_store\mconstraints.h" />
     <ClInclude Include="src\geometry_store\mloads.h" />
     <ClInclude Include="src\geometry_store\label_text_store.h" />
+    <ClInclude Include="src\geometry_store\solver\fe_solver.h" />
     <ClInclude Include="src\loadconstraint_window.h" />
     <ClInclude Include="src\geometry_store\buffers\gBuffers.h" />
     <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h" />
@@ -201,6 +204,7 @@
     <ClInclude Include="src\mouse_events.h" />
     <ClInclude Include="src\mouse_event_handler.h" />
     <ClInclude Include="src\options_window.h" />
+    <ClInclude Include="src\solver_window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="dlls\freetype.dll" />
