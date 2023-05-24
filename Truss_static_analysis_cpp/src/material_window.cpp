@@ -27,15 +27,15 @@ void material_window::render_window()
 
 	// Convert material_list to a vector of const char*
 	std::vector<const char*> material_names;
-	for (const auto& mat : material_list) 
+	for (const auto& mat : material_list)
 	{
-		material_names.push_back(mat.material_name.c_str());
+		material_names.push_back(mat.second.material_name.c_str());
 	}
 
-	ImGui::ListBox("Select Material", &selected_material_option, material_names.data(), material_names.size(),4);
+	ImGui::ListBox("Select Material", &selected_material_option, material_names.data(), material_names.size(), 4);
 
 	ImGui::Spacing();
-	
+
 	// Get selected material
 	const material_data& selected_material_data = material_list[selected_material_option];
 
@@ -44,18 +44,18 @@ void material_window::render_window()
 	ImVec4 text_color = ImVec4(std_color.x, std_color.y, std_color.z, 1.0f);
 
 	ImGui::TextColored(text_color, "Material ID: %i", selected_material_data.material_id);
-	ImGui::TextColored(text_color,"Selected Material: %s", selected_material_data.material_name.c_str());
-	ImGui::TextColored(text_color,"Young's Modulus: %.3f", selected_material_data.youngs_mod);
-	ImGui::TextColored(text_color,"Density: %.3e", selected_material_data.mat_density);
-	ImGui::TextColored(text_color,"Cross-Section Area: %.3f", selected_material_data.cs_area);
+	ImGui::TextColored(text_color, "Selected Material: %s", selected_material_data.material_name.c_str());
+	ImGui::TextColored(text_color, "Young's Modulus: %.3f", selected_material_data.youngs_mod);
+	ImGui::TextColored(text_color, "Density: %.3e", selected_material_data.mat_density);
+	ImGui::TextColored(text_color, "Cross-Section Area: %.3f", selected_material_data.cs_area);
 
 	// Diable delete if the selected option is Default (0)
-	const bool is_delete_button_disabled = selected_material_option ==0?true:false;
+	const bool is_delete_button_disabled = selected_material_option == 0 ? true : false;
 	ImGui::BeginDisabled(is_delete_button_disabled);
 	if (ImGui::Button("Delete Material")) {
 		// Delete material
 		execute_delete_materialid = selected_material_data.material_id;
-		material_list.erase(material_list.begin() + selected_material_option);
+		material_list.erase(selected_material_data.material_id);
 		selected_material_option = 0;
 	}
 	ImGui::EndDisabled();
@@ -115,7 +115,7 @@ void material_window::render_window()
 		static double new_material_cs_area = 8000.0;
 
 		ImGui::InputText("Material Name", new_material_name, IM_ARRAYSIZE(new_material_name));
-		ImGui::InputDouble("Density", &new_material_density,0,0, "%.4e");
+		ImGui::InputDouble("Density", &new_material_density, 0, 0, "%.4e");
 		ImGui::InputDouble("Young's Modulus", &new_material_youngs_modulus, 0, 0, "%.3f");
 		ImGui::InputDouble("Cross-Section Area", &new_material_cs_area, 0, 0, "%.3f");
 
@@ -129,9 +129,9 @@ void material_window::render_window()
 			new_material.mat_density = new_material_density;
 			new_material.youngs_mod = new_material_youngs_modulus;
 			new_material.cs_area = new_material_cs_area;
-			material_list.push_back(new_material);
+			material_list[new_material.material_id] = new_material;
 
-			 // Update the combo box
+			// Update the combo box
 			selected_material_option = material_list.size() - 1;
 		}
 	}
@@ -153,8 +153,8 @@ glm::vec3 material_window::get_standard_color(int color_index)
 {
 	// Red, Green, Blue, Yellow, Magenta, Cyan, Orange, Purple, Lime, Pink
 	static const std::vector<glm::vec3> colorSet = {
-			glm::vec3(1.0f, 0.0f, 0.0f),         
-			glm::vec3(0.0f, 1.0f, 0.0f),         
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f),
 			glm::vec3(1.0f, 1.0f, 0.0f),
 			glm::vec3(1.0f, 0.0f, 1.0f),
@@ -175,19 +175,19 @@ int material_window::get_unique_material_id()
 	std::vector<int> all_ids;
 	for (auto& mat : material_list)
 	{
-		all_ids.push_back(mat.material_id);
+		all_ids.push_back(mat.first);
 	}
 
 
-	if (all_ids.size() != 0) 
+	if (all_ids.size() != 0)
 	{
 		int i;
 		std::sort(all_ids.begin(), all_ids.end());
 
 		// Find if any of the nodes are missing in an ordered int
-		for (i = 0; i < all_ids.size(); i++) 
+		for (i = 0; i < all_ids.size(); i++)
 		{
-			if (all_ids[i] != i) 
+			if (all_ids[i] != i)
 			{
 				return i;
 			}

@@ -214,13 +214,18 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("Constraints/ Loads"))
 			{
 				// Handle menu Add Load & Add Constraint
-				ct_window.is_show_window = true;
-
+				if (geom.is_geometry_set == true)
+				{
+					ct_window.is_show_window = true;
+				}
 			}
 			if (ImGui::MenuItem("Material"))
 			{
 				// Handle menu Edit Materials
-				mat_window.is_show_window = true;
+				if (geom.is_geometry_set == true)
+				{
+					mat_window.is_show_window = true;
+				}
 			}
 			if (ImGui::MenuItem("View Options"))
 			{
@@ -235,8 +240,11 @@ void app_window::menu_events()
 			if (ImGui::MenuItem("FE Analysis"))
 			{
 				// Handle menu FE Analysis
-				fe_window.execute_open = true;
-				fe_window.is_show_window = true;
+				if (geom.is_geometry_set == true)
+				{
+					fe_window.execute_open = true;
+					fe_window.is_show_window = true;
+				}
 			}
 			ImGui::EndMenu();
 		}

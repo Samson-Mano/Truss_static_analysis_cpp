@@ -24,10 +24,10 @@ void lines_store_list::init(geom_parameters* geom_param_ptr)
 	lineMap.clear();
 }
 
-void lines_store_list::add_node_list(std::unordered_map<int, nodes_store>* mode_nodes_ptr)
+void lines_store_list::add_node_list(std::unordered_map<int, nodes_store>* model_nodes_ptr)
 {
 	// Set the model nodes
-	this->mode_nodes_ptr = mode_nodes_ptr;
+	this->model_nodes_ptr = model_nodes_ptr;
 }
 
 void lines_store_list::add_line(int& line_id, const nodes_store& startNode, const nodes_store& endNode, int material_id)
@@ -79,7 +79,7 @@ void lines_store_list::set_buffer()
 {
 	// Update the buffer
 		// Define the line vertices of the model (3 node position & 3 color)
-	const unsigned int line_vertex_count = 6 * (*mode_nodes_ptr).size();
+	const unsigned int line_vertex_count = 6 * (*model_nodes_ptr).size();
 	float* line_vertices = new float[line_vertex_count];
 
 	// Node ID map to keep track of the ids of the nodes
@@ -87,7 +87,7 @@ void lines_store_list::set_buffer()
 	unsigned int line_v_index = 0;
 	unsigned int v_id = 0;
 
-	for (auto& node : (*mode_nodes_ptr))
+	for (auto& node : (*model_nodes_ptr))
 	{
 		// node_store
 		// Add the node id to map

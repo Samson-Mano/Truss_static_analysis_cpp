@@ -29,9 +29,9 @@ public:
 	void paint_line_material_id();
 	int is_line_hit(glm::vec2& loc);
 	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency);
-	void add_node_list(std::unordered_map<int, nodes_store>* mode_nodes_ptr);
+	void add_node_list(std::unordered_map<int, nodes_store>* model_nodes_ptr);
 private:
-	std::unordered_map<int,nodes_store>* mode_nodes_ptr;
+	std::unordered_map<int,nodes_store>* model_nodes_ptr;
 	geom_parameters* geom_param_ptr;
 	label_text_store line_id_labels;
 	label_text_store line_length_labels;

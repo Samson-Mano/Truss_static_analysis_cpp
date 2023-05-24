@@ -81,12 +81,13 @@ void geom_store::write_rawdata(std::ofstream& file)
 	// Write all the material property
 	for (auto& mat : mat_window->material_list)
 	{
+		material_data mat_d = mat.second;
 		file << "mtrl, "
-			<< mat.material_id << ", "
-			<< mat.material_name << ", "
-			<< mat.youngs_mod << ", "
-			<< mat.mat_density << ", "
-			<< mat.cs_area << std::endl;
+			<< mat_d.material_id << ", "
+			<< mat_d.material_name << ", "
+			<< mat_d.youngs_mod << ", "
+			<< mat_d.mat_density << ", "
+			<< mat_d.cs_area << std::endl;
 	}
 }
 
@@ -122,7 +123,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	mloads loadMap;
 	loadMap.init(&geom_param);
 	// Material data list
-	std::vector<material_data> mat_data;
+	std::unordered_map<int,material_data> mat_data;
 
 	// Process the lines
 	while (j < lines.size())
@@ -188,7 +189,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			inpt_material.cs_area = std::stod(fields[5]); // Get the material cross section area
 
 			// Add to materail list
-			mat_data.push_back(inpt_material);
+			mat_data[inpt_material.material_id]=inpt_material;
 		}
 
 		// Iterate line
@@ -335,7 +336,7 @@ void geom_store::read_varai2d(std::ifstream& input_file)
 
 	// Add to materail list
 	mat_window->material_list.clear();
-	mat_window->material_list.push_back(inpt_material);
+	mat_window->material_list[inpt_material.material_id] = inpt_material;
 
 
 	mconstraints constraintMap;
@@ -531,7 +532,7 @@ void geom_store::paint_geometry()
 		// Execute the Analysis
 		if (fe_window->execute_solver == true)
 		{
-			fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,fe_window);
+			fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,&mat_window->material_list,fe_window);
 			// Analysis execution complete
 			fe_window->execute_solver = false;
 		}

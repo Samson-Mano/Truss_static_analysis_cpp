@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <unordered_map>
 #include <filesystem>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -26,7 +27,7 @@ public:
 	int execute_delete_materialid = -1;
 
 	int selected_material_option = 0;
-	std::vector<material_data> material_list;
+	std::unordered_map<int,material_data> material_list;
 
 	material_window();
 	~material_window();
