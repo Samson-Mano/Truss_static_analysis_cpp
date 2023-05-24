@@ -22,6 +22,7 @@
 - Map the results to nodes and elements
 - Postprocessing using Dynamic draw
 - Animate results
+- Finalize the resource imports
 
 # Plane truss finite element solver
 
