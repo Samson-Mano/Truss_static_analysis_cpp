@@ -18,7 +18,7 @@
 - ~~import/export model in native format~~
 - ~~UI for updating material~~
 - Build solver
-- ~~Color profile for the model environment
+- ~~Color profile for the model environment~~
 - Map the results to nodes and elements
 - Postprocessing using Dynamic draw
 - Animate results
