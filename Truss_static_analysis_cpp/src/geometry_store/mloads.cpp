@@ -162,7 +162,7 @@ void mloads::update_buffer()
 
 		// std::cout << node_value.node_id << "->" << load_angle_rad << std::endl;
 
-		load_value_labels.add_text(temp_str.c_str(), node_value.node_pt, temp_color, load_angle_rad, true);
+		load_value_labels.add_text(temp_str.c_str(), node_value.node_pt,glm::vec2(0), temp_color, load_angle_rad, true);
 	}
 
 	load_value_labels.set_buffers();

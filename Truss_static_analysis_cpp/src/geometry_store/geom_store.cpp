@@ -184,8 +184,8 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			material_data inpt_material;
 			inpt_material.material_id = std::stoi(fields[1]); // Get the material id
 			inpt_material.material_name = fields[2]; // Get the material name
-			inpt_material.mat_density = std::stod(fields[3]); // Get the material youngs modulus
-			inpt_material.youngs_mod = std::stod(fields[4]); // Get the material density
+			inpt_material.youngs_mod = std::stod(fields[3]); // Get the material youngs modulus
+			inpt_material.mat_density = std::stod(fields[4]); // Get the material density 
 			inpt_material.cs_area = std::stod(fields[5]); // Get the material cross section area
 
 			// Add to materail list
@@ -397,6 +397,8 @@ void geom_store::create_geometry(nodes_store_list& model_nodes,
 	this->constraintMap.update_buffer();
 	this->loadMap.update_buffer();
 	this->model_lines.update_material_id_buffer();
+
+	this->fe_window->reset_solver_window();
 }
 
 void geom_store::add_window_ptr(options_window* op_window, material_window* mat_window, solver_window* fe_window)
@@ -518,6 +520,14 @@ void geom_store::paint_geometry()
 	// Clean the back buffer and assign the new color to it
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	// Execute the closing of solution window
+	if (fe_window->execute_close == true)
+	{
+		update_model_transperency(false);
+		// Closing event of solution window done
+		fe_window->execute_close = false;
+	}
+
 	// Analysis solution paint (Analysis complete !!)
 	if (fe_window->is_show_window == true)
 	{
@@ -541,16 +551,40 @@ void geom_store::paint_geometry()
 		if (fe_window->is_analysis_complete == true)
 		{
 			// Analysis complete Paint the results
+			model_nodes.update_result_matrices(fe_window->deformation_scale);
+			model_nodes.paint_nodes_defl();
 
+			model_lines.update_result_matrices(fe_window->deformation_scale);
+			model_lines.paint_line_defl();
+
+			// Paint result text
+			if (fe_window->show_result_text_values == true)
+			{
+				model_nodes.paint_nodes_defl_values();
+
+				if (fe_window->selected_solution_option == 0)
+				{
+					// Deflection paint
+
+				}
+				else if (fe_window->selected_solution_option == 1)
+				{
+					// Member force
+
+				}
+				else if (fe_window->selected_solution_option == 2)
+				{
+					// Member stress
+
+				}
+			}
 		}
-	}
 
-	// Execute the closing of solution window
-	if (fe_window->execute_close == true)
-	{
-		update_model_transperency(false);
-		// Closing event of solution window done
-		fe_window->execute_close = false;
+		if (fe_window->show_undeformed_model == false)
+		{
+			// Exit without showing un-deformed model
+			return;
+		}
 	}
 
 	// Paint the model

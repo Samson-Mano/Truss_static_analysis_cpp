@@ -41,13 +41,14 @@ void label_text_store::delete_all()
 	total_char_count = 0;
 }
 
-void label_text_store::add_text(std::string label, glm::vec2 label_loc, glm::vec3 label_color,
+void label_text_store::add_text(std::string label, glm::vec2 label_loc, glm::vec2 label_offset, glm::vec3 label_color,
 	float label_angle, bool above_point)
 {
 	// Create a temporary element
 	label_text temp_label;
 	temp_label.label = label;
 	temp_label.label_loc = label_loc;
+	temp_label.label_offset = label_offset;
 	temp_label.label_color = label_color;
 	temp_label.label_angle = label_angle;
 	temp_label.label_size = geom_param_ptr->font_size;
@@ -69,7 +70,7 @@ void label_text_store::set_buffers()
 {
 
 	// Define the label vertices of the model (4 vertex (to form a triangle) 2 position, 2 origin, 2 texture coordinate, 1 char ID)
-	unsigned int label_vertex_count = 4 * 9 * total_char_count;
+	unsigned int label_vertex_count = 4 * 11 * total_char_count;
 	float* label_vertices = new float[label_vertex_count];
 
 	// 6 indices to form a triangle
@@ -89,6 +90,7 @@ void label_text_store::set_buffers()
 	VertexBufferLayout label_layout;
 	label_layout.AddFloat(2);  // Position
 	label_layout.AddFloat(2);  // Origin
+	label_layout.AddFloat(2);  // Offset
 	label_layout.AddFloat(2); // Texture coordinate
 	label_layout.AddFloat(3); // Text color
 
@@ -185,17 +187,21 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 2] = loc.x;
 		vertices[vertex_index + 3] = loc.y;
 
+		// Label offset
+		vertices[vertex_index + 4] = lb.label_offset.x;
+		vertices[vertex_index + 5] = lb.label_offset.y;
+
 		// Texture Glyph coordinate
-		vertices[vertex_index + 4] = ch_data.top_left.x + margin;
-		vertices[vertex_index + 5] = ch_data.top_left.y;
+		vertices[vertex_index + 6] = ch_data.top_left.x + margin;
+		vertices[vertex_index + 7] = ch_data.top_left.y;
 
 		// Text color
-		vertices[vertex_index + 6] = lb_color.x;
-		vertices[vertex_index + 7] = lb_color.y;
-		vertices[vertex_index + 8] = lb_color.z;
+		vertices[vertex_index + 8] = lb_color.x;
+		vertices[vertex_index + 9] = lb_color.y;
+		vertices[vertex_index + 10] = lb_color.z;
 
 		// Iterate
-		vertex_index = vertex_index + 9;
+		vertex_index = vertex_index + 11;
 
 		//__________________________________________________________________________________________
 
@@ -210,17 +216,21 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 2] = loc.x;
 		vertices[vertex_index + 3] = loc.y;
 
+		// Label offset
+		vertices[vertex_index + 4] = lb.label_offset.x;
+		vertices[vertex_index + 5] = lb.label_offset.y;
+
 		// Texture Glyph coordinate
-		vertices[vertex_index + 4] = ch_data.top_left.x + margin;
-		vertices[vertex_index + 5] = ch_data.bot_right.y;
+		vertices[vertex_index + 6] = ch_data.top_left.x + margin;
+		vertices[vertex_index + 7] = ch_data.bot_right.y;
 
 		// Text color
-		vertices[vertex_index + 6] = lb_color.x;
-		vertices[vertex_index + 7] = lb_color.y;
-		vertices[vertex_index + 8] = lb_color.z;
+		vertices[vertex_index + 8] = lb_color.x;
+		vertices[vertex_index + 9] = lb_color.y;
+		vertices[vertex_index + 10] = lb_color.z;
 
 		// Iterate
-		vertex_index = vertex_index + 9;
+		vertex_index = vertex_index + 11;
 
 		//__________________________________________________________________________________________
 
@@ -235,17 +245,21 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 2] = loc.x;
 		vertices[vertex_index + 3] = loc.y;
 
+		// Label offset
+		vertices[vertex_index + 4] = lb.label_offset.x;
+		vertices[vertex_index + 5] = lb.label_offset.y;
+
 		// Texture Glyph coordinate
-		vertices[vertex_index + 4] = ch_data.bot_right.x - margin;
-		vertices[vertex_index + 5] = ch_data.bot_right.y;
+		vertices[vertex_index + 6] = ch_data.bot_right.x - margin;
+		vertices[vertex_index + 7] = ch_data.bot_right.y;
 
 		// Text color
-		vertices[vertex_index + 6] = lb_color.x;
-		vertices[vertex_index + 7] = lb_color.y;
-		vertices[vertex_index + 8] = lb_color.z;
+		vertices[vertex_index + 8] = lb_color.x;
+		vertices[vertex_index + 9] = lb_color.y;
+		vertices[vertex_index + 10] = lb_color.z;
 
 		// Iterate
-		vertex_index = vertex_index + 9;
+		vertex_index = vertex_index + 11;
 
 		//__________________________________________________________________________________________
 
@@ -260,17 +274,21 @@ void label_text_store::get_buffer(label_text& lb,
 		vertices[vertex_index + 2] = loc.x;
 		vertices[vertex_index + 3] = loc.y;
 
+		// Label offset
+		vertices[vertex_index + 4] = lb.label_offset.x;
+		vertices[vertex_index + 5] = lb.label_offset.y;
+
 		// Texture Glyph coordinate
-		vertices[vertex_index + 4] = ch_data.bot_right.x - margin;
-		vertices[vertex_index + 5] = ch_data.top_left.y;
+		vertices[vertex_index + 6] = ch_data.bot_right.x - margin;
+		vertices[vertex_index + 7] = ch_data.top_left.y;
 
 		// Text color
-		vertices[vertex_index + 6] = lb_color.x;
-		vertices[vertex_index + 7] = lb_color.y;
-		vertices[vertex_index + 8] = lb_color.z;
+		vertices[vertex_index + 8] = lb_color.x;
+		vertices[vertex_index + 9] = lb_color.y;
+		vertices[vertex_index + 10] = lb_color.z;
 
 		// Iterate
-		vertex_index = vertex_index + 9;
+		vertex_index = vertex_index + 11;
 
 		//__________________________________________________________________________________________
 		x += (ch_data.Advance >> 6) * font_scale;

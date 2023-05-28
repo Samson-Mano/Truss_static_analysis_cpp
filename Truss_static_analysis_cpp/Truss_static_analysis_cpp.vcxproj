@@ -220,6 +220,8 @@
     <None Include="src\geometry_store\shaders\load_vertex_shader.vert" />
     <None Include="src\geometry_store\shaders\node_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\node_vertex_shader.vert" />
+    <None Include="src\geometry_store\shaders\resulttext_frag_shader.frag" />
+    <None Include="src\geometry_store\shaders\resulttext_vert_shader.vert" />
     <None Include="src\geometry_store\shaders\text_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\text_vert_shader.vert" />
   </ItemGroup>

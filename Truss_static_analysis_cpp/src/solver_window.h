@@ -19,14 +19,18 @@ public:
 	bool animate_play = true;
 	bool animate_pause = false;
 	int selected_solution_option = 0;
-	double deformation_scale = 0.0f;
+	float time_val = 0.0f;
+	double deformation_scale_max = 10.0f;
+	double animation_speed = 10.0f;
+	double deformation_scale;
+
 
 	std::string log_buffer;
 
 	solver_window();
 	~solver_window();
 	void render_window();
-
+	void reset_solver_window();
 private:
 
 };

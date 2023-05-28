@@ -30,6 +30,7 @@ public:
 	glm::mat4 modelMatrix; // Geometry model matrix
 	float geom_scale; // Scale of the geometry
 	float geom_transparency; // Value to control the geometry transparency
+	float defl_scale; // Value of deflection scale
 
 	// Screen transformations
 	glm::mat4 panTranslation; // Pan translataion

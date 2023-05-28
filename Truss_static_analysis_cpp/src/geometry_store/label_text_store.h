@@ -10,6 +10,7 @@ struct label_text
 	// Store the individual label
 	std::string label;
 	glm::vec2 label_loc;
+	glm::vec2 label_offset;
 	glm::vec3 label_color;
 	float label_angle;
 	float label_size;
@@ -30,7 +31,7 @@ public:
 	label_text_store();
 	~label_text_store();
 	// void init(font_atlas* font);
-	void add_text(std::string text, glm::vec2 text_loc, glm::vec3 text_color, float font_angle,bool above_point);
+	void add_text(std::string text, glm::vec2 text_loc, glm::vec2 label_offset, glm::vec3 text_color, float font_angle,bool above_point);
 	void set_buffers();
 	void paint_text();
 	void delete_all();
