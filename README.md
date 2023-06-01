@@ -1,7 +1,7 @@
 # Plane truss finite element solver
 
 Description:
-This repository contains a C++ project that implements a Finite Element Method (FEM) solver for plane truss structures. The FEM is a widely used numerical method for analyzing and solving structural engineering problems, such as trusses, beams, and frames. The solver in this project can compute the displacements, reactions, and internal forces of a given plane truss structure subjected to external loads. This project is part of my effort in learning C++.
+This repository contains a C++ project that implements a Finite Element Method (FEM) solver for plane truss structures. The FEM is a widely used numerical method for analyzing and solving structural engineering problems, such as trusses, beams, and frames. The solver in this project can compute the displacements, reactions, and internal forces of a given plane truss structure subjected to external loads.
 
 ## Features:
 
@@ -16,8 +16,8 @@ This repository contains a C++ project that implements a Finite Element Method (
 - Define the truss geometry, material properties, and loads in the input file using the specified format
 - Run the solver executable, which reads the input file and computes the truss displacements, reactions, and internal forces
 - Visualize the results using the included OpenGL-based GUI, which provides options for displaying truss geometry, displacements, and internal forces
-- Post-process the results as needed, such as plotting them or exporting them for further analysis
-- Read How_to_use.Pdf for more information.
+- Post-process the results as needed for further analysis
+- Read How to use Images/Plane Truss Finite Element Solver.pdf for more information.
 
 ## Dependencies:
 
