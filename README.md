@@ -30,8 +30,21 @@ This repository contains a C++ project that implements a Finite Element Method (
 ## License:
 This project is open-source and released under the MIT license. Feel free to use, modify, and distribute the code as per the terms of the license.
 
+## Example 1
+![steel tower](/Images/steel_tower_ex1.PNG)
+![steel_tower_model](/Images/steel_tower_ex1_model_view.PNG)
+![steel tower deflection](/Images/steel_tower_ex1_defl_view.PNG)
+![steel tower member force](/Images/steel_tower_ex1_mforce_view.PNG)
 
+![overhang](/Images/overhang_ex2.PNG)
+![overhang model view](/Images/overhang_ex2_model_view.PNG)
+![overhang deflection](/Images/overhang_ex2_defl_view.PNG)
+![overhang member force](/Images/overhang_ex2_mforce_view.PNG)
 
+![railroad bridge](/Images/railroad_ex3.PNG)
+![railroad model view](/Images/railroad_ex3_model_view.PNG)
+![railroad deflection](/Images/railroad_ex3_defl_view.PNG)
+![railroad member force](/Images/railroad_ex3_mforce_view.PNG)
 
 ## Status: Complete
 ## To DO List
