@@ -25,6 +25,10 @@ void geom_store::init()
 	// Initialize constraint and loads
 	this->loadMap.init(&geom_param);
 	this->constraintMap.init(&geom_param);
+
+	// Set the reaction force x & y
+	this->reaction_x.init(&geom_param);
+	this->reaction_y.init(&geom_param);
 }
 
 void geom_store::write_rawdata(std::ofstream& file)
@@ -495,18 +499,21 @@ void geom_store::set_geometry()
 	loadMap.set_buffer();
 
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
-	std::string parentString = shadersPath.string();
-	std::cout << "Parent path: " << parentString << std::endl;
+	std::filesystem::path shadersPath =geom_param.resourcePath;
 
 	// Text shader
-	text_shader.create_shader((shadersPath.string() + "/text_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/text_frag_shader.frag").c_str());
+	text_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/text_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/text_frag_shader.frag").c_str());
 
 	// Set texture uniform variables
 	text_shader.setUniform("u_Texture", 0);
+
+	// Result text shader
+	result_text_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/text_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/text_frag_shader.frag").c_str());
+
+	// Set texture uniform variables
+	result_text_shader.setUniform("u_Texture", 0);
 
 	// Geometry is set
 	is_geometry_set = true;
@@ -542,7 +549,10 @@ void geom_store::paint_geometry()
 		// Execute the Analysis
 		if (fe_window->execute_solver == true)
 		{
-			fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,&mat_window->material_list,fe_window);
+			reaction_x.init(&geom_param);
+			reaction_y.init(&geom_param);
+
+;			fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,&mat_window->material_list, reaction_x, reaction_y,fe_window);
 			// Analysis execution complete
 			fe_window->execute_solver = false;
 		}
@@ -555,27 +565,49 @@ void geom_store::paint_geometry()
 			model_nodes.paint_nodes_defl();
 
 			model_lines.update_result_matrices(fe_window->deformation_scale);
-			model_lines.paint_line_defl();
+
+			if (fe_window->selected_solution_option == 0)
+			{
+				// Deflection Contour
+				model_lines.paint_line_defl();
+			}
+			else
+			{
+				// Member force contour
+				model_lines.paint_line_mforce();
+			}
+
+			if (fe_window->show_reactionforce == true)
+			{
+				// Show the nodal reaction force
+				reaction_x.paint_loads();
+				reaction_y.paint_loads();
+
+				// Paint the reaction force label
+				result_text_shader.Bind();
+				reaction_x.paint_load_labels();
+				reaction_y.paint_load_labels();
+				result_text_shader.UnBind();
+			}
 
 			// Paint result text
 			if (fe_window->show_result_text_values == true)
 			{
-				model_nodes.paint_nodes_defl_values();
 
 				if (fe_window->selected_solution_option == 0)
 				{
 					// Deflection paint
-
+					model_nodes.paint_nodes_defl_values();
 				}
 				else if (fe_window->selected_solution_option == 1)
 				{
 					// Member force
-
+					model_lines.paint_line_mforce_values();
 				}
 				else if (fe_window->selected_solution_option == 2)
 				{
 					// Member stress
-
+					model_lines.paint_line_mstress_values();
 				}
 			}
 		}
@@ -653,12 +685,14 @@ void geom_store::update_model_transperency(bool is_transparent)
 	{
 		// Set the transparency value
 		text_shader.setUniform("transparency", 0.1f);
+		result_text_shader.setUniform("transparency", 0.8f);
 		geom_param.geom_transparency = 0.2f;
 	}
 	else
 	{
 		// remove transparency
 		text_shader.setUniform("transparency", 0.7f);
+		result_text_shader.setUniform("transparency", 0.8f);
 		geom_param.geom_transparency = 1.0f;
 	}
 
@@ -666,7 +700,9 @@ void geom_store::update_model_transperency(bool is_transparent)
 	model_lines.update_geometry_matrices(false, false, false, true);
 	model_nodes.update_geometry_matrices(false, false, false, true);
 	constraintMap.update_geometry_matrices(false, false, false, true);
-	loadMap.update_geometry_matrices(false, false, false, true);
+	loadMap.update_geometry_matrices(false, false, false, true,false);
+	reaction_x.update_geometry_matrices(false, false, false, true,true);
+	reaction_y.update_geometry_matrices(false, false, false, true,true);
 }
 
 void geom_store::set_model_matrix()
@@ -695,10 +731,15 @@ void geom_store::set_model_matrix()
 	model_lines.update_geometry_matrices(true, false, false,true);
 	model_nodes.update_geometry_matrices(true, false, false, true);
 	constraintMap.update_geometry_matrices(true, false, false, true);
-	loadMap.update_geometry_matrices(true, false, false, true);
+	loadMap.update_geometry_matrices(true, false, false, true,false);
+	reaction_x.update_geometry_matrices(true, false, false, false,true);
+	reaction_y.update_geometry_matrices(true, false, false, false,true);
 
 	text_shader.setUniform("transparency", 0.7f);
 	text_shader.setUniform("modelMatrix", geom_param.modelMatrix, false);
+
+	result_text_shader.setUniform("transparency", 0.7f);
+	result_text_shader.setUniform("modelMatrix", geom_param.modelMatrix, false);
 }
 
 void geom_store::updateWindowDimension(const int& window_width, const int& window_height)
@@ -723,6 +764,7 @@ void geom_store::zoomfit_geometry()
 	// Set the pan translation matrix
 	geom_param.panTranslation = glm::mat4(1.0f);
 	text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
+	result_text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
 
 	// Set the zoom matrix
 	geom_param.zoom_scale = 1.0f;
@@ -730,9 +772,12 @@ void geom_store::zoomfit_geometry()
 	model_lines.update_geometry_matrices(false, true, true, false);
 	model_nodes.update_geometry_matrices(false, true, true, false);
 	constraintMap.update_geometry_matrices(false, true, true, false);
-	loadMap.update_geometry_matrices(false, true, true, false);
+	loadMap.update_geometry_matrices(false, true, true, false,false);
+	reaction_x.update_geometry_matrices(false, true, true, false,true);
+	reaction_y.update_geometry_matrices(false, true, true, false,true);
 
 	text_shader.setUniform("zoomscale", geom_param.zoom_scale);
+	result_text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 }
 
 void geom_store::pan_geometry(glm::vec2& transl)
@@ -749,9 +794,12 @@ void geom_store::pan_geometry(glm::vec2& transl)
 	model_lines.update_geometry_matrices(false, true, false,false);
 	model_nodes.update_geometry_matrices(false, true, false, false);
 	constraintMap.update_geometry_matrices(false, true, false, false);
-	loadMap.update_geometry_matrices(false, true, false, false);
+	loadMap.update_geometry_matrices(false, true, false, false,false);
+	reaction_x.update_geometry_matrices(false, true, false, false,true);
+	reaction_y.update_geometry_matrices(false, true, false, false,true);
 
 	text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
+	result_text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
 }
 
 void geom_store::zoom_geometry(float& z_scale)
@@ -765,9 +813,12 @@ void geom_store::zoom_geometry(float& z_scale)
 	model_lines.update_geometry_matrices(false, false, true, false);
 	model_nodes.update_geometry_matrices(false, false, true, false);
 	constraintMap.update_geometry_matrices(false, false, true, false);
-	loadMap.update_geometry_matrices(false, false, true, false);
+	loadMap.update_geometry_matrices(false, false, true, false,false);
+	reaction_x.update_geometry_matrices(false, false, true, false,true);
+	reaction_y.update_geometry_matrices(false, false, true, false,true);
 
 	text_shader.setUniform("zoomscale", geom_param.zoom_scale);
+	result_text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 }
 
 void geom_store::set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add)

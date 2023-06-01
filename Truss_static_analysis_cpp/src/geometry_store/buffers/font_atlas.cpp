@@ -11,7 +11,7 @@ font_atlas::~font_atlas()
 {
 }
 
-void font_atlas::create_atlas()
+void font_atlas::create_atlas(std::filesystem::path& resourcePath)
 {
 	// FreeType
 	// --------
@@ -23,14 +23,9 @@ void font_atlas::create_atlas()
 		return;
 	}
 
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
-	std::string parentString = shadersPath.string();
-
 	// load font as face
 	FT_Face face;
-	if (FT_New_Face(ft, (shadersPath.string() + "/ttf_CenturyGothic.ttf").c_str(), 0, &face)) {
+	if (FT_New_Face(ft, (resourcePath.string() + "/src/geometry_store/shaders/ttf_CenturyGothic.ttf").c_str(), 0, &face)) {
 		std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 		return;
 	}

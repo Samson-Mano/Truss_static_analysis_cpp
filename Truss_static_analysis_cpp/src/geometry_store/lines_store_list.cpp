@@ -15,12 +15,16 @@ void lines_store_list::init(geom_parameters* geom_param_ptr)
 	line_id_labels.geom_param_ptr = geom_param_ptr;
 	line_length_labels.geom_param_ptr = geom_param_ptr;
 	material_id_labels.geom_param_ptr = geom_param_ptr;
+	line_mforce_labels.geom_param_ptr = geom_param_ptr;
+	line_mstress_labels.geom_param_ptr = geom_param_ptr;
 
 	// Delete all the lines
 	line_count = 0;
 	line_id_labels.delete_all();
 	line_length_labels.delete_all();
 	material_id_labels.delete_all();
+	line_mforce_labels.delete_all();
+	line_mstress_labels.delete_all();
 	lineMap.clear();
 }
 
@@ -30,23 +34,7 @@ void lines_store_list::add_node_list(std::unordered_map<int, nodes_store>* model
 	this->model_nodes_ptr = model_nodes_ptr;
 }
 
-void lines_store_list::update_results(int& line_id, double youngs_mod, double cs_area)
-{
-	// Update the results from solver
-		// Compute the differences in x and y coordinates
-	double dx = lineMap[line_id].startNode.node_pt.x - lineMap[line_id].endNode.node_pt.x;
-	double dy = lineMap[line_id].startNode.node_pt.y - lineMap[line_id].endNode.node_pt.y;
-
-	// Compute the length of the truss element
-	double eLength = std::sqrt((dx * dx) + (dy * dy));
-
-
-	// Update the member force and member stress
-	lineMap[line_id].member_force = 0.0f;
-	lineMap[line_id].member_stress = 0.0f;
-}
-
-void lines_store_list::add_line(int& line_id, const nodes_store& startNode, const nodes_store& endNode, int material_id)
+void lines_store_list::add_line(int& line_id,const nodes_store startNode,const nodes_store endNode, int material_id)
 {
 	// Add the line to the list
 	lines_store temp_line;
@@ -104,6 +92,8 @@ void lines_store_list::set_buffer()
 	unsigned int line_v_index = 0;
 	unsigned int v_id = 0;
 
+	lines_store line_null; // line null
+
 	for (auto& node : (*model_nodes_ptr))
 	{
 		// node_store
@@ -111,7 +101,7 @@ void lines_store_list::set_buffer()
 		node_id_map[node.first] = v_id;
 
 		// Add the line point
-		set_line_vertices(line_vertices, line_v_index, node.second,0);
+		set_line_vertices(line_vertices, line_v_index, node.second, line_null,0);
 
 		v_id++;
 	}
@@ -145,13 +135,11 @@ void lines_store_list::set_buffer()
 	delete[] line_indices;
 	
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
 
 	// Line shader
-	line_shader.create_shader((shadersPath.string() + "/geom_vertex_shader.vert").c_str(),
-		(shadersPath.string() + "/geom_frag_shader.frag").c_str());
+	line_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/geom_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/geom_frag_shader.frag").c_str());
 
 	// Set the buffers for the labels
 	line_id_labels.set_buffers();
@@ -160,7 +148,7 @@ void lines_store_list::set_buffer()
 
 void lines_store_list::set_defl_buffer()
 {
-	// Update the buffer
+	// Update the deflection buffer
 	// Define the line vertices of the model (2 node position, 2 deflection, 3 color, 1 to note result or not)
 	const unsigned int line_vertex_count = 8 * (*model_nodes_ptr).size();
 	float* line_vertices = new float[line_vertex_count];
@@ -170,6 +158,8 @@ void lines_store_list::set_defl_buffer()
 	unsigned int line_v_index = 0;
 	unsigned int v_id = 0;
 
+	lines_store line_null; // line null
+
 	for (auto& node : (*model_nodes_ptr))
 	{
 		// node_store
@@ -177,7 +167,7 @@ void lines_store_list::set_defl_buffer()
 		node_id_map[node.first] = v_id;
 
 		// Add the line point
-		set_line_vertices(line_vertices, line_v_index, node.second, 1);
+		set_line_vertices(line_vertices, line_v_index, node.second, line_null, 1);
 
 		v_id++;
 	}
@@ -211,17 +201,90 @@ void lines_store_list::set_defl_buffer()
 	delete[] line_indices;
 
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
 
 	// Line shader
-	line_defl_shader.create_shader((shadersPath.string() + "/geom_vertex_shader.vert").c_str(),
-		(shadersPath.string() + "/geom_frag_shader.frag").c_str());
+	line_defl_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/geom_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/geom_frag_shader.frag").c_str());
 
-	// Set the buffers for the labels
-	line_id_labels.set_buffers();
-	line_length_labels.set_buffers();
+	//// Set the buffers for the labels
+	//line_id_labels.set_buffers();
+	//line_length_labels.set_buffers();
+}
+
+void lines_store_list::set_mforce_buffer()
+{
+	// Update the member force buffer
+	// Define the line vertices of the model (2 node position, 2 deflection, 3 color, 1 to note result or not)
+	const unsigned int line_vertex_count = 8 * 2 * line_count;
+	float* line_vertices = new float[line_vertex_count];
+
+	// Node ID map to keep track of the ids of the nodes
+	std::unordered_map<int, int> node_id_map;
+	unsigned int line_v_index = 0;
+	unsigned int v_id = 0;
+
+	// Define the indices of the lines of the model
+	unsigned int line_indices_count = 2 * line_count;
+	unsigned int* line_indices = new unsigned int[line_indices_count];
+
+	nodes_store node_null; // node null
+
+	unsigned int line_i_index = 0;
+	// Add the line index
+	for (const auto& line : lineMap)
+	{
+		// lines store
+		lines_store ln = line.second;
+
+		// Add the node id to map (Strat node)
+		node_id_map[ln.startNode.node_id] = v_id;
+		v_id++;
+
+		// Add the node id to map (End node)
+		node_id_map[ln.endNode.node_id] = v_id;
+		v_id++;
+
+		// Set the line vertices
+		set_line_vertices(line_vertices, line_v_index, node_null,ln, 2);
+
+		// Set the line indices
+		set_line_indices(line_indices, line_i_index, node_id_map, ln);
+	}
+
+	unsigned int line_vertex_size = line_vertex_count * sizeof(float);
+
+	VertexBufferLayout line_layout;
+	line_layout.AddFloat(2);  // Position	
+	line_layout.AddFloat(2);  // Deflection
+	line_layout.AddFloat(3);  // Color
+	line_layout.AddFloat(1);  // int to track deflection
+
+	// Create the Line buffers
+	line_mforce_buffer.CreateBuffers((void*)line_vertices, line_vertex_size, (unsigned int*)line_indices, line_indices_count, line_layout);
+
+	// Delete the dynamic array
+	delete[] line_vertices;
+	delete[] line_indices;
+
+	// Create shader
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
+
+	// Create the result text buffers
+	result_text_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/resulttext_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/resulttext_frag_shader.frag").c_str());
+
+	// Set texture uniform variables
+	result_text_shader.setUniform("u_Texture", 0);
+
+	// Set the buffers for the displacement labels
+	line_mforce_labels.set_buffers();
+	line_mstress_labels.set_buffers();
+
+	// Line shader
+	line_mforce_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/geom_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/geom_frag_shader.frag").c_str());
+
 }
 
 void lines_store_list::update_material_id_buffer()
@@ -291,6 +354,32 @@ void lines_store_list::paint_line_defl()
 	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
 	line_defl_buffer.UnBind();
 	line_defl_shader.UnBind();
+}
+
+void lines_store_list::paint_line_mforce()
+{
+	// Paint the line member force
+	line_mforce_shader.Bind();
+	line_mforce_buffer.Bind();
+	glDrawElements(GL_LINES, 2 * line_count, GL_UNSIGNED_INT, 0);
+	line_mforce_buffer.UnBind();
+	line_mforce_shader.UnBind();
+}
+
+void lines_store_list::paint_line_mstress_values()
+{
+	// Paint the line member stress values
+	result_text_shader.Bind();
+	line_mstress_labels.paint_text();
+	result_text_shader.UnBind();
+}
+
+void lines_store_list::paint_line_mforce_values()
+{
+	// Paint the line member force values
+	result_text_shader.Bind();
+	line_mforce_labels.paint_text();
+	result_text_shader.UnBind();
 }
 
 int lines_store_list::is_line_hit(glm::vec2& loc)
@@ -365,36 +454,93 @@ bool lines_store_list::isClickPointOnLine(const glm::vec2& clickPoint, const glm
 	return false; // Click point is not on the line segment
 }
 
-void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& line_v_index, const nodes_store& node, int is_rslt)
+void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& line_v_index, const nodes_store& node, const lines_store& line, int is_rslt)
 {
-	// Set the line vertices
-	line_vertices[line_v_index + 0] = node.node_pt.x;
-	line_vertices[line_v_index + 1] = node.node_pt.y;
-
-	// Set the line deflection value
-	line_vertices[line_v_index + 2] = node.nodal_displ.x / max_displacement;
-	line_vertices[line_v_index + 3] = node.nodal_displ.y / max_displacement;
 
 	if (is_rslt == 0)
 	{
+		// Set the line vertices
+		line_vertices[line_v_index + 0] = node.node_pt.x;
+		line_vertices[line_v_index + 1] = node.node_pt.y;
+
+		// Set the line deflection value
+		line_vertices[line_v_index + 2] = node.nodal_displ.x / max_displacement;
+		line_vertices[line_v_index + 3] = node.nodal_displ.y / max_displacement;
+
 		// line default color
 		line_vertices[line_v_index + 4] = geom_param_ptr->geom_colors.line_color.x;
 		line_vertices[line_v_index + 5] = geom_param_ptr->geom_colors.line_color.y;
 		line_vertices[line_v_index + 6] = geom_param_ptr->geom_colors.line_color.z;
+
+		// Integer to track whether values have result data 
+		line_vertices[line_v_index + 7] = is_rslt;
+
+		// Increment
+		line_v_index = line_v_index + 8;
 	}
-	else
+	else if (is_rslt == 1)
 	{
+		// Set the line vertices
+		line_vertices[line_v_index + 0] = node.node_pt.x;
+		line_vertices[line_v_index + 1] = node.node_pt.y;
+
+		// Set the line deflection value
+		line_vertices[line_v_index + 2] = node.nodal_displ.x / max_displacement;
+		line_vertices[line_v_index + 3] = node.nodal_displ.y / max_displacement;
+
 		// Line displacement color
 		line_vertices[line_v_index + 4] = node.node_contour_color.x;
 		line_vertices[line_v_index + 5] = node.node_contour_color.y;
 		line_vertices[line_v_index + 6] = node.node_contour_color.z;
+
+		// Integer to track whether values have result data 
+		line_vertices[line_v_index + 7] = is_rslt;
+
+		// Increment
+		line_v_index = line_v_index + 8;
 	}
+	else if (is_rslt == 2)
+	{
+		// Set the line vertices
+		line_vertices[line_v_index + 0] = line.startNode.node_pt.x;
+		line_vertices[line_v_index + 1] = line.startNode.node_pt.y;
 
-	// Integer to track whether values have result data 
-	line_vertices[line_v_index + 7] = is_rslt;
+		// Set the line deflection value
+		line_vertices[line_v_index + 2] = (*model_nodes_ptr)[line.startNode.node_id].nodal_displ.x / max_displacement;
+		line_vertices[line_v_index + 3] = (*model_nodes_ptr)[line.startNode.node_id].nodal_displ.y / max_displacement;
 
-	// Increment
-	line_v_index = line_v_index + 8;
+		// Line displacement color
+		line_vertices[line_v_index + 4] = line.member_force_color.x;
+		line_vertices[line_v_index + 5] = line.member_force_color.y;
+		line_vertices[line_v_index + 6] = line.member_force_color.z;
+
+		// Integer to track whether values have result data 
+		line_vertices[line_v_index + 7] = is_rslt;
+
+		// Increment
+		line_v_index = line_v_index + 8;
+
+		//_________________________________________________________________________________
+
+		// Set the line vertices
+		line_vertices[line_v_index + 0] = line.endNode.node_pt.x;
+		line_vertices[line_v_index + 1] = line.endNode.node_pt.y;
+
+		// Set the line deflection value
+		line_vertices[line_v_index + 2] = (*model_nodes_ptr)[line.endNode.node_id].nodal_displ.x / max_displacement;
+		line_vertices[line_v_index + 3] = (*model_nodes_ptr)[line.endNode.node_id].nodal_displ.y / max_displacement;
+
+		// Line displacement color
+		line_vertices[line_v_index + 4] = line.member_force_color.x;
+		line_vertices[line_v_index + 5] = line.member_force_color.y;
+		line_vertices[line_v_index + 6] = line.member_force_color.z;
+
+		// Integer to track whether values have result data 
+		line_vertices[line_v_index + 7] = is_rslt;
+
+		// Increment
+		line_v_index = line_v_index + 8;
+	}
 }
 
 void lines_store_list::set_line_indices(unsigned int* line_indices, unsigned int& line_i_index, std::unordered_map<int, int>& node_id_map, const lines_store& line)
@@ -413,6 +559,8 @@ void lines_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pan
 	{
 		line_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
 		line_defl_shader.setUniform("transparency", 1.0f);
+		line_mforce_shader.setUniform("transparency", 1.0f);
+		result_text_shader.setUniform("transparency", 1.0f);
 	}
 
 	// Model Matrix
@@ -420,9 +568,13 @@ void lines_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pan
 	{
 		line_shader.setUniform("geom_scale", geom_param_ptr->geom_scale);
 		line_defl_shader.setUniform("geom_scale", geom_param_ptr->geom_scale);
+		line_mforce_shader.setUniform("geom_scale", geom_param_ptr->geom_scale);
+		result_text_shader.setUniform("geom_scale", geom_param_ptr->geom_scale);
 
 		line_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 		line_defl_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
+		line_mforce_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
+		result_text_shader.setUniform("modelMatrix", geom_param_ptr->modelMatrix, false);
 	}
 
 	// Pan Translation
@@ -430,6 +582,8 @@ void lines_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pan
 	{
 		line_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
 		line_defl_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
+		line_mforce_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
+		result_text_shader.setUniform("panTranslation", geom_param_ptr->panTranslation, false);
 	}
 
 	// Zoom Translation
@@ -437,6 +591,8 @@ void lines_store_list::update_geometry_matrices(bool is_modelmatrix, bool is_pan
 	{
 		line_shader.setUniform("zoomscale", geom_param_ptr->zoom_scale);
 		line_defl_shader.setUniform("zoomscale", geom_param_ptr->zoom_scale);
+		line_mforce_shader.setUniform("zoomscale", geom_param_ptr->zoom_scale);
+		result_text_shader.setUniform("zoomscale", geom_param_ptr->zoom_scale);
 	}
 }
 
@@ -445,13 +601,75 @@ void lines_store_list::update_result_matrices(float defl_scale)
 {
 	// Update the deflection scale uniform
 	line_defl_shader.setUniform("deflscale", defl_scale);
+	line_mforce_shader.setUniform("deflscale", defl_scale);
+	result_text_shader.setUniform("deflscale", defl_scale);
 }
 
-void lines_store_list::set_result_max(double max_displacement, double max_resultant, double max_memberforce, double max_memberstress)
+void lines_store_list::update_results(int& line_id, double member_stress, double member_force)
+{
+	// Update the member force and member stress
+	lineMap[line_id].member_stress = member_stress;
+	lineMap[line_id].member_force = member_force;
+}
+
+void lines_store_list::set_result_max(double max_displacement, double max_resultant, double max_memberstress, double max_memberforce)
 {
 	// set the maximum values 
 	this->max_displacement = max_displacement;
 	this->max_resultant = max_resultant;
-	this->max_memberforce = max_memberforce;
 	this->max_memberstress = max_memberstress;
+	this->max_memberforce = max_memberforce;
+
+	// Clear the member force/ member stress labels
+	line_mforce_labels.delete_all();
+	line_mstress_labels.delete_all();
+
+	for (auto& ln_m : lineMap)
+	{
+		lines_store ln = ln_m.second;
+
+		// Find the member force color
+		float force_scale = std::abs(ln.member_force) / max_memberforce;
+		glm::vec3 member_force_color = nodes_store_list::getContourColor(force_scale);
+
+		lineMap[ln.line_id].member_force_color = member_force_color;
+
+		// Find the member stress color
+		float stress_scale = std::abs(ln.member_stress) / max_memberstress;
+		glm::vec3 member_stress_color = nodes_store_list::getContourColor(stress_scale);
+
+		lineMap[ln.line_id].member_stress_color = member_stress_color;
+
+		//_____________________________________________________________________________________________________________
+		// Find the line parameters for line member force/ stress labels
+		glm::vec2 start_pt = ln.startNode.node_pt;
+		glm::vec2 end_pt = ln.endNode.node_pt;
+
+		// Calculate the midpoint of the line segment
+		glm::vec2 line_mid_pt = glm::vec2((start_pt.x + end_pt.x) * 0.5f, (start_pt.y + end_pt.y) * 0.5f);
+
+		float line_angle = atan2(end_pt.y - start_pt.y, end_pt.x - start_pt.x);
+
+		// Mid Point Displacement
+		glm::vec2 node_displ_start_node = glm::vec2((*model_nodes_ptr)[ln.startNode.node_id].nodal_displ.x / max_displacement,
+			(*model_nodes_ptr)[ln.startNode.node_id].nodal_displ.y / max_displacement);
+		glm::vec2 node_displ_end_node = glm::vec2((*model_nodes_ptr)[ln.endNode.node_id].nodal_displ.x / max_displacement,
+			(*model_nodes_ptr)[ln.endNode.node_id].nodal_displ.y / max_displacement);
+
+		glm::vec2 line_mid_pt_displ = glm::vec2((node_displ_start_node.x + node_displ_end_node.x) * 0.5f, (node_displ_start_node.y + node_displ_end_node.y) * 0.5f);
+
+
+		// Set the member force label
+		std::string temp_str = std::to_string(ln.member_force);
+
+		line_mforce_labels.add_text(temp_str.c_str(), line_mid_pt, line_mid_pt_displ,
+			member_force_color, line_angle, false);
+
+		// Set the member stress label
+		temp_str = std::to_string(ln.member_stress);
+
+		line_mstress_labels.add_text(temp_str.c_str(), line_mid_pt, line_mid_pt_displ,
+			member_stress_color, line_angle, false);
+	}
+
 }

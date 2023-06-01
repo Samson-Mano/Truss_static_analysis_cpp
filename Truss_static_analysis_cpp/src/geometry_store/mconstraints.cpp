@@ -73,17 +73,15 @@ void mconstraints::delete_all()
 void mconstraints::set_buffer()
 {
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
 
 	// Load shader
-	constraint_shader.create_shader((shadersPath.string() + "/constraint_vertex_shader.vert").c_str(),
-		(shadersPath.string() + "/constraint_frag_shader.frag").c_str());
+	constraint_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/constraint_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/constraint_frag_shader.frag").c_str());
 
 	// Load textures
-	constraint_texture_pin.LoadTexture((shadersPath.string() + "/pic_pin_support.png").c_str());
-	constraint_texture_roller.LoadTexture((shadersPath.string() + "/pic_roller_support.png").c_str());
+	constraint_texture_pin.LoadTexture((shadersPath.string() + "/src/geometry_store/shaders/pic_pin_support.png").c_str());
+	constraint_texture_roller.LoadTexture((shadersPath.string() + "/src/geometry_store/shaders/pic_roller_support.png").c_str());
 
 	// Set texture uniform variables
 	constraint_shader.setUniform("u_Textures[0]", 0);

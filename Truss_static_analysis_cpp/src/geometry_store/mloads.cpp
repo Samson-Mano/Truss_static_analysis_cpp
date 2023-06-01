@@ -79,13 +79,11 @@ void mloads::delete_all()
 void mloads::set_buffer()
 {
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
 
 	// Load shader
-	load_shader.create_shader((shadersPath.string() + "/load_vertex_shader.vert").c_str(),
-		(shadersPath.string() + "/load_frag_shader.frag").c_str());
+	load_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/load_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/load_frag_shader.frag").c_str());
 }
 
 void mloads::update_buffer()
@@ -121,7 +119,7 @@ void mloads::update_buffer()
 	unsigned int load_arrowtail_i_index = 0;
 
 	// Load Max
-	float load_max = 0.0f;
+	float load_max = max_load;
 
 	// Find the load maximum
 	for (auto& load : l_data)
@@ -409,12 +407,19 @@ void mloads::set_load_arrowtail_indices(unsigned int* load_arrowtail_vertex_indi
 	load_arrowtail_i_index = load_arrowtail_i_index + 2;
 }
 
-void mloads::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency)
+void mloads::update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency, bool is_rslt)
 {
 	// Set Transparency
 	if (set_transparency == true)
 	{
-		load_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
+		if (is_rslt == false)
+		{
+			load_shader.setUniform("transparency", geom_param_ptr->geom_transparency);
+		}
+		else
+		{
+			load_shader.setUniform("transparency", 1.0f);
+		}
 	}
 
 	// Model Matrix

@@ -48,6 +48,9 @@ private:
 	mconstraints constraintMap;
 	// Load data store
 	mloads loadMap;
+	// Result reaction force
+	mloads reaction_x;
+	mloads reaction_y;
 
 	// View options ptr and Material window ptr
 	options_window* op_window;
@@ -59,6 +62,7 @@ private:
 
 	// Store the openGL buffers
 	shader text_shader;
+	shader result_text_shader;
 
 	// Functions to set the geometry
 	void paint_model();

@@ -19,6 +19,9 @@ public:
 	const float font_size = 16.0f * std::pow(10, -5);
 	const float node_circle_radii = 0.005f;
 
+	// File path
+	std::filesystem::path resourcePath;
+
 	// Window size
 	int window_width;
 	int window_height;

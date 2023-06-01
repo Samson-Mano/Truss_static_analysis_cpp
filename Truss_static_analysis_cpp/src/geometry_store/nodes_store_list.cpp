@@ -97,15 +97,14 @@ void nodes_store_list::set_buffer()
 	node_buffer.CreateBuffers((void*)node_vertices, node_vertex_size, (unsigned int*)node_vertex_indices, node_indices_count, node_layout);
 
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
 
 	// Node shader
-	node_shader.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
-		(shadersPath.string() + "/node_frag_shader.frag").c_str());
+	node_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/node_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/node_frag_shader.frag").c_str());
 
-	node_texture.LoadTexture((shadersPath.string() + "/pic_3d_circle_paint.png").c_str());
+
+	node_texture.LoadTexture((shadersPath.string() + "/src/geometry_store/shaders/pic_3d_circle_paint.png").c_str());
 	node_shader.setUniform("u_Texture", 0);
 
 	// Set the buffers for the labels
@@ -153,20 +152,18 @@ void nodes_store_list::set_defl_buffer()
 	node_defl_buffer.CreateBuffers((void*)node_vertices, node_vertex_size, (unsigned int*)node_vertex_indices, node_indices_count, node_layout);
 
 	// Create shader
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	std::filesystem::path shadersPath = geom_param_ptr->resourcePath;// / "src/geometry_store/shaders";
 
 	// Node shader
-	node_defl_shader.create_shader((shadersPath.string() + "/node_vertex_shader.vert").c_str(),
-		(shadersPath.string() + "/node_frag_shader.frag").c_str());
+	node_defl_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/node_vertex_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/node_frag_shader.frag").c_str());
 
-	node_defl_texture.LoadTexture((shadersPath.string() + "/pic_3d_circle_paint.png").c_str());
+	node_defl_texture.LoadTexture((shadersPath.string() + "/src/geometry_store/shaders/pic_3d_circle_paint.png").c_str());
 	node_defl_shader.setUniform("u_Texture", 0);
 
 	// Create the result text buffers
-	result_text_shader.create_shader((shadersPath.string() + "/resulttext_vert_shader.vert").c_str(),
-		(shadersPath.string() + "/resulttext_frag_shader.frag").c_str());
+	result_text_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/resulttext_vert_shader.vert").c_str(),
+		(shadersPath.string() + "/src/geometry_store/shaders/resulttext_frag_shader.frag").c_str());
 
 	// Set texture uniform variables
 	result_text_shader.setUniform("u_Texture", 0);
@@ -486,29 +483,39 @@ void nodes_store_list::set_result_max(double max_displacement, double max_result
 
 	// Clear the displacement lables
 	node_displ_labels.delete_all();
+
+	// Set the node contour color
+	for (auto& nd_m : nodeMap)
+	{
+		int node_id = nd_m.first;
+
+		// Set the node displ color
+		double displ = std::sqrt(std::pow(nodeMap[node_id].nodal_displ.x, 2) +
+			std::pow(nodeMap[node_id].nodal_displ.y, 2));
+		double displ_scale = displ / max_displacement;
+
+		// Set the Node Color
+		nodeMap[node_id].node_contour_color = getContourColor(displ_scale);
+
+		// Set the node displacement label
+		std::string temp_str = "(" + std::to_string(nodeMap[node_id].nodal_displ.x) + ", " +
+			std::to_string(nodeMap[node_id].nodal_displ.y) + ")";
+
+		// Node Displacement
+		glm::vec2 node_displ_offset = glm::vec2(nodeMap[node_id].nodal_displ.x / max_displacement, 
+			nodeMap[node_id].nodal_displ.y / max_displacement);
+
+		node_displ_labels.add_text(temp_str.c_str(), nodeMap[node_id].node_pt, node_displ_offset,
+			nodeMap[node_id].node_contour_color, 0.0f, true);
+	}
 }
 
-void nodes_store_list::update_results(int& node_id, double displ_x, double displ_y, double resultant_x, double resultant_y)
+void nodes_store_list::update_results(int& node_id, double displ_x, double displ_y, double resultant_x, double resultant_y, double resultant_angle)
 {
 	// Update the Nodal results 
 	nodeMap[node_id].nodal_displ = glm::vec2(displ_x, displ_y);
 	nodeMap[node_id].nodal_reaction = glm::vec2(resultant_x, resultant_y);
-
-	// Set the node displ color
-	double displ = std::sqrt(std::pow(displ_x, 2) + std::pow(displ_y, 2));
-	double displ_scale = displ / max_displacement;
-
-	// Set the Node Color
-	nodeMap[node_id].node_contour_color = getContourColor(displ_scale);
-
-	// Set the node displacement label
-	std::string temp_str = "(" + std::to_string(displ_x) + ", " + std::to_string(displ_y) + ")";
-
-	// Node Displacement
-	glm::vec2 node_displ_offset = glm::vec2(nodeMap[node_id].nodal_displ.x/max_displacement, nodeMap[node_id].nodal_displ.y / max_displacement);
-
-	node_displ_labels.add_text(temp_str.c_str(), nodeMap[node_id].node_pt, node_displ_offset,
-		nodeMap[node_id].node_contour_color, 0.0f, true);
+	nodeMap[node_id].nodal_reaction_angle = resultant_angle;
 }
 
 

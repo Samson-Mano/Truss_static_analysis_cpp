@@ -13,6 +13,8 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 	mconstraints* cnsts,
 	mloads* loads,
 	std::unordered_map<int, material_data>* mdatas,
+	mloads& reaction_x,
+	mloads& reaction_y,
 	solver_window* fe_window)
 {
 	// Main Solver Start
@@ -178,56 +180,23 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 	}
 
 	//____________________________________________________________________________________________________________________
-	//____________________________________________________________________________________________________________________
-	// Find the maximum displacement and resultant
-	// double max_displacement_x = 1.0E-16;
-	// double max_displacement_y = 1.0E-16;
-	double max_displacement = 0.0;
-	double max_resultant = 0.0;
-	for (auto& nd : nodes->nodeMap)
-	{
-		int matrix_index = nodeid_map[nd.first];
+	// Map the analysis Results
+	bool is_map_success = false;
 
-		// Extract the node displacement and find the resultant 
-		double displ_xy = std::sqrt(std::pow(globalDisplacementMatrix((matrix_index * 2) + 0, 0), 2) + 
-			std::pow(globalDisplacementMatrix((matrix_index * 2) + 1, 0), 2));
+	map_analysis_results(globalDisplacementMatrix,
+		globalResultantMatrix,
+		nodes,
+		lines,
+		cnsts,
+		loads,
+		reaction_x,
+		reaction_y,
+		mdatas,
+		dofIndices,
+		is_map_success,
+		output_file);
 
-		//if (std::abs(globalDisplacementMatrix((matrix_index * 2) + 0, 0)) > std::abs(max_displacement_x))
-		//{
-		//	// Fix the maximum displacement X
-		//	max_displacement_x = globalDisplacementMatrix((matrix_index * 2) + 0, 0);
-		//}
-
-		//if (std::abs(globalDisplacementMatrix((matrix_index * 2) + 1, 0)) > std::abs(max_displacement_y))
-		//{
-		//	// Fix the maximum displacement Y
-		//	max_displacement_y = globalDisplacementMatrix((matrix_index * 2) + 1, 0);
-		//}
-
-		if (displ_xy > max_displacement)
-		{
-			// fix the maximum displacement
-			max_displacement = displ_xy;
-		}
-
-		// Extract the node resultant
-		double resultant_xy = std::sqrt(std::pow(globalResultantMatrix((matrix_index * 2) + 0, 0), 2) +
-			std::pow(globalResultantMatrix((matrix_index * 2) + 1, 0),2));
-
-		if (resultant_xy > max_resultant)
-		{
-			// fix the maximum resultant
-			max_resultant = resultant_xy;
-		}
-	}
-
-	nodes->set_result_max(max_displacement, max_resultant); // Set the results of maximim displacement and maximum resultant
-	lines->set_result_max(max_displacement, max_resultant, 0.0f, 0.0f);
-
-	//____________________________________________________________________________________________________________________
-	// Set the analysis
-
-	if (max_displacement == 0 || max_resultant == 0)
+	if (is_map_success == false)
 	{
 		output_file << "Resultant force is Zero or Max Displacement is Zero" << std::endl;
 		output_file << "Analysis failed ........ " << std::endl;
@@ -241,53 +210,6 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 	fe_window->log_buffer.append("6. Resultant forces calculated \n");
 	fe_window->log_buffer.append("Solve success ........ \n");
 
-	//____________________________________________________________________________________________________________________
-	// Map the results to Nodes and Elements
-	// Map to results to Nodes
-	for (auto& nd : nodes->nodeMap)
-	{
-		int node_id = nd.first;
-		int matrix_index = nodeid_map[node_id];
-
-		// Extract the node displacement 
-		double displ_x = globalDisplacementMatrix((matrix_index * 2) + 0, 0);
-		double displ_y = globalDisplacementMatrix((matrix_index * 2) + 1, 0);
-
-		// Extract the node resultant
-		double resultant_x = globalResultantMatrix((matrix_index * 2) + 0, 0);
-		double resultant_y = globalResultantMatrix((matrix_index * 2) + 1, 0);
-
-		if (cnsts->c_data.find(node_id) == cnsts->c_data.end())
-		{
-			// No constraint is in this node
-			nodes->update_results(node_id, displ_x, displ_y, 0.0, 0.0);
-		}
-		else
-		{
-			// Constraint present in this node
-			if (cnsts->c_data[node_id].constraint_type == 0)
-			{
-				// Pin support
-				nodes->update_results(node_id, 0.0, 0.0, resultant_x, resultant_y);
-			}
-			else
-			{
-				// Roller support
-				nodes->update_results(node_id, displ_x, 0.0, 0.0, resultant_y);
-			}
-		}
-	}
-
-
-	// Map the results to Elements
-	for (auto& ln : lines->lineMap)
-	{
-		// Get the material data of this line
-		int line_id = ln.first;
-		material_data mdata = (*mdatas)[ln.second.material_id];
-
-		lines->update_results(line_id, mdata.youngs_mod, mdata.cs_area);
-	}
 
 
 	fe_window->log_buffer.append("Results are mapped to elements \n");
@@ -298,6 +220,7 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 
 	// Set the line buffers
 	lines->set_defl_buffer();
+	lines->set_mforce_buffer();
 	lines->update_geometry_matrices(true, true, true, true);
 
 	fe_window->is_analysis_complete = true;
@@ -619,6 +542,354 @@ void fe_solver::get_global_displacement_matrix(Eigen::MatrixXd& globalDisplaceme
 		output_file << std::endl;
 	}
 }
+
+void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
+	Eigen::MatrixXd globalResultantMatrix,
+	nodes_store_list* nodes,
+	lines_store_list* lines,
+	mconstraints* cnsts,
+	mloads* loads,
+	mloads& reaction_x,
+	mloads& reaction_y,
+	std::unordered_map<int, material_data>* mdatas,
+	std::unordered_map<int, int>& dofIndices,
+	bool& is_map_success, std::ofstream& output_file)
+{
+	double max_memberforce = 0.0;
+	double max_memberstress = 0.0;
+
+	double constraint_angle_rad = 0.0;
+	double support_Lcos = 0.0;
+	double support_Msin = 0.0;
+
+	// Main function to fix the results displacement, resultant force, member force and member stress
+	for (auto& ln_m : lines->lineMap)
+	{
+		// Get the line member
+		lines_store ln = ln_m.second;
+
+		// Get the matrix index of both start and end node
+		int SN_matrix_index = nodeid_map[ln.startNode.node_id];
+		int EN_matrix_index = nodeid_map[ln.endNode.node_id];
+
+		// Extract the start and end node displacement
+		Eigen::Matrix<double, 4, 1> element_displacement;
+
+		element_displacement.coeffRef(0, 0) = globalDisplacementMatrix((SN_matrix_index * 2) + 0, 0);
+		element_displacement.coeffRef(1, 0) = globalDisplacementMatrix((SN_matrix_index * 2) + 1, 0);
+		element_displacement.coeffRef(2, 0) = globalDisplacementMatrix((EN_matrix_index * 2) + 0, 0);
+		element_displacement.coeffRef(3, 0) = globalDisplacementMatrix((EN_matrix_index * 2) + 1, 0);
+
+		// Extract the reaction force of start and End node
+		Eigen::Matrix<double, 4, 1> element_resultant;
+
+		element_resultant.coeffRef(0, 0) = globalResultantMatrix((SN_matrix_index * 2) + 0, 0);
+		element_resultant.coeffRef(1, 0) = globalResultantMatrix((SN_matrix_index * 2) + 1, 0);
+		element_resultant.coeffRef(2, 0) = globalResultantMatrix((EN_matrix_index * 2) + 0, 0);
+		element_resultant.coeffRef(3, 0) = globalResultantMatrix((EN_matrix_index * 2) + 1, 0);
+
+		// Extract the element Degree of freedom matrix
+		Eigen::Matrix<double, 4, 1> element_dof;
+
+		element_dof.coeffRef(0, 0) = dofIndices[((SN_matrix_index * 2) + 0)];
+		element_dof.coeffRef(1, 0) = dofIndices[((SN_matrix_index * 2) + 1)];
+		element_dof.coeffRef(2, 0) = dofIndices[((EN_matrix_index * 2) + 0)];
+		element_dof.coeffRef(3, 0) = dofIndices[((EN_matrix_index * 2) + 1)];
+
+		// Transform the Nodal displacement w.r.t support inclination
+		// Transformation matrices to include support inclinatation
+		Eigen::Matrix4d s_transformation_matrix = Eigen::Matrix4d::Zero(); // support inclination transformation matrix
+
+		int constraint_type;
+
+
+		// Start node support inclination
+		if (cnsts->c_data.find(ln.startNode.node_id) == cnsts->c_data.end())
+		{
+			// No constraint at the start node
+			s_transformation_matrix.row(0) = Eigen::RowVector4d(1.0, 0.0, 0.0, 0.0);
+			s_transformation_matrix.row(1) = Eigen::RowVector4d(0.0, 1.0, 0.0, 0.0);
+		}
+		else
+		{
+			constraint_type = cnsts->c_data[ln.startNode.node_id].constraint_type; // Constrint type (0 - pin support, 1 - roller support)
+			constraint_angle_rad = (cnsts->c_data[ln.startNode.node_id].constraint_angle - 90.0) * (m_pi / 180.0f); // Constrint angle in radians
+			support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
+			support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
+
+			// Pin or Roller Support
+			s_transformation_matrix.row(0) = Eigen::RowVector4d(support_Lcos, -support_Msin, 0.0, 0.0);
+			s_transformation_matrix.row(1) = Eigen::RowVector4d(support_Msin, support_Lcos, 0.0, 0.0);
+		}
+
+
+		// End node support inclination
+		if (cnsts->c_data.find(ln.endNode.node_id) == cnsts->c_data.end())
+		{
+			// No constraint at the start node
+			s_transformation_matrix.row(2) = Eigen::RowVector4d(0.0, 0.0, 1.0, 0.0);
+			s_transformation_matrix.row(3) = Eigen::RowVector4d(0.0, 0.0, 0.0, 1.0);
+		}
+		else
+		{
+			constraint_type = cnsts->c_data[ln.endNode.node_id].constraint_type; // Constrint type (0 - pin support, 1 - roller support)
+			constraint_angle_rad = (cnsts->c_data[ln.endNode.node_id].constraint_angle - 90.0) * (m_pi / 180.0f); // Constrint angle in radians
+			support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
+			support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
+
+			// Pin or Roller Support
+			s_transformation_matrix.row(2) = Eigen::RowVector4d(0.0, 0.0, support_Lcos, -support_Msin);
+			s_transformation_matrix.row(3) = Eigen::RowVector4d(0.0, 0.0, support_Msin, support_Lcos);
+		}
+
+		//__________________________________________________________________________________________________________________
+		// Calculate the transformed element displacement
+		Eigen::Matrix<double, 4, 1> element_displacement_transformed;
+
+		element_displacement_transformed = s_transformation_matrix * element_displacement;
+
+		// Calculate the transformed element resultant
+		Eigen::Matrix<double, 4, 1> element_resultant_transformed;
+
+		element_resultant_transformed = s_transformation_matrix * element_resultant;
+
+		//__________________________________________________________________________________________________________________
+
+		// Compute the differences in x and y coordinates
+		double dx = ln.endNode.node_pt.x - ln.startNode.node_pt.x;
+		double dy = -1.0 * (ln.endNode.node_pt.y - ln.startNode.node_pt.y);
+
+		// Compute the length of the truss element
+		double eLength = std::sqrt((dx * dx) + (dy * dy));
+
+		material_data mdata = (*mdatas)[ln.material_id];
+
+		// Get the element properties
+		double youngs_mod = mdata.youngs_mod;
+		double cs_area = mdata.cs_area;
+
+
+		// Compute the direction cosines
+		double Lcos = (dx / eLength);
+		double Msin = (dy / eLength);
+
+		// Calculate member stress, member strain and member force
+
+		double member_strain = ((Lcos * element_displacement_transformed.coeff(0)) +
+			(Msin * element_displacement_transformed.coeff(1)) +
+			(-Lcos * element_displacement_transformed.coeff(2)) +
+			(-Msin * element_displacement_transformed.coeff(3))) / eLength;
+
+
+		double member_stress = youngs_mod * member_strain;
+
+		double member_force = cs_area * member_stress;
+
+		// Get the material data of this line
+		int line_id = ln_m.first;
+
+		// Fix the member Stress and Member Force
+		lines->update_results(line_id, member_stress, member_force);
+
+		// Fix the maximum value member stress and member strain
+		if (max_memberstress < std::abs(member_stress))
+		{
+			max_memberstress = std::abs(member_stress);
+		}
+
+		if (max_memberforce < std::abs(member_force))
+		{
+			max_memberforce = std::abs(member_force);
+		}
+	}
+
+	// Create a global support inclination matrix
+	int numDOF = nodes->node_count * 2; // Number of degrees of freedom (2 DOFs per node)
+	int node_id = 0;
+
+	Eigen::MatrixXd globalSupportInclinationMatrix(numDOF, numDOF);
+	globalSupportInclinationMatrix.setZero();
+
+	// Global displacement and resultant matrix transformed
+	Eigen::MatrixXd global_displacement_transformed(numDOF, 1);
+	global_displacement_transformed.setZero();
+
+	Eigen::MatrixXd global_resultant_transformed(numDOF, 1);
+	global_resultant_transformed.setZero();
+
+	// Transform the Nodal results with support inclination
+	for (auto& nd_m : nodes->nodeMap)
+	{
+		node_id = nd_m.first;
+		int matrix_index = nodeid_map[node_id];
+
+
+		if (cnsts->c_data.find(node_id) == cnsts->c_data.end())
+		{
+			// No constraint is in this node
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 0) = 1.0;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 1) = 0.0;
+
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 0) = 0.0;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 1) = 1.0;
+		}
+		else
+		{
+			// Constraint present in this node
+			constraint_angle_rad = (cnsts->c_data[node_id].constraint_angle - 90.0f) * (m_pi / 180.0f); // Constrint angle in radians
+			support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
+			support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
+
+			// Pin or Roller Support
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 0) = support_Lcos;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 1) = -1.0 * support_Msin;
+
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 0) = support_Msin;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 1) = support_Lcos;
+		}
+	}
+
+	// Transform the global displacement w.r.t support inclination
+	global_displacement_transformed = globalSupportInclinationMatrix * globalDisplacementMatrix;
+
+	// Transformt the global resultant w.r.t support inclination
+	global_resultant_transformed = globalSupportInclinationMatrix * globalResultantMatrix;
+
+
+	if (print_matrix == true)
+	{
+		// Print the Global Displacement Transformed matrix
+		output_file << "Global Displacement Matrix - Settlement Transformed" << std::endl;
+		output_file << global_displacement_transformed << std::endl;
+		output_file << std::endl;
+
+		// Print the Global Resultant Transformed matrix
+		output_file << "Global Resultant Matrix - Settlement Transformed" << std::endl;
+		output_file << global_resultant_transformed << std::endl;
+		output_file << std::endl;
+	}
+
+
+	// Map the results to Nodes and Elements
+	double max_displacement = 0.0;
+	double max_resultant = 0.0;
+
+	reaction_x.delete_all();
+	reaction_y.delete_all();
+
+	for (auto& nd_m : nodes->nodeMap)
+	{
+		node_id = nd_m.first;
+		int matrix_index = nodeid_map[node_id];
+
+		// Extract the node displacement 
+		double displ_x = global_displacement_transformed((matrix_index * 2) + 0, 0);
+		double displ_y = global_displacement_transformed((matrix_index * 2) + 1, 0);
+
+		// Extract the node resultant
+		double resultant_x = globalResultantMatrix((matrix_index * 2) + 0, 0);
+		double resultant_y = globalResultantMatrix((matrix_index * 2) + 1, 0);
+
+		double constraint_angle = 0.0;
+
+		if (cnsts->c_data.find(node_id) != cnsts->c_data.end())
+		{
+			// Constraint present in this node
+			constraint_angle = cnsts->c_data[node_id].constraint_angle; // Constrint angle in radians
+
+			// Create the reaction force x
+			if (std::roundf(resultant_x) != 0)
+			{
+				float reaction_val_x = resultant_x;
+				float constraint_angle_x = constraint_angle - 90.0f;
+
+				// constraint_angle_x = constraint_angle_x > 360.0f ? (constraint_angle_x - 360.0f) : constraint_angle_x;
+
+				if (reaction_val_x < 0)
+				{
+					reaction_val_x = -1 * reaction_val_x;
+					constraint_angle_x = (constraint_angle_x + 180.0f);
+				}
+
+				constraint_angle_x = constraint_angle_x > 360.0f ? (constraint_angle_x - 360.0f) : constraint_angle_x;
+
+				// Set the reaction force x
+				reaction_x.add_load(node_id, &nd_m.second, reaction_val_x, constraint_angle_x);
+			}
+
+			// Create the reaction force y
+			if (std::roundf(resultant_y) != 0)
+			{
+				float reaction_val_y = resultant_y;
+				float constraint_angle_y = constraint_angle;
+
+				// constraint_angle_y = constraint_angle_y > 360.0f ? (constraint_angle_y - 360.0f) : constraint_angle_y;
+
+				if (reaction_val_y < 0)
+				{
+					reaction_val_y = -1 * reaction_val_y;
+					constraint_angle_y = constraint_angle_y + 180.0f;
+				}
+
+				constraint_angle_y = constraint_angle_y > 360.0f ? (constraint_angle_y - 360.0f) : constraint_angle_y;
+
+				// Set the reaction force y
+				reaction_y.add_load(node_id, &nd_m.second, reaction_val_y, constraint_angle_y);
+			}
+		}
+
+		nodes->update_results(node_id, displ_x, displ_y, resultant_x, resultant_y, constraint_angle);
+
+		// Extract the node displacement and find the resultant 
+		double displ_xy = std::sqrt(std::pow(displ_x, 2) + std::pow(displ_y, 2));
+
+		if (displ_xy > max_displacement)
+		{
+			// fix the maximum displacement
+			max_displacement = displ_xy;
+		}
+
+		// Extract the node resultant
+		double resultant_xy = std::sqrt(std::pow(resultant_x, 2) + std::pow(resultant_y, 2));
+
+		if (resultant_xy > max_resultant)
+		{
+			// fix the maximum resultant
+			max_resultant = resultant_xy;
+		}
+
+	}
+
+	if (max_displacement == 0 || max_resultant == 0)
+	{
+		// Results are not valid
+		is_map_success = false;
+	}
+	else
+	{
+		// results are valid maping success
+		is_map_success = true;
+	}
+
+	// Set the maximum values
+	nodes->set_result_max(max_displacement, max_resultant); // Set the results of maximim displacement and maximum resultant
+	lines->set_result_max(max_displacement, max_resultant, max_memberstress, max_memberforce);
+
+	// Create the buffers for reaction force
+	reaction_x.set_buffer();
+	reaction_y.set_buffer();
+
+	// Set the maximum value for load
+	reaction_x.max_load = max_resultant;
+	reaction_y.max_load = max_resultant;
+
+	reaction_x.update_buffer();
+	reaction_y.update_buffer();
+
+	reaction_x.update_geometry_matrices(true, true, true, true,true);
+	reaction_y.update_geometry_matrices(true, true, true, true,true);
+}
+
 
 
 

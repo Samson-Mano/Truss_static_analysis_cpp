@@ -16,9 +16,9 @@ loadconstraint_window::~loadconstraint_window()
 void loadconstraint_window::bind_images()
 {
 	// Load the texture from a file
-	std::filesystem::path currentDirPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentDirPath.parent_path();
-	std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
+	//std::filesystem::path currentDirPath = std::filesystem::current_path();
+	//std::filesystem::path parentPath = currentDirPath.parent_path();
+	//std::filesystem::path shadersPath = parentPath / "Truss_static_analysis_cpp/src/geometry_store/shaders";
 
 	std::string img_path = "";
 	unsigned int my_image_texture = 0;

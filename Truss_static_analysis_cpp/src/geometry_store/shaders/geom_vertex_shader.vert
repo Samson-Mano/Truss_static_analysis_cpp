@@ -5,6 +5,7 @@ uniform mat4 panTranslation;
 uniform float zoomscale;
 uniform float deflscale;
 uniform float geom_scale;
+uniform int soln_option;
 
 layout(location = 0) in vec2 position;
 layout(location = 1) in vec2 node_defl;

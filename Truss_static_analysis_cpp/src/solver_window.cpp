@@ -24,30 +24,26 @@ void solver_window::render_window()
 		execute_solver = true;
 	}
 
+
 	// Add a log text box
 	ImGui::TextWrapped("Solver Log:");
+	ImGui::BeginChild("log_scroll_region", ImVec2(-1, 200), true, ImGuiWindowFlags_HorizontalScrollbar);
+	ImGui::TextUnformatted(log_buffer.c_str());
 
-
-
-	constexpr size_t kLogBufferSize = 1024;
-	char log_char[kLogBufferSize];
-
-	// Copy the log string
-	strcpy_s(log_char, kLogBufferSize, log_buffer.c_str());
-
-	if (ImGui::InputTextMultiline("##log", log_char, kLogBufferSize, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 10),
-		ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_EnterReturnsTrue))
-	{
+	// Automatic scroll to bottom
+	if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
 		ImGui::SetScrollHereY(1.0f);
-	}
+
+	ImGui::EndChild();
+
 
 	ImGui::Spacing();
 	//_________________________________________________________________________________________
 
 	// Add check boxes to show the Deformed model
 	ImGui::Checkbox("Show Model", &show_undeformed_model);
-	// ImGui::Checkbox("Show Deformation", &show_deformed_model);
 	ImGui::Checkbox("Show Result values", &show_result_text_values);
+	ImGui::Checkbox("Show Reaction Force", &show_reactionforce);
 
 	ImGui::Spacing();
 
@@ -265,7 +261,7 @@ void solver_window::reset_solver_window()
 	execute_solver = false; // Main solver run event flag
 	execute_close = false; // Closing of solution window event flag
 	show_undeformed_model = true; // show undeformed model 
-	show_deformed_model = true; // show the results on deformed
+	show_reactionforce = true; // show the results on deformed
 	show_result_text_values = true; // show the result text values
 	animate_play = true;
 	animate_pause = false;

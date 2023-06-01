@@ -39,6 +39,6 @@ public:
 
 	font_atlas();
 	~font_atlas();
-	void create_atlas(); // Function to create the atlas
+	void create_atlas(std::filesystem::path& resourcePath); // Function to create the atlas
 };
 

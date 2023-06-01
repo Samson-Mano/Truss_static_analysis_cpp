@@ -14,6 +14,7 @@ struct nodes_store
 	glm::vec3 node_contour_color;
 	glm::vec2 nodal_displ;
 	glm::vec2 nodal_reaction;
+	double nodal_reaction_angle;
 };
 
 
@@ -40,10 +41,11 @@ public:
 	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency);
 	void update_result_matrices(float defl_scale);
 	void set_result_max(double max_displacement, double max_resultant);
-	void update_results(int& node_id, double displ_x, double displ_y, double resultant_x, double resultant_y);
+	void update_results(int& node_id, double displ_x, double displ_y, double resultant_x, double resultant_y, double resultant_angle);
+	static glm::vec3 getContourColor(float value);
 
 private:
-	int colormap_type = 1; // 0 means jet and 1 means Rainbow
+	static const int colormap_type = 1; // 0 means jet and 1 means Rainbow
 	geom_parameters* geom_param_ptr;
 	label_text_store node_id_labels;
 	label_text_store node_coord_labels;
@@ -58,5 +60,5 @@ private:
 
 	void set_node_vertices(float* node_vertices, unsigned int& node_v_index, nodes_store& node,int is_rslt);
 	void set_node_indices(unsigned int* node_indices, unsigned int& node_i_index);
-	glm::vec3 getContourColor(float value);
+
 };

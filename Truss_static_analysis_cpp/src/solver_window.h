@@ -14,7 +14,7 @@ public:
 	bool execute_solver = false; // Main solver run event flag
 	bool execute_close = false; // Closing of solution window event flag
 	bool show_undeformed_model = true; // show undeformed model 
-	bool show_deformed_model = true; // show the results on deformed
+	bool show_reactionforce = true; // show the results on deformed
 	bool show_result_text_values = true; // show the result text values
 	bool animate_play = true;
 	bool animate_pause = false;

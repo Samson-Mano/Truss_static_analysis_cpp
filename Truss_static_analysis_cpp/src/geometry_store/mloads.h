@@ -16,6 +16,7 @@ public:
 	// Create an unordered_map to store constraints with node ID as key
 	int load_count;
 	std::unordered_map<int, load_data> l_data;
+	float max_load = 0.0f;
 
 	mloads();
 	~mloads();
@@ -27,7 +28,7 @@ public:
 	void update_buffer();
 	void paint_loads();
 	void paint_load_labels();
-	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency);
+	void update_geometry_matrices(bool is_modelmatrix, bool is_pantranslation, bool is_zoomtranslation, bool set_transparency,bool is_rslt);
 private:
 	geom_parameters* geom_param_ptr;
 	gBuffers loadarrowhead_buffer;

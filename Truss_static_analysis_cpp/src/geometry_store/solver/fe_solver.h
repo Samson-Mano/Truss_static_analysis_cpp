@@ -25,6 +25,8 @@ public:
 		mconstraints* cnsts,
 		mloads* loads,
 		std::unordered_map<int, material_data>* mdatas,
+		mloads& reaction_x,
+		mloads& reaction_y,
 		solver_window* fe_window);
 
 private:
@@ -49,6 +51,14 @@ private:
 	void get_global_displacement_matrix(Eigen::MatrixXd& globalDisplacementMatrix, Eigen::SparseMatrix<double>& reduced_globalDisplacementMatrix,
 		 std::unordered_map<int, int>& dofIndices, std::ofstream& output_file);
 
-
+	void map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix, Eigen::MatrixXd globalResultantMatrix, nodes_store_list* nodes,
+		lines_store_list* lines,
+		mconstraints* cnsts,
+		mloads* loads,
+		mloads& reaction_x,
+		mloads& reaction_y,
+		std::unordered_map<int, material_data>* mdatas,
+		std::unordered_map<int, int>& dofIndices,
+		bool& is_map_success, std::ofstream& output_file);
 
 };
