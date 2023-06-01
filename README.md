@@ -1,29 +1,3 @@
-# Status: In progress
-## To DO List
-- ~~Create the ImGUI menu bar events~~
-- ~~Create the mouse events~~
-- ~~Import the model data~~
-- ~~Create class to handle the model data~~
-- ~~Set up the vertex buffer, index buffer, buffer layout etc~~
-- ~~Create a basic vertex & fragment shader~~
-- ~~Define the model matrix as well as translate, zoom and rotate matrix for vertex shader~~
-- ~~Paint the truss model with basic elements (as points and lines)~~
-- ~~Fit the imported geometry with proper geometry scale~~
-- ~~Pan, zoom and zoom to fit operation~~
-- ~~Implement circle for nodes (instead of points) texture for nodes~~
-- ~~UI for adding constraint~~
-- ~~UI for adding load~~
-- ~~Add load and constraint to the model by clicking on the node~~
-- ~~Text in GUI to show load value, length, node number, member number etc.~~
-- ~~import/export model in native format~~
-- ~~UI for updating material~~
-- Build solver
-- ~~Color profile for the model environment~~
-- Map the results to nodes and elements
-- Postprocessing using Dynamic draw
-- Animate results
-- Finalize the resource imports
-
 # Plane truss finite element solver
 
 Description:
@@ -55,3 +29,32 @@ This repository contains a C++ project that implements a Finite Element Method (
 
 ## License:
 This project is open-source and released under the MIT license. Feel free to use, modify, and distribute the code as per the terms of the license.
+
+
+
+
+## Status: Complete
+## To DO List
+- ~~Create the ImGUI menu bar events~~
+- ~~Create the mouse events~~
+- ~~Import the model data~~
+- ~~Create class to handle the model data~~
+- ~~Set up the vertex buffer, index buffer, buffer layout etc~~
+- ~~Create a basic vertex & fragment shader~~
+- ~~Define the model matrix as well as translate, zoom and rotate matrix for vertex shader~~
+- ~~Paint the truss model with basic elements (as points and lines)~~
+- ~~Fit the imported geometry with proper geometry scale~~
+- ~~Pan, zoom and zoom to fit operation~~
+- ~~Implement circle for nodes (instead of points) texture for nodes~~
+- ~~UI for adding constraint~~
+- ~~UI for adding load~~
+- ~~Add load and constraint to the model by clicking on the node~~
+- ~~Text in GUI to show load value, length, node number, member number etc.~~
+- ~~import/export model in native format~~
+- ~~UI for updating material~~
+- ~~Build solver~~
+- ~~Color profile for the model environment~~
+- ~~Map the results to nodes and elements~~
+- ~~Postprocessing using Dynamic draw~~
+- ~~Animate results~~
+- ~~Finalize the resource imports~~
