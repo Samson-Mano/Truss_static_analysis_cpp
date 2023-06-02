@@ -74,7 +74,7 @@ void lines_store_list::add_line(int& line_id,const nodes_store startNode,const n
 	line_id_labels.add_text(temp_str.c_str(), line_mid_pt , glm::vec2(0), temp_color, line_angle, true);
 
 	// Add the node coordinate label
-	float line_length = sqrt(pow(end_pt.x - start_pt.x, 2) + pow(end_pt.y - start_pt.y, 2));
+	float line_length = static_cast<float>(sqrt(pow(end_pt.x - start_pt.x, 2) + pow(end_pt.y - start_pt.y, 2)));
 	temp_str = std::to_string(line_length);
 
 	line_length_labels.add_text(temp_str.c_str(), line_mid_pt, glm::vec2(0), temp_color, line_angle, false);
@@ -464,8 +464,8 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 1] = node.node_pt.y;
 
 		// Set the line deflection value
-		line_vertices[line_v_index + 2] = node.nodal_displ.x / max_displacement;
-		line_vertices[line_v_index + 3] = node.nodal_displ.y / max_displacement;
+		line_vertices[line_v_index + 2] = static_cast<float>(node.nodal_displ.x / max_displacement);
+		line_vertices[line_v_index + 3] = static_cast<float>(node.nodal_displ.y / max_displacement);
 
 		// line default color
 		line_vertices[line_v_index + 4] = geom_param_ptr->geom_colors.line_color.x;
@@ -473,7 +473,7 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 6] = geom_param_ptr->geom_colors.line_color.z;
 
 		// Integer to track whether values have result data 
-		line_vertices[line_v_index + 7] = is_rslt;
+		line_vertices[line_v_index + 7] = static_cast<float>(is_rslt);
 
 		// Increment
 		line_v_index = line_v_index + 8;
@@ -485,8 +485,8 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 1] = node.node_pt.y;
 
 		// Set the line deflection value
-		line_vertices[line_v_index + 2] = node.nodal_displ.x / max_displacement;
-		line_vertices[line_v_index + 3] = node.nodal_displ.y / max_displacement;
+		line_vertices[line_v_index + 2] = static_cast<float>(node.nodal_displ.x / max_displacement);
+		line_vertices[line_v_index + 3] = static_cast<float>(node.nodal_displ.y / max_displacement);
 
 		// Line displacement color
 		line_vertices[line_v_index + 4] = node.node_contour_color.x;
@@ -494,7 +494,7 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 6] = node.node_contour_color.z;
 
 		// Integer to track whether values have result data 
-		line_vertices[line_v_index + 7] = is_rslt;
+		line_vertices[line_v_index + 7] = static_cast<float>(is_rslt);
 
 		// Increment
 		line_v_index = line_v_index + 8;
@@ -506,8 +506,8 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 1] = line.startNode.node_pt.y;
 
 		// Set the line deflection value
-		line_vertices[line_v_index + 2] = (*model_nodes_ptr)[line.startNode.node_id].nodal_displ.x / max_displacement;
-		line_vertices[line_v_index + 3] = (*model_nodes_ptr)[line.startNode.node_id].nodal_displ.y / max_displacement;
+		line_vertices[line_v_index + 2] = static_cast<float>((*model_nodes_ptr)[line.startNode.node_id].nodal_displ.x / max_displacement);
+		line_vertices[line_v_index + 3] = static_cast<float>((*model_nodes_ptr)[line.startNode.node_id].nodal_displ.y / max_displacement);
 
 		// Line displacement color
 		line_vertices[line_v_index + 4] = line.member_force_color.x;
@@ -515,7 +515,7 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 6] = line.member_force_color.z;
 
 		// Integer to track whether values have result data 
-		line_vertices[line_v_index + 7] = is_rslt;
+		line_vertices[line_v_index + 7] = static_cast<float>(is_rslt);
 
 		// Increment
 		line_v_index = line_v_index + 8;
@@ -527,8 +527,8 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 1] = line.endNode.node_pt.y;
 
 		// Set the line deflection value
-		line_vertices[line_v_index + 2] = (*model_nodes_ptr)[line.endNode.node_id].nodal_displ.x / max_displacement;
-		line_vertices[line_v_index + 3] = (*model_nodes_ptr)[line.endNode.node_id].nodal_displ.y / max_displacement;
+		line_vertices[line_v_index + 2] = static_cast<float>((*model_nodes_ptr)[line.endNode.node_id].nodal_displ.x / max_displacement);
+		line_vertices[line_v_index + 3] = static_cast<float>((*model_nodes_ptr)[line.endNode.node_id].nodal_displ.y / max_displacement);
 
 		// Line displacement color
 		line_vertices[line_v_index + 4] = line.member_force_color.x;
@@ -536,7 +536,7 @@ void lines_store_list::set_line_vertices(float* line_vertices, unsigned int& lin
 		line_vertices[line_v_index + 6] = line.member_force_color.z;
 
 		// Integer to track whether values have result data 
-		line_vertices[line_v_index + 7] = is_rslt;
+		line_vertices[line_v_index + 7] = static_cast<float>(is_rslt);
 
 		// Increment
 		line_v_index = line_v_index + 8;
@@ -629,13 +629,13 @@ void lines_store_list::set_result_max(double max_displacement, double max_result
 		lines_store ln = ln_m.second;
 
 		// Find the member force color
-		float force_scale = std::abs(ln.member_force) / max_memberforce;
+		float force_scale = static_cast<float>(std::abs(ln.member_force) / max_memberforce);
 		glm::vec3 member_force_color = nodes_store_list::getContourColor(force_scale);
 
 		lineMap[ln.line_id].member_force_color = member_force_color;
 
 		// Find the member stress color
-		float stress_scale = std::abs(ln.member_stress) / max_memberstress;
+		float stress_scale = static_cast<float>(std::abs(ln.member_stress) / max_memberstress);
 		glm::vec3 member_stress_color = nodes_store_list::getContourColor(stress_scale);
 
 		lineMap[ln.line_id].member_stress_color = member_stress_color;

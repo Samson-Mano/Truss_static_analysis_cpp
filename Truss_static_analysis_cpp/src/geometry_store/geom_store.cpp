@@ -561,10 +561,10 @@ void geom_store::paint_geometry()
 		if (fe_window->is_analysis_complete == true)
 		{
 			// Analysis complete Paint the results
-			model_nodes.update_result_matrices(fe_window->deformation_scale);
+			model_nodes.update_result_matrices(static_cast<float>(fe_window->deformation_scale));
 			model_nodes.paint_nodes_defl();
 
-			model_lines.update_result_matrices(fe_window->deformation_scale);
+			model_lines.update_result_matrices(static_cast<float>(fe_window->deformation_scale));
 
 			if (fe_window->selected_solution_option == 0)
 			{

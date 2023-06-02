@@ -211,7 +211,7 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 10] = 0.0f;
 
 	// Texture type
-	constraint_vertices[constraint_v_index + 11] = constraint_type;
+	constraint_vertices[constraint_v_index + 11] = static_cast<float>(constraint_type);
 
 	// Increment
 	constraint_v_index = constraint_v_index + 12;
@@ -236,7 +236,7 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 10] = 0.0f;
 
 	// Texture type
-	constraint_vertices[constraint_v_index + 11] = constraint_type;
+	constraint_vertices[constraint_v_index + 11] = static_cast<float>(constraint_type);
 
 	// Increment
 	constraint_v_index = constraint_v_index + 12;
@@ -261,7 +261,7 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 10] = 1.0f;
 
 	// Texture type
-	constraint_vertices[constraint_v_index + 11] = constraint_type;
+	constraint_vertices[constraint_v_index + 11] = static_cast<float>(constraint_type);
 
 	// Increment
 	constraint_v_index = constraint_v_index + 12;
@@ -286,7 +286,7 @@ void mconstraints::set_constraint_vertices(float* constraint_vertices, unsigned 
 	constraint_vertices[constraint_v_index + 10] = 1.0f;
 
 	// Texture type
-	constraint_vertices[constraint_v_index + 11] = constraint_type;
+	constraint_vertices[constraint_v_index + 11] = static_cast<float>(constraint_type);
 
 	// Increment
 	constraint_v_index = constraint_v_index + 12;

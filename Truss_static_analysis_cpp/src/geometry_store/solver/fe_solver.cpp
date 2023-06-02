@@ -555,8 +555,8 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 	std::unordered_map<int, int>& dofIndices,
 	bool& is_map_success, std::ofstream& output_file)
 {
-	double max_memberforce = 0.0;
-	double max_memberstress = 0.0;
+	float max_memberforce = 0.0;
+	float max_memberstress = 0.0;
 
 	double constraint_angle_rad = 0.0;
 	double support_Lcos = 0.0;
@@ -771,8 +771,8 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 
 
 	// Map the results to Nodes and Elements
-	double max_displacement = 0.0;
-	double max_resultant = 0.0;
+	float max_displacement = 0.0;
+	float max_resultant = 0.0;
 
 	reaction_x.delete_all();
 	reaction_y.delete_all();
@@ -783,14 +783,14 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 		int matrix_index = nodeid_map[node_id];
 
 		// Extract the node displacement 
-		double displ_x = global_displacement_transformed((matrix_index * 2) + 0, 0);
-		double displ_y = global_displacement_transformed((matrix_index * 2) + 1, 0);
+		float displ_x = static_cast<float>(global_displacement_transformed((matrix_index * 2) + 0, 0));
+		float displ_y = static_cast<float>(global_displacement_transformed((matrix_index * 2) + 1, 0));
 
 		// Extract the node resultant
-		double resultant_x = globalResultantMatrix((matrix_index * 2) + 0, 0);
-		double resultant_y = globalResultantMatrix((matrix_index * 2) + 1, 0);
+		float resultant_x = static_cast<float>(globalResultantMatrix((matrix_index * 2) + 0, 0));
+		float resultant_y = static_cast<float>(globalResultantMatrix((matrix_index * 2) + 1, 0));
 
-		double constraint_angle = 0.0;
+		float constraint_angle = 0.0;
 
 		if (cnsts->c_data.find(node_id) != cnsts->c_data.end())
 		{
@@ -798,7 +798,7 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 			constraint_angle = cnsts->c_data[node_id].constraint_angle; // Constrint angle in radians
 
 			// Create the reaction force x
-			if (std::roundf(resultant_x) != 0)
+			if (std::roundf(static_cast<float>(resultant_x)) != 0)
 			{
 				float reaction_val_x = resultant_x;
 				float constraint_angle_x = constraint_angle - 90.0f;
@@ -841,7 +841,7 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 		nodes->update_results(node_id, displ_x, displ_y, resultant_x, resultant_y, constraint_angle);
 
 		// Extract the node displacement and find the resultant 
-		double displ_xy = std::sqrt(std::pow(displ_x, 2) + std::pow(displ_y, 2));
+		float displ_xy = std::sqrt(std::pow(displ_x, 2) + std::pow(displ_y, 2));
 
 		if (displ_xy > max_displacement)
 		{
@@ -850,7 +850,7 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 		}
 
 		// Extract the node resultant
-		double resultant_xy = std::sqrt(std::pow(resultant_x, 2) + std::pow(resultant_y, 2));
+		float resultant_xy = std::sqrt(std::pow(resultant_x, 2) + std::pow(resultant_y, 2));
 
 		if (resultant_xy > max_resultant)
 		{

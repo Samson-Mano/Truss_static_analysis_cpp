@@ -275,8 +275,8 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 3] = node.node_pt.y;
 
 	// Set the node deflection center
-	node_vertices[node_v_index + 4] =  node.nodal_displ.x / max_displacement;
-	node_vertices[node_v_index + 5] =  node.nodal_displ.y / max_displacement;
+	node_vertices[node_v_index + 4] = static_cast<float>(node.nodal_displ.x / max_displacement);
+	node_vertices[node_v_index + 5] = static_cast<float>(node.nodal_displ.y / max_displacement);
 
 	// Set the node color
 	if(is_rslt == 0)
@@ -297,7 +297,7 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 10] = 0.0f;
 
 	// Integer to track whether values have result data 
-	node_vertices[node_v_index + 11] = is_rslt;
+	node_vertices[node_v_index + 11] = static_cast<float>(is_rslt);
 
 	// Increment
 	node_v_index = node_v_index + 12;
@@ -311,8 +311,8 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 3] = node.node_pt.y;
 
 	// Set the node deflection center
-	node_vertices[node_v_index + 4] = node.nodal_displ.x / max_displacement;
-	node_vertices[node_v_index + 5] = node.nodal_displ.y / max_displacement;
+	node_vertices[node_v_index + 4] = static_cast<float>(node.nodal_displ.x / max_displacement);
+	node_vertices[node_v_index + 5] = static_cast<float>(node.nodal_displ.y / max_displacement);
 
 	// Set the node color
 	if (is_rslt == 0)
@@ -333,7 +333,7 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 10] = 0.0f;
 
 	// Integer to track whether values have result data 
-	node_vertices[node_v_index + 11] = is_rslt;
+	node_vertices[node_v_index + 11] = static_cast<float>(is_rslt);
 
 	// Increment
 	node_v_index = node_v_index + 12;
@@ -347,8 +347,8 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 3] = node.node_pt.y;
 
 	// Set the node deflection center
-	node_vertices[node_v_index + 4] = node.nodal_displ.x / max_displacement;
-	node_vertices[node_v_index + 5] = node.nodal_displ.y / max_displacement;
+	node_vertices[node_v_index + 4] = static_cast<float>(node.nodal_displ.x / max_displacement);
+	node_vertices[node_v_index + 5] = static_cast<float>(node.nodal_displ.y / max_displacement);
 
 	// Set the node color
 	if (is_rslt == 0)
@@ -369,7 +369,7 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 10] = 1.0f;
 
 	// Integer to track whether values have result data 
-	node_vertices[node_v_index + 11] = is_rslt;
+	node_vertices[node_v_index + 11] = static_cast<float>(is_rslt);
 
 	// Increment
 	node_v_index = node_v_index + 12;
@@ -383,8 +383,8 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 3] = node.node_pt.y;
 
 	// Set the node deflection center
-	node_vertices[node_v_index + 4] = node.nodal_displ.x / max_displacement;
-	node_vertices[node_v_index + 5] = node.nodal_displ.y / max_displacement;
+	node_vertices[node_v_index + 4] = static_cast<float>(node.nodal_displ.x / max_displacement);
+	node_vertices[node_v_index + 5] = static_cast<float>(node.nodal_displ.y / max_displacement);
 
 	// Set the node color
 	if (is_rslt == 0)
@@ -405,7 +405,7 @@ void  nodes_store_list::set_node_vertices(float* node_vertices, unsigned int& no
 	node_vertices[node_v_index + 10] = 1.0f;
 
 	// Integer to track whether values have result data 
-	node_vertices[node_v_index + 11] = is_rslt;
+	node_vertices[node_v_index + 11] = static_cast<float>(is_rslt);
 
 	// Increment
 	node_v_index = node_v_index + 12;
@@ -495,7 +495,7 @@ void nodes_store_list::set_result_max(double max_displacement, double max_result
 		double displ_scale = displ / max_displacement;
 
 		// Set the Node Color
-		nodeMap[node_id].node_contour_color = getContourColor(displ_scale);
+		nodeMap[node_id].node_contour_color = getContourColor(static_cast<float>(displ_scale));
 
 		// Set the node displacement label
 		std::string temp_str = "(" + std::to_string(nodeMap[node_id].nodal_displ.x) + ", " +
