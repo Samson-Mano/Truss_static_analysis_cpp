@@ -37,11 +37,13 @@ This project is open-source and released under the MIT license. Feel free to use
 ![steel tower deflection](/Images/steel_tower_ex1_defl_view.PNG)
 ![steel tower member force](/Images/steel_tower_ex1_mforce_view.PNG)
 
+## Example 2
 ![overhang](/Images/overhang_ex2.PNG)
 ![overhang model view](/Images/overhang_ex2_model_view.PNG)
 ![overhang deflection](/Images/overhang_ex2_defl_view.PNG)
 ![overhang member force](/Images/overhang_ex2_mforce_view.PNG)
 
+## Example 3
 ![railroad bridge](/Images/railroad_ex3.PNG)
 ![railroad model view](/Images/railroad_ex3_model_view.PNG)
 ![railroad deflection](/Images/railroad_ex3_defl_view.PNG)
