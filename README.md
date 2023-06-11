@@ -6,22 +6,23 @@ This repository contains a C++ project that implements a Finite Element Method (
 ## Features:
 
 - Implementation of the FEM for solving plane truss problems
-- Support for various boundary conditions, including pinned, roller, and free supports
+- Support for various boundary conditions, including inclined pinned, roller, and free supports
 - Input file format for defining truss geometry, material properties, and loads
 - Visualization of truss geometry, displacements, and internal forces using OpenGL
-- Post-processing capabilities, such as plotting of results and export of data
+- Post-processing capabilities.
+- Zoom in/out (Ctrl + scroll), Pan operation (Ctrl + Right click drag), Zoom to fit (Ctrl + F)
 
 ## Usage:
-
-- Define the truss geometry, material properties, and loads in the input file using the specified format
-- Run the solver executable, which reads the input file and computes the truss displacements, reactions, and internal forces
+- Download Truss_static_cpp_portable_version.7z to your PC. Extract and run the exe file to open the application.
+- Read How to use Plane Truss Finite Element Solver.pdf.
+- Import the truss geometry, define the material properties, constraints, and loads.
+- Run the FE solver, which computes the truss displacements, reactions, and internal forces
 - Visualize the results using the included OpenGL-based GUI, which provides options for displaying truss geometry, displacements, and internal forces
 - Post-process the results as needed for further analysis
-- Read How to use Images/Plane Truss Finite Element Solver.pdf for more information.
 
 ## Dependencies:
 
-- C++ compiler that supports C++11 or higher
+- C++ compiler that supports C++17 or higher
 - GLFW and GLEW libraries for OpenGL windowing and rendering
 - ImGui library for creating GUI
 - Eigen library for linear algebra operations
@@ -36,11 +37,13 @@ This project is open-source and released under the MIT license. Feel free to use
 ![steel tower deflection](/Images/steel_tower_ex1_defl_view.PNG)
 ![steel tower member force](/Images/steel_tower_ex1_mforce_view.PNG)
 
+## Example 2
 ![overhang](/Images/overhang_ex2.PNG)
 ![overhang model view](/Images/overhang_ex2_model_view.PNG)
 ![overhang deflection](/Images/overhang_ex2_defl_view.PNG)
 ![overhang member force](/Images/overhang_ex2_mforce_view.PNG)
 
+## Example 3
 ![railroad bridge](/Images/railroad_ex3.PNG)
 ![railroad model view](/Images/railroad_ex3_model_view.PNG)
 ![railroad deflection](/Images/railroad_ex3_defl_view.PNG)
