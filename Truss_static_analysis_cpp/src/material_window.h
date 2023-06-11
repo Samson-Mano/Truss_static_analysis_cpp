@@ -34,5 +34,6 @@ public:
 	void render_window();
 	static glm::vec3 get_standard_color(int color_index);
 private:
+	int selected_list_option = 0;
 	int get_unique_material_id();
 };

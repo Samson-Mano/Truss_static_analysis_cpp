@@ -27,15 +27,21 @@ void material_window::render_window()
 
 	// Convert material_list to a vector of const char*
 	std::vector<const char*> material_names;
+	std::unordered_map<int, int> material_id_selected_option;
+	int i = 0;
+
 	for (const auto& mat : material_list)
 	{
+		material_id_selected_option[i] = mat.first;
 		material_names.push_back(mat.second.material_name.c_str());
+		i++;
 	}
 
-	ImGui::ListBox("Select Material", &selected_material_option, material_names.data(), material_names.size(), 4);
+	ImGui::ListBox("Select Material", &selected_list_option, material_names.data(), material_names.size(), 4);
 
 	ImGui::Spacing();
 
+	selected_material_option = material_id_selected_option[selected_list_option];
 	// Get selected material
 	const material_data& selected_material_data = material_list[selected_material_option];
 
@@ -50,13 +56,13 @@ void material_window::render_window()
 	ImGui::TextColored(text_color, "Cross-Section Area: %.3f", selected_material_data.cs_area);
 
 	// Diable delete if the selected option is Default (0)
-	const bool is_delete_button_disabled = selected_material_option == 0 ? true : false;
+	const bool is_delete_button_disabled = selected_list_option == 0 ? true : false;
 	ImGui::BeginDisabled(is_delete_button_disabled);
 	if (ImGui::Button("Delete Material")) {
 		// Delete material
 		execute_delete_materialid = selected_material_data.material_id;
 		material_list.erase(selected_material_data.material_id);
-		selected_material_option = 0;
+		selected_list_option = 0;
 	}
 	ImGui::EndDisabled();
 
@@ -132,7 +138,7 @@ void material_window::render_window()
 			material_list[new_material.material_id] = new_material;
 
 			// Update the combo box
-			selected_material_option = material_list.size() - 1;
+			selected_list_option = material_list.size() - 1;
 		}
 	}
 
