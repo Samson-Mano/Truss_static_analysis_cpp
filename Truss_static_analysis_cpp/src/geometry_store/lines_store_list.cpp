@@ -75,7 +75,12 @@ void lines_store_list::add_line(int& line_id,const nodes_store startNode,const n
 
 	// Add the node coordinate label
 	float line_length = static_cast<float>(sqrt(pow(end_pt.x - start_pt.x, 2) + pow(end_pt.y - start_pt.y, 2)));
-	temp_str = std::to_string(line_length);
+
+
+	std::stringstream ss;
+	ss << std::fixed << std::setprecision(geom_param_ptr->length_precision) << line_length;
+
+	temp_str = ss.str();
 
 	line_length_labels.add_text(temp_str.c_str(), line_mid_pt, glm::vec2(0), temp_color, line_angle, false);
 }
@@ -660,13 +665,20 @@ void lines_store_list::set_result_max(double max_displacement, double max_result
 
 
 		// Set the member force label
-		std::string temp_str = std::to_string(ln.member_force);
+		std::stringstream ss_fr;
+		ss_fr << std::fixed << std::setprecision(geom_param_ptr->mforce_precision) << ln.member_force;
+
+		std::string temp_str = ss_fr.str();
 
 		line_mforce_labels.add_text(temp_str.c_str(), line_mid_pt, line_mid_pt_displ,
 			member_force_color, line_angle, false);
 
 		// Set the member stress label
-		temp_str = std::to_string(ln.member_stress);
+
+		std::stringstream ss_st;
+		ss_st << std::fixed << std::setprecision(geom_param_ptr->mstress_precision) << ln.member_stress;
+
+		temp_str = ss_st.str();
 
 		line_mstress_labels.add_text(temp_str.c_str(), line_mid_pt, line_mid_pt_displ,
 			member_stress_color, line_angle, false);

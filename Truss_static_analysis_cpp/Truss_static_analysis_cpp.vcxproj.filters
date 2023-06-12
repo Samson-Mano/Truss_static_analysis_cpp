@@ -243,6 +243,7 @@
     <None Include="src\geometry_store\shaders\text_vert_shader.vert" />
     <None Include="src\geometry_store\shaders\resulttext_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\resulttext_vert_shader.vert" />
+    <None Include="imgui.ini" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Images\innx_icon.png">

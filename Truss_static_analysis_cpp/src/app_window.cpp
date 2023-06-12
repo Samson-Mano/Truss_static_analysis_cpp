@@ -189,6 +189,12 @@ void app_window::menu_events()
 				menu_click.update_event(import_varai2d, geom);
 				isWindowSizeChanging = true;
 			}
+			if (ImGui::MenuItem("Import *.dxf file"))
+			{
+				// Handle menu Import AutoCAD dxf file
+				menu_click.update_event(import_dxf_data, geom);
+				isWindowSizeChanging = true;
+			}
 			if (ImGui::MenuItem("Import raw data"))
 			{
 				// Handle menu Import raw data

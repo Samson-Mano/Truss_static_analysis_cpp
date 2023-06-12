@@ -28,6 +28,7 @@ public:
 	~geom_store();
 	void init();
 	void write_rawdata(std::ofstream& file);
+	void read_dxfdata(std::ostringstream& input_data);
 	void read_rawdata(std::ifstream& input_file);
 	void read_varai2d(std::ifstream& input_file);
 	void add_window_ptr(options_window* op_window, material_window* mat_window, solver_window* fe_window);

@@ -137,7 +137,6 @@ void mloads::update_buffer()
 		load_data load_val = load.second;
 
 		glm::vec3 temp_color = geom_param_ptr->geom_colors.load_color;
-		std::string	temp_str = std::to_string(load_val.load_value);
 		float load_angle = load_val.load_angle;
 
 
@@ -160,7 +159,18 @@ void mloads::update_buffer()
 
 		// std::cout << node_value.node_id << "->" << load_angle_rad << std::endl;
 
-		load_value_labels.add_text(temp_str.c_str(), node_value.node_pt,glm::vec2(0), temp_color, load_angle_rad, true);
+		std::stringstream ss;
+		ss << std::fixed << std::setprecision(geom_param_ptr->load_precision) << std::abs(load_val.load_value);
+
+		std::string	temp_str = ss.str();
+		
+		bool is_load_val_above = false;
+		if (load_val.load_value < 0)
+		{
+			is_load_val_above = true;
+		}
+
+		load_value_labels.add_text(temp_str.c_str(), node_value.node_pt,glm::vec2(0), temp_color, load_angle_rad, is_load_val_above);
 	}
 
 	load_value_labels.set_buffers();

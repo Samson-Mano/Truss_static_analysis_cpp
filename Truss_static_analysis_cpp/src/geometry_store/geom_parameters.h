@@ -19,6 +19,14 @@ public:
 	const float font_size = static_cast<float>(16.0f * std::pow(10, -5));
 	const float node_circle_radii = 0.005f;
 
+	// Precision for various values
+	const int length_precision = 3;
+	const int coord_precision = 3;
+	const int load_precision = 2;
+	const int defl_precision = 6;
+	const int mforce_precision = 2;
+	const int mstress_precision = 3;
+
 	// File path
 	std::filesystem::path resourcePath;
 

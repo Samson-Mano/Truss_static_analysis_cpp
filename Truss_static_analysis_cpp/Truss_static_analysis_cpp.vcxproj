@@ -216,6 +216,7 @@
     <None Include="dlls\freetype.dll" />
     <None Include="dlls\glew32.dll" />
     <None Include="dlls\glfw3.dll" />
+    <None Include="imgui.ini" />
     <None Include="src\geometry_store\shaders\basic_frag_shader.frag" />
     <None Include="src\geometry_store\shaders\basic_vert_shader.vert" />
     <None Include="src\geometry_store\shaders\constraint_frag_shader.frag" />

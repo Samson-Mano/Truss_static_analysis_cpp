@@ -56,7 +56,14 @@ void nodes_store_list::add_node(const int& node_id, const glm::vec3& node_pt)
 	node_id_labels.add_text(temp_str.c_str(), node_pt,glm::vec2(0), temp_color, 0.0f, true);
 
 	// Add the node coordinate label
-	temp_str = "(" + std::to_string(node_pt.x) + ", " + std::to_string(node_pt.y) + ")";
+
+	std::stringstream ss_x;
+	ss_x << std::fixed << std::setprecision(geom_param_ptr->coord_precision) << node_pt.x;
+
+	std::stringstream ss_y;
+	ss_y << std::fixed << std::setprecision(geom_param_ptr->coord_precision) << node_pt.y;
+
+	temp_str = "(" + ss_x.str() + ", " + ss_y.str() + ")";
 
 	node_coord_labels.add_text(temp_str.c_str(), node_pt, glm::vec2(0), temp_color, 0.0f, false);
 }
@@ -498,8 +505,14 @@ void nodes_store_list::set_result_max(double max_displacement, double max_result
 		nodeMap[node_id].node_contour_color = getContourColor(static_cast<float>(displ_scale));
 
 		// Set the node displacement label
-		std::string temp_str = "(" + std::to_string(nodeMap[node_id].nodal_displ.x) + ", " +
-			std::to_string(nodeMap[node_id].nodal_displ.y) + ")";
+
+		std::stringstream ss_x;
+		ss_x << std::fixed << std::setprecision(geom_param_ptr->defl_precision) << nodeMap[node_id].nodal_displ.x;
+
+		std::stringstream ss_y;
+		ss_y << std::fixed << std::setprecision(geom_param_ptr->defl_precision) << nodeMap[node_id].nodal_displ.y;
+
+		std::string temp_str = "(" + ss_x.str() + ", " + ss_y.str() + ")";
 
 		// Node Displacement
 		glm::vec2 node_displ_offset = glm::vec2(nodeMap[node_id].nodal_displ.x / max_displacement, 

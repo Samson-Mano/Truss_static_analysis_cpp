@@ -95,6 +95,104 @@ void geom_store::write_rawdata(std::ofstream& file)
 	}
 }
 
+void geom_store::read_dxfdata(std::ostringstream& input_data)
+{
+	// Read the data from string
+	std::string inputStr = input_data.str();
+	std::stringstream ss(inputStr);
+
+	std::string temp;
+	std::vector<std::string> lines;
+	while (std::getline(ss, temp))
+	{
+		lines.push_back(temp);
+	}
+
+	int j = 0, i = 0;
+
+
+	// Create a temporary variable to store the nodes
+	nodes_store_list model_nodes;
+	model_nodes.init(&geom_param);
+
+	// Create a temporary variable to store the lines
+	lines_store_list model_lines;
+	model_lines.init(&geom_param);
+
+	// Process the lines
+	while (j < lines.size())
+	{
+		std::string line = lines[j];
+		std::string type = line.substr(0, 4);  // Extract the first 4 characters of the line
+
+		// Split the line into comma-separated fields
+		std::istringstream iss(line);
+		std::string field;
+		std::vector<std::string> fields;
+		while (std::getline(iss, field, ','))
+		{
+			fields.push_back(field);
+		}
+
+		if (type == "node")
+		{
+			// Read the nodes
+			int node_id = std::stoi(fields[1]); // node ID
+			float x = std::stof(fields[2]); // Node coordinate x
+			float y = std::stof(fields[3]); // Node coordinate y
+
+			// Add to node Map
+			model_nodes.add_node(node_id, glm::vec3(x, y, 0.0f));
+		}
+		else if (type == "line")
+		{
+			int line_id = std::stoi(fields[1]); // line ID
+			int start_node_id = std::stoi(fields[2]); // line id start node
+			int end_node_id = std::stoi(fields[3]); // line id end node
+			int material_id = std::stoi(fields[4]); // materail ID of the line
+
+			// Add to line Map (Note that Nodes needed to be added before the start of line addition !!!!)
+			int mat_id = 0;
+			model_lines.add_line(line_id, model_nodes.nodeMap[start_node_id], model_nodes.nodeMap[end_node_id], material_id);
+		}
+
+		// Iterate line
+		j++;
+	}
+
+	if (model_nodes.node_count < 1 || model_lines.line_count < 1)
+	{
+		// No elements added
+		return;
+	}
+
+
+	// add a default material to the material list
+	material_data inpt_material;
+	inpt_material.material_id = 0; // Get the material id
+	inpt_material.material_name = "Default material"; //Default material name
+	inpt_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	inpt_material.youngs_mod = 2.07 * std::pow(10, 5); //  MPa
+	inpt_material.cs_area = 6014; // mm2
+
+	// Add to materail list
+	mat_window->material_list.clear();
+	mat_window->material_list[inpt_material.material_id] = inpt_material;
+
+	// Constraint data store
+	mconstraints constraintMap;
+	constraintMap.init(&geom_param);
+
+
+	// Load data store
+	mloads loadMap;
+	loadMap.init(&geom_param);
+
+		// Re-instantitize geom_store object using the nodeMap and lineMap
+	deleteResources();
+	create_geometry(model_nodes, model_lines, constraintMap, loadMap);
+}
+
 void geom_store::read_rawdata(std::ifstream& input_file)
 {
 	// Read the Raw Data
