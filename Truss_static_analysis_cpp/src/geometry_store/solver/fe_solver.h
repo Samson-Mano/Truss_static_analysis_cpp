@@ -16,7 +16,7 @@ class fe_solver
 {
 public:
 	const double m_pi = 3.14159265358979323846;
-	bool print_matrix = true;
+	bool print_matrix = false;
 
 	fe_solver();
 	~fe_solver();
@@ -38,8 +38,11 @@ private:
 	void get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix, lines_store& ln, 
 		material_data& mdata, mconstraints* cnsts, std::ofstream& output_file);
 
-	void get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix,nodes_store_list* nodes, 
-		mloads* loads, std::ofstream& output_file);
+	void get_global_supportinclination_matrix(Eigen::MatrixXd& globalSupportInclinationMatrix, nodes_store_list* nodes,
+		mconstraints* cnsts, std::ofstream& output_file);
+
+	void get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eigen::MatrixXd& globalSupportInclinationMatrix, 
+		nodes_store_list* nodes, mloads* loads, std::ofstream& output_file);
 
 	void get_global_dof_matrix(std::unordered_map<int, int>& dofIndices,int& reducedDOF, 
 		nodes_store_list* nodes, mconstraints* cnsts, std::ofstream& output_file);
@@ -51,7 +54,9 @@ private:
 	void get_global_displacement_matrix(Eigen::MatrixXd& globalDisplacementMatrix, Eigen::SparseMatrix<double>& reduced_globalDisplacementMatrix,
 		 std::unordered_map<int, int>& dofIndices, std::ofstream& output_file);
 
-	void map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix, Eigen::MatrixXd globalResultantMatrix, nodes_store_list* nodes,
+	void map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix, Eigen::MatrixXd globalResultantMatrix, 
+		Eigen::MatrixXd& globalSupportInclinationMatrix, 
+		nodes_store_list* nodes,
 		lines_store_list* lines,
 		mconstraints* cnsts,
 		mloads* loads,

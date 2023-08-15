@@ -1,0 +1,12 @@
+node, 0, 0, 0
+node, 1, 3000, 0
+node, 2, 1500, 1500
+line, 0, 0, 1, 0
+line, 1, 0, 2, 0
+line, 2, 1, 2, 0
+cnst, 0, 0, 90
+cnst, 1, 1, 90
+cnst, 2, 1, 0
+load, 1, 100000, 180
+load, 2, 300000, 90
+mtrl, 0, Default material, 207000, 7.83e-09, 6014

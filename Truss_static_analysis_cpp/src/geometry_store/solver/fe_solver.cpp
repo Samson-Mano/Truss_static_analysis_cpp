@@ -105,11 +105,18 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 
 	fe_window->log_buffer.append("2. Global Stiffness Matrix created \n");
 	//____________________________________________________________________________________________________________________
+	// Global support inclination matrix
+	Eigen::MatrixXd globalSupportInclinationMatrix(numDOF, numDOF);
+	globalSupportInclinationMatrix.setZero();
+
+	get_global_supportinclination_matrix(globalSupportInclinationMatrix, nodes, cnsts, output_file);
+
+	//____________________________________________________________________________________________________________________
 	// Global force matrix
 	Eigen::MatrixXd globalForceMatrix(numDOF, 1);
 	globalForceMatrix.setZero();
 
-	get_global_force_matrix(globalForceMatrix, nodes, loads, output_file);
+	get_global_force_matrix(globalForceMatrix, globalSupportInclinationMatrix, nodes, loads, output_file);
 
 	fe_window->log_buffer.append("3. Global Force Matrix created \n");
 	//____________________________________________________________________________________________________________________
@@ -120,7 +127,6 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 	int reducedDOF = 0;
 
 	get_global_dof_matrix(dofIndices, reducedDOF, nodes, cnsts, output_file);
-
 	//____________________________________________________________________________________________________________________
 	// Reduced Global force and stiffness matrix
 	Eigen::SparseMatrix<double>  reduced_globalStiffnessMatrix(reducedDOF, reducedDOF);
@@ -185,6 +191,7 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 
 	map_analysis_results(globalDisplacementMatrix,
 		globalResultantMatrix,
+		globalSupportInclinationMatrix,
 		nodes,
 		lines,
 		cnsts,
@@ -365,8 +372,59 @@ void fe_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMa
 	}
 }
 
-void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, nodes_store_list* nodes,
-	mloads* loads, std::ofstream& output_file)
+void fe_solver::get_global_supportinclination_matrix(Eigen::MatrixXd& globalSupportInclinationMatrix, nodes_store_list* nodes,
+	mconstraints* cnsts, std::ofstream& output_file)
+{
+	int node_id = 0;
+	double constraint_angle_rad = 0.0;
+	double support_Lcos = 0.0;
+	double support_Msin = 0.0;
+
+	// Transform the Nodal results with support inclination
+	for (auto& nd_m : nodes->nodeMap)
+	{
+		node_id = nd_m.first;
+		int matrix_index = nodeid_map[node_id];
+
+
+		if (cnsts->c_data.find(node_id) == cnsts->c_data.end())
+		{
+			// No constraint is in this node
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 0) = 1.0;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 1) = 0.0;
+
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 0) = 0.0;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 1) = 1.0;
+		}
+		else
+		{
+			// Constraint present in this node
+			constraint_angle_rad = (cnsts->c_data[node_id].constraint_angle - 90.0f) * (m_pi / 180.0f); // Constrint angle in radians
+			support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
+			support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
+
+			// Pin or Roller Support
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 0) = support_Lcos;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 1) = -1.0 * support_Msin;
+
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 0) = support_Msin;
+			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 1) = support_Lcos;
+		}
+	}
+
+
+
+	if (print_matrix == true)
+	{
+		// Print the Global Displacement matrix
+		output_file << "Global Support Inclination Matrix" << std::endl;
+		output_file << globalSupportInclinationMatrix << std::endl;
+		output_file << std::endl;
+	}
+}
+
+void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eigen::MatrixXd& globalSupportInclinationMatrix,
+	nodes_store_list* nodes,mloads* loads, std::ofstream& output_file)
 {
 	// Create a global force matrix
 	for (auto& nd_l : nodes->nodeMap)
@@ -396,6 +454,8 @@ void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, node
 		}
 	}
 
+	// Apply transformation due to support inclination
+	globalForceMatrix = globalSupportInclinationMatrix.transpose() * globalForceMatrix;
 
 	if (print_matrix == true)
 	{
@@ -545,6 +605,7 @@ void fe_solver::get_global_displacement_matrix(Eigen::MatrixXd& globalDisplaceme
 
 void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 	Eigen::MatrixXd globalResultantMatrix,
+	Eigen::MatrixXd& globalSupportInclinationMatrix,
 	nodes_store_list* nodes,
 	lines_store_list* lines,
 	mconstraints* cnsts,
@@ -707,8 +768,6 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 	int numDOF = nodes->node_count * 2; // Number of degrees of freedom (2 DOFs per node)
 	int node_id = 0;
 
-	Eigen::MatrixXd globalSupportInclinationMatrix(numDOF, numDOF);
-	globalSupportInclinationMatrix.setZero();
 
 	// Global displacement and resultant matrix transformed
 	Eigen::MatrixXd global_displacement_transformed(numDOF, 1);
@@ -716,38 +775,6 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 
 	Eigen::MatrixXd global_resultant_transformed(numDOF, 1);
 	global_resultant_transformed.setZero();
-
-	// Transform the Nodal results with support inclination
-	for (auto& nd_m : nodes->nodeMap)
-	{
-		node_id = nd_m.first;
-		int matrix_index = nodeid_map[node_id];
-
-
-		if (cnsts->c_data.find(node_id) == cnsts->c_data.end())
-		{
-			// No constraint is in this node
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 0) = 1.0;
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 1) = 0.0;
-
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 0) = 0.0;
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 1) = 1.0;
-		}
-		else
-		{
-			// Constraint present in this node
-			constraint_angle_rad = (cnsts->c_data[node_id].constraint_angle - 90.0f) * (m_pi / 180.0f); // Constrint angle in radians
-			support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
-			support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
-
-			// Pin or Roller Support
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 0) = support_Lcos;
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 0, (matrix_index * 2) + 1) = -1.0 * support_Msin;
-
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 0) = support_Msin;
-			globalSupportInclinationMatrix.coeffRef((matrix_index * 2) + 1, (matrix_index * 2) + 1) = support_Lcos;
-		}
-	}
 
 	// Transform the global displacement w.r.t support inclination
 	global_displacement_transformed = globalSupportInclinationMatrix * globalDisplacementMatrix;
@@ -889,7 +916,6 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 	reaction_x.update_geometry_matrices(true, true, true, true,true);
 	reaction_y.update_geometry_matrices(true, true, true, true,true);
 }
-
 
 
 
