@@ -116,7 +116,7 @@ void loadconstraint_window::render_constraint_tab()
 
 	// Input box to give input via text
 	static bool input_mode = false;
-	static char angle_str[4] = ""; // buffer to store input angle string
+	static char angle_str[16] = ""; // buffer to store input angle string
 	static float angle_input = constraint_angleDegrees; // buffer to store input angle value
 
 	// Button to switch to input mode
@@ -125,7 +125,7 @@ void loadconstraint_window::render_constraint_tab()
 		if (ImGui::Button("Input Angle"))
 		{
 			input_mode = true;
-			snprintf(angle_str, 4, "%.1f", constraint_angleDegrees); // set the buffer to current angle
+			snprintf(angle_str, 16, "%.1f", constraint_angleDegrees); // set the buffer to current angle
 		}
 	}
 	else // input mode

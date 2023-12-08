@@ -51,8 +51,8 @@ void material_window::render_window()
 
 	ImGui::TextColored(text_color, "Material ID: %i", selected_material_data.material_id);
 	ImGui::TextColored(text_color, "Selected Material: %s", selected_material_data.material_name.c_str());
-	ImGui::TextColored(text_color, "Young's Modulus: %.3f", selected_material_data.youngs_mod);
-	ImGui::TextColored(text_color, "Density: %.3e", selected_material_data.mat_density);
+	ImGui::TextColored(text_color, "Young's Modulus: %.4e", selected_material_data.youngs_mod);
+	ImGui::TextColored(text_color, "Density: %.4e", selected_material_data.mat_density);
 	ImGui::TextColored(text_color, "Cross-Section Area: %.3f", selected_material_data.cs_area);
 
 	// Diable delete if the selected option is Default (0)
@@ -122,7 +122,7 @@ void material_window::render_window()
 
 		ImGui::InputText("Material Name", new_material_name, IM_ARRAYSIZE(new_material_name));
 		ImGui::InputDouble("Density", &new_material_density, 0, 0, "%.4e");
-		ImGui::InputDouble("Young's Modulus", &new_material_youngs_modulus, 0, 0, "%.3f");
+		ImGui::InputDouble("Young's Modulus", &new_material_youngs_modulus, 0, 0, "%.4e");
 		ImGui::InputDouble("Cross-Section Area", &new_material_cs_area, 0, 0, "%.3f");
 
 		if (ImGui::Button("Create Material"))
