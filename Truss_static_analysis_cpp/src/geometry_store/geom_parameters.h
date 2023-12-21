@@ -31,21 +31,21 @@ public:
 	std::filesystem::path resourcePath;
 
 	// Window size
-	int window_width;
-	int window_height;
+	int window_width = 800;
+	int window_height = 600;
 
-	glm::vec3 min_b; // (min_x, min_y,0)
-	glm::vec3 max_b; // (max_x, max_y,0)
-	glm::vec3 geom_bound; // Bound magnitude
-	glm::vec3 center; // center of the geometry
-	glm::mat4 modelMatrix; // Geometry model matrix
-	float geom_scale; // Scale of the geometry
-	float geom_transparency; // Value to control the geometry transparency
-	float defl_scale; // Value of deflection scale
+	glm::vec3 min_b = glm::vec3(0); // (min_x, min_y,0)
+	glm::vec3 max_b = glm::vec3(0); // (max_x, max_y,0)
+	glm::vec3 geom_bound = glm::vec3(0); // Bound magnitude
+	glm::vec3 center = glm::vec3(0); // center of the geometry
+	glm::mat4 modelMatrix = glm::mat4(0); // Geometry model matrix
+	float geom_scale = 1.0f; // Scale of the geometry
+	float geom_transparency = 1.0f; // Value to control the geometry transparency
+	float defl_scale = 0.01f; // Value of deflection scale
 
 	// Screen transformations
-	glm::mat4 panTranslation; // Pan translataion
-	float zoom_scale; // Zoom scale
+	glm::mat4 panTranslation =  glm::mat4(1); // Pan translataion
+	float zoom_scale = 1.0f; // Zoom scale
 
 	// Standard colors
 	geom_color_theme geom_colors;
