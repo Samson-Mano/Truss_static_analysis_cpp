@@ -30,9 +30,9 @@ public:
 	bool is_add_load = false;
 	int constraint_selectedOptionIndex = 0;
 	float constraint_angleDegrees = 0.0f;
-	float load_angleDegrees = 0.0f;
+	double load_angleDegrees = 0.0f;
 	float square_size = 50.0f;
-	float loadValue = 0.0f;
+	double loadValue = 0.0f;
 private:
 	my_image_data pin_image;
 	my_image_data roller_image;

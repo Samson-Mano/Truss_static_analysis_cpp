@@ -37,7 +37,7 @@ public:
 	void zoomfit_geometry();
 	void pan_geometry(glm::vec2& transl);
 	void zoom_geometry(float& z_scale);
-	void set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add);
+	void set_nodal_loads(glm::vec2& loc, double& load_value, double& load_angle, bool is_add);
 	void set_nodal_constraints(glm::vec2& loc, int& constraint_type, float& constraint_angle, bool is_add);
 	void set_line_material(glm::vec2& loc);
 	void update_delete_material(int& del_material_id);

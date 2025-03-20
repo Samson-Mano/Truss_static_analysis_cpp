@@ -461,7 +461,7 @@ void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eige
 	{
 		// Print the Global Force matrix
 		output_file << "Global Force Matrix" << std::endl;
-		output_file << globalForceMatrix << std::endl;
+		output_file << std::fixed << std::setprecision(6) << globalForceMatrix << std::endl;  // Set decimal precision to 6 
 		output_file << std::endl;
 	}
 }
@@ -827,8 +827,8 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 			// Create the reaction force x
 			if (std::roundf(static_cast<float>(resultant_x)) != 0)
 			{
-				float reaction_val_x = resultant_x;
-				float constraint_angle_x = constraint_angle - 90.0f;
+				double reaction_val_x = resultant_x;
+				double constraint_angle_x = constraint_angle - 90.0f;
 
 				// constraint_angle_x = constraint_angle_x > 360.0f ? (constraint_angle_x - 360.0f) : constraint_angle_x;
 
@@ -847,8 +847,8 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 			// Create the reaction force y
 			if (std::roundf(resultant_y) != 0)
 			{
-				float reaction_val_y = resultant_y;
-				float constraint_angle_y = constraint_angle;
+				double reaction_val_y = resultant_y;
+				double constraint_angle_y = constraint_angle;
 
 				// constraint_angle_y = constraint_angle_y > 360.0f ? (constraint_angle_y - 360.0f) : constraint_angle_y;
 

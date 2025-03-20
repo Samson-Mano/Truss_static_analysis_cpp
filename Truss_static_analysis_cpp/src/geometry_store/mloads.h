@@ -6,22 +6,22 @@ struct load_data
 {
 	int node_id;
 	nodes_store* node;
-	float load_value;
-	float load_angle;
+	double load_value;
+	double load_angle;
 };
 
 class mloads
 {
 public:
 	// Create an unordered_map to store constraints with node ID as key
-	int load_count;
+	int load_count = 0;
 	std::unordered_map<int, load_data> l_data;
-	float max_load = 0.0f;
+	double max_load = 0.0f;
 
 	mloads();
 	~mloads();
 	void init(geom_parameters* geom_param_ptr);
-	void add_load(int& node_id, nodes_store* node, float& load_value, float& load_angle);
+	void add_load(int& node_id, nodes_store* node, double& load_value, double& load_angle);
 	void delete_load(int& node_id);
 	void delete_all();
 	void set_buffer();

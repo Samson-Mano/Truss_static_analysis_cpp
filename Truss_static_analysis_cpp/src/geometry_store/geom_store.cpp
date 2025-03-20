@@ -39,7 +39,8 @@ void geom_store::write_rawdata(std::ofstream& file)
 		// Print the node details
 		nodes_store nd_val = node.second;
 
-		file << "node, "
+		file << std::fixed << std::setprecision(6)  // Set decimal precision to 6  
+			<< "node, "
 			<< nd_val.node_id << ", "
 			<< nd_val.node_pt.x << ", "
 			<< nd_val.node_pt.y << std::endl;
@@ -64,7 +65,8 @@ void geom_store::write_rawdata(std::ofstream& file)
 		// Print the constraint details
 		constraint_data cn_val = cnst.second;
 
-		file << "cnst, "
+		file << std::fixed << std::setprecision(6)  // Set decimal precision to 6 
+			<< "cnst, "
 			<< cn_val.node_id << ", "
 			<< cn_val.constraint_type << ", "
 			<< cn_val.constraint_angle << std::endl;
@@ -76,7 +78,8 @@ void geom_store::write_rawdata(std::ofstream& file)
 		// Print the load details
 		load_data ld_val = ld.second;
 
-		file << "load, "
+		file << std::fixed << std::setprecision(6)  // Set decimal precision to 6 
+			<< "load, "
 			<< ld_val.node_id << ", "
 			<< ld_val.load_value << ", "
 			<< ld_val.load_angle << std::endl;
@@ -86,7 +89,8 @@ void geom_store::write_rawdata(std::ofstream& file)
 	for (auto& mat : mat_window->material_list)
 	{
 		material_data mat_d = mat.second;
-		file << "mtrl, "
+		file << std::fixed << std::setprecision(6)  // Set decimal precision to 6 
+			<< "mtrl, "
 			<< mat_d.material_id << ", "
 			<< mat_d.material_name << ", "
 			<< mat_d.youngs_mod << ", "
@@ -274,8 +278,8 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 		else if (type == "load")
 		{
 			int load_nd_id = std::stoi(fields[1]); // load node ID
-			float load_val = std::stof(fields[2]); // load value
-			float load_angle = std::stof(fields[3]); // load angle
+			double load_val = std::stof(fields[2]); // load value
+			double load_angle = std::stof(fields[3]); // load angle
 
 			// Add to load map
 			loadMap.add_load(load_nd_id, &model_nodes.nodeMap[load_nd_id], load_val, load_angle);
@@ -919,7 +923,7 @@ void geom_store::zoom_geometry(float& z_scale)
 	result_text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 }
 
-void geom_store::set_nodal_loads(glm::vec2& loc, float& load_value, float& load_angle, bool is_add)
+void geom_store::set_nodal_loads(glm::vec2& loc, double& load_value, double& load_angle, bool is_add)
 {
 	int node_hit_id = -1;
 	// Set the nodal loads

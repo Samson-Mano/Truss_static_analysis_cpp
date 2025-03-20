@@ -227,8 +227,8 @@ void loadconstraint_window::render_load_tab()
 
 	// Input box to give input via text
 	static bool loadval_input_mode = false;
-	static char load_str[16] = ""; // buffer to store input load string
-	static float load_input = 0; // buffer to store input load value
+	static char load_str[32] = ""; // buffer to store input load string
+	static float load_input = 0.0; // buffer to store input load value
 
 	// Button to switch to input mode
 	if (!loadval_input_mode)
@@ -236,7 +236,7 @@ void loadconstraint_window::render_load_tab()
 		if (ImGui::Button("Input Load"))
 		{
 			loadval_input_mode = true;
-			snprintf(load_str, 16, "%.1f", loadValue); // set the buffer to current load value
+			snprintf(load_str, 32, "%.2f", loadValue); // set the buffer to current load value
 		}
 	}
 	else // input mode
@@ -246,7 +246,7 @@ void loadconstraint_window::render_load_tab()
 		if (ImGui::InputText("##InputLoad", load_str, IM_ARRAYSIZE(load_str), ImGuiInputTextFlags_CharsDecimal))
 		{
 			// convert the input string to int
-			load_input = atoi(load_str);
+			load_input = atof(load_str);
 			// set the load value to input value
 			loadValue = load_input;
 		}
@@ -261,12 +261,12 @@ void loadconstraint_window::render_load_tab()
 
 	// Text for load value
 	ImGui::SameLine();
-	ImGui::Text("Load = %.1f", loadValue);
+	ImGui::Text("Load = %.2f", loadValue);
 	//_________________________________________________________________________________________
 
 	// Input box to give input via text
 	static bool loadangle_input_mode = false;
-	static char load_angle_str[4] = ""; // buffer to store input angle string
+	static char load_angle_str[8] = ""; // buffer to store input angle string
 	static float load_angle_input = load_angleDegrees; // buffer to store input angle value
 
 	// Button to switch to input mode
@@ -275,7 +275,7 @@ void loadconstraint_window::render_load_tab()
 		if (ImGui::Button("Input Angle"))
 		{
 			loadangle_input_mode = true;
-			snprintf(load_angle_str, 4, "%.1f", load_angleDegrees); // set the buffer to current angle
+			snprintf(load_angle_str, 8, "%.2f", load_angleDegrees); // set the buffer to current angle
 		}
 	}
 	else // input mode
@@ -300,10 +300,12 @@ void loadconstraint_window::render_load_tab()
 		}
 	}
 
+	float load_angleDegrees_f = static_cast<float>(load_angleDegrees);
+
 	// Slider for angle
 	ImGui::Text("Angle");
 	ImGui::SameLine();
-	ImGui::SliderFloat("Degrees", &load_angleDegrees, 0.0f, 360.0f, "%.1f");
+	ImGui::SliderFloat("Degrees", &load_angleDegrees_f, 0.0f, 360.0f, "%.1f");
 	//_________________________________________________________________________________________
 
 		// add some vertical spacing
@@ -422,7 +424,9 @@ void loadconstraint_window::draw_load_image()
 		ImVec2 img_pos_bot_right(0, 0);
 		ImVec2 img_pos_bot_left(0, 0);
 
-		bool draw_img = get_image_min_max_coord(window_pos, window_size, img_pos_top_left, img_pos_top_right, img_pos_bot_right, img_pos_bot_left, load_angleDegrees);
+		float load_angleDegrees_f = static_cast<float>(load_angleDegrees);
+
+		bool draw_img = get_image_min_max_coord(window_pos, window_size, img_pos_top_left, img_pos_top_right, img_pos_bot_right, img_pos_bot_left, load_angleDegrees_f);
 
 		if (draw_img == true)
 		{

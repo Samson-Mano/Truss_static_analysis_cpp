@@ -22,7 +22,7 @@ void mloads::init(geom_parameters* geom_param_ptr)
 	l_data.clear();
 }
 
-void mloads::add_load(int& node_id, nodes_store* node, float& load_value, float& load_angle)
+void mloads::add_load(int& node_id, nodes_store* node, double& load_value, double& load_angle)
 {
 	if (load_value == 0)
 		return;
@@ -119,7 +119,7 @@ void mloads::update_buffer()
 	unsigned int load_arrowtail_i_index = 0;
 
 	// Load Max
-	float load_max = max_load;
+	double load_max = max_load;
 
 	// Find the load maximum
 	for (auto& load : l_data)

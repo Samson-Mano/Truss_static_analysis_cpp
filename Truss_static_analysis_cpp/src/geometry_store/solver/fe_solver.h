@@ -16,7 +16,7 @@ class fe_solver
 {
 public:
 	const double m_pi = 3.14159265358979323846;
-	bool print_matrix = false;
+	bool print_matrix = true;
 
 	fe_solver();
 	~fe_solver();
