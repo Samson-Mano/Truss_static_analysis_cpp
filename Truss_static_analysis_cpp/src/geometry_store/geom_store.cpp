@@ -93,9 +93,9 @@ void geom_store::write_rawdata(std::ofstream& file)
 			<< "mtrl, "
 			<< mat_d.material_id << ", "
 			<< mat_d.material_name << ", "
-			<< mat_d.youngs_mod << ", "
-			<< mat_d.mat_density << ", "
-			<< mat_d.cs_area << std::endl;
+			<< std::scientific  << mat_d.youngs_mod << ", "
+			<< std::scientific  << mat_d.mat_density << ", "
+			<< std::fixed << std::setprecision(6) << mat_d.cs_area << std::endl;
 	}
 }
 
@@ -171,17 +171,29 @@ void geom_store::read_dxfdata(std::ostringstream& input_data)
 	}
 
 
+	// add a rigid link material to the material list
+	material_data rigidlink_material;
+	rigidlink_material.material_id = 0; // Get the material id
+	rigidlink_material.material_name = "Rigid Link"; //Default material name
+	rigidlink_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	rigidlink_material.youngs_mod = INFINITY; //  MPa
+	rigidlink_material.cs_area = 6014; // mm2
+
+
 	// add a default material to the material list
-	material_data inpt_material;
-	inpt_material.material_id = 0; // Get the material id
-	inpt_material.material_name = "Default material"; //Default material name
-	inpt_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
-	inpt_material.youngs_mod = 2.07 * std::pow(10, 5); //  MPa
-	inpt_material.cs_area = 6014; // mm2
+	material_data default_material;
+	default_material.material_id = 1; // Get the material id
+	default_material.material_name = "Default material"; //Default material name
+	default_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	default_material.youngs_mod = 2.07 * std::pow(10, 5); //  MPa
+	default_material.cs_area = 6014; // mm2
+
 
 	// Add to materail list
 	mat_window->material_list.clear();
-	mat_window->material_list[inpt_material.material_id] = inpt_material;
+	mat_window->material_list[rigidlink_material.material_id] = rigidlink_material;
+	mat_window->material_list[default_material.material_id] = default_material;
+
 
 	// Constraint data store
 	mconstraints constraintMap;
@@ -410,7 +422,7 @@ void geom_store::read_varai2d(std::ifstream& input_file)
 				end_node_id = std::stoi(token);
 
 				// Create lines_store object using references to startNode and endNode
-				model_lines.add_line(line_id, model_nodes.nodeMap[start_node_id], model_nodes.nodeMap[end_node_id], 0);
+				model_lines.add_line(line_id, model_nodes.nodeMap[start_node_id], model_nodes.nodeMap[end_node_id], 1);
 
 				j++;
 			}
@@ -432,17 +444,28 @@ void geom_store::read_varai2d(std::ifstream& input_file)
 	//default_material.youngs_mod = 2.07 * std::pow(10, 5); // MPa
 	//default_material.cs_area = 6014; // mm2
 
+		// add a rigid link material to the material list
+	material_data rigidlink_material;
+	rigidlink_material.material_id = 0; // Get the material id
+	rigidlink_material.material_name = "Rigid Link"; //Default material name
+	rigidlink_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	rigidlink_material.youngs_mod = INFINITY; //  MPa
+	rigidlink_material.cs_area = 6014; // mm2
 
-	material_data inpt_material;
-	inpt_material.material_id = 0; // Get the material id
-	inpt_material.material_name = "Default material"; //Default material name
-	inpt_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
-	inpt_material.youngs_mod = 2.07 * std::pow(10, 5); //  MPa
-	inpt_material.cs_area = 6014; // mm2
+	// add a default material to the material list
+	material_data default_material;
+	default_material.material_id = 1; // Get the material id
+	default_material.material_name = "Default material"; //Default material name
+	default_material.mat_density = 7.83 * std::pow(10, -9); // tons/mm3
+	default_material.youngs_mod = 2.07 * std::pow(10, 5); //  MPa
+	default_material.cs_area = 6014; // mm2
 
 	// Add to materail list
 	mat_window->material_list.clear();
-	mat_window->material_list[inpt_material.material_id] = inpt_material;
+	mat_window->material_list[rigidlink_material.material_id] = rigidlink_material;
+	mat_window->material_list[default_material.material_id] = default_material;
+	
+
 
 
 	mconstraints constraintMap;

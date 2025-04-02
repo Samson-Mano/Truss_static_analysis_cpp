@@ -56,7 +56,7 @@ void material_window::render_window()
 	ImGui::TextColored(text_color, "Cross-Section Area: %.3f", selected_material_data.cs_area);
 
 	// Diable delete if the selected option is Default (0)
-	const bool is_delete_button_disabled = selected_list_option == 0 ? true : false;
+	const bool is_delete_button_disabled = selected_list_option == 0 || selected_list_option == 1 ? true : false;
 	ImGui::BeginDisabled(is_delete_button_disabled);
 	if (ImGui::Button("Delete Material")) {
 		// Delete material

@@ -3,14 +3,15 @@ node, 1, -3200, 1250
 node, 2, 0, 1250
 node, 3, 3200, 1250
 node, 4, 0, -0
-line, 0, 0, 1, 0
-line, 1, 1, 2, 0
-line, 2, 2, 3, 0
-line, 3, 0, 4, 0
-line, 4, 4, 3, 0
-line, 5, 2, 4, 0
-line, 6, 4, 1, 0
+line, 0, 0, 1, 1
+line, 1, 1, 2, 1
+line, 2, 2, 3, 1
+line, 3, 0, 4, 1
+line, 4, 4, 3, 1
+line, 5, 2, 4, 1
+line, 6, 4, 1, 1
 cnst, 1, 0, 180
 cnst, 0, 1, 180
 load, 3, 100, 90
-mtrl, 0, Default material, 207000, 7.83e-09, 6014
+mtrl, 0, Rigid Link, inf, 7.830000e-09, 6014.000000
+mtrl, 1, Default material, 2.070000e+05, 7.830000e-09, 6014.000000

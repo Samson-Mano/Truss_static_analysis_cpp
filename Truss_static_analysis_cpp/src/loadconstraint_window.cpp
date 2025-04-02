@@ -306,6 +306,9 @@ void loadconstraint_window::render_load_tab()
 	ImGui::Text("Angle");
 	ImGui::SameLine();
 	ImGui::SliderFloat("Degrees", &load_angleDegrees_f, 0.0f, 360.0f, "%.1f");
+
+	load_angleDegrees = load_angleDegrees_f;
+
 	//_________________________________________________________________________________________
 
 		// add some vertical spacing

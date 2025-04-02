@@ -1,10 +1,11 @@
 node, 0, -2165.06, 1006.26
 node, 1, 2165.06, 3506.26
 node, 2, -602.141, 4688.28
-line, 0, 0, 1, 0
-line, 1, 0, 2, 0
-line, 2, 2, 1, 0
+line, 0, 0, 1, 1
+line, 1, 0, 2, 1
+line, 2, 2, 1, 1
 cnst, 0, 0, 60
 cnst, 1, 1, 60
 load, 2, 100, 60
-mtrl, 0, Default material, 207000, 7.83e-09, 6014
+mtrl, 0, Rigid Link, inf, 7.830000e-09, 6014.000000
+mtrl, 1, Default material, 2.070000e+05, 7.830000e-09, 6014.000000

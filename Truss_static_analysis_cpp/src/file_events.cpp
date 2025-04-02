@@ -475,7 +475,7 @@ void file_events::import_dxfdata_geometry(geom_store& geom)
 	int line_id = 0;
 	for (auto& ln : all_dxf_lines)
 	{
-		dxf_input << "line, " << line_id << "," << ln.startpt_id << ", " << ln.endpt_id << ", " << "0" << "\n";
+		dxf_input << "line, " << line_id << "," << ln.startpt_id << ", " << ln.endpt_id << ", " << "1" << "\n";
 		line_id++;
 	}
 

@@ -10,31 +10,32 @@ node, 2, -2, -1.5
 node, 9, 2, -1.5
 node, 10, 2, 0.5
 node, 11, 4, -0.5
-line, 0, 0, 1, 0
-line, 1, 1, 2, 0
-line, 2, 2, 3, 0
-line, 3, 3, 4, 0
-line, 4, 2, 5, 3
-line, 5, 1, 6, 0
-line, 6, 1, 5, 0
-line, 7, 2, 4, 1
-line, 8, 0, 6, 0
-line, 9, 6, 5, 0
-line, 10, 5, 4, 0
-line, 11, 7, 8, 0
-line, 12, 8, 9, 0
-line, 13, 9, 3, 0
-line, 14, 9, 10, 3
-line, 15, 8, 11, 0
-line, 16, 8, 10, 0
-line, 17, 9, 4, 1
-line, 18, 7, 11, 0
-line, 19, 11, 10, 0
-line, 20, 10, 4, 0
+line, 0, 0, 1, 1
+line, 1, 1, 2, 1
+line, 2, 2, 3, 1
+line, 3, 3, 4, 1
+line, 4, 2, 5, 4
+line, 5, 1, 6, 1
+line, 6, 1, 5, 1
+line, 7, 2, 4, 2
+line, 8, 0, 6, 1
+line, 9, 6, 5, 1
+line, 10, 5, 4, 1
+line, 11, 7, 8, 1
+line, 12, 8, 9, 1
+line, 13, 9, 3, 1
+line, 14, 9, 10, 4
+line, 15, 8, 11, 1
+line, 16, 8, 10, 1
+line, 17, 9, 4, 2
+line, 18, 7, 11, 1
+line, 19, 11, 10, 1
+line, 20, 10, 4, 1
 cnst, 0, 0, 90
 cnst, 3, 1, 90
 load, 4, 100, 0
 load, 7, 100, 90
-mtrl, 0, Default material, 207000, 7.83e-09, 6014
-mtrl, 1, New Material, 210000, 7.865e-09, 4000
-mtrl, 3, New Material, 210000, 7.865e-09, 4000
+mtrl, 0, Rigid Link, inf, 7.830000e-09, 6014.000000
+mtrl, 1, Default material, 2.070000e+05, 7.830000e-09, 6014.000000
+mtrl, 2, New Material, 210000, 7.865e-09, 4000
+mtrl, 4, New Material, 210000, 7.865e-09, 4000
