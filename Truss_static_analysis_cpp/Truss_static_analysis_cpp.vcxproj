@@ -156,6 +156,7 @@
     <ClCompile Include="src\geometry_store\mconstraints.cpp" />
     <ClCompile Include="src\geometry_store\mloads.cpp" />
     <ClCompile Include="src\geometry_store\solver\fe_solver.cpp" />
+    <ClCompile Include="src\geometry_store\solver\penalty_solver.cpp" />
     <ClCompile Include="src\loadconstraint_window.cpp" />
     <ClCompile Include="src\geometry_store\buffers\gBuffers.cpp" />
     <ClCompile Include="src\geometry_store\buffers\IndexBuffer.cpp" />
@@ -194,6 +195,7 @@
     <ClInclude Include="src\geometry_store\mloads.h" />
     <ClInclude Include="src\geometry_store\label_text_store.h" />
     <ClInclude Include="src\geometry_store\solver\fe_solver.h" />
+    <ClInclude Include="src\geometry_store\solver\penalty_solver.h" />
     <ClInclude Include="src\loadconstraint_window.h" />
     <ClInclude Include="src\geometry_store\buffers\gBuffers.h" />
     <ClInclude Include="src\geometry_store\buffers\IndexBuffer.h" />
