@@ -47,9 +47,21 @@ private:
 		nodes_store_list* nodes, mloads* loads, std::ofstream& output_file);
 
 
-	void apply_SPC_boundary_conditions(Eigen::MatrixXd& globalStiffnessMatrix, Eigen::VectorXd& globalForceMatrix, int numDOF,
+	void get_boundary_condition_penalty_matrix(Eigen::MatrixXd& globalPenaltyStiffnessMatrix, int numDOF,
 		nodes_store_list* nodes, lines_store_list* lines, mconstraints* cnsts, std::ofstream& output_file);
 
+
+	void map_analysis_results(Eigen::VectorXd& globalDisplacementMatrix,
+		Eigen::VectorXd& globalResultantMatrix,
+		nodes_store_list* nodes,
+		lines_store_list* lines,
+		mconstraints* cnsts,
+		mloads* loads,
+		mloads& reaction_x,
+		mloads& reaction_y,
+		std::unordered_map<int, material_data>* mdatas,
+		bool& is_map_success, 
+		std::ofstream& output_file);
 
 
 
