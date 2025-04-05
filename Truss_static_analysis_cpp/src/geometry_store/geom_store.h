@@ -11,6 +11,7 @@
 #include "../material_window.h"
 #include "../solver_window.h"
 #include "solver/fe_solver.h"
+#include "solver/penalty_solver.h"
 #include "label_text_store.h"
 #include <fstream>
 #include <sstream>
@@ -60,6 +61,7 @@ private:
 
 	// Solver store
 	fe_solver fe_sol;
+	penalty_solver fe_penalty_sol;
 
 	// Store the openGL buffers
 	shader text_shader;

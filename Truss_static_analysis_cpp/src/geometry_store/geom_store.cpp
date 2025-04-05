@@ -93,8 +93,8 @@ void geom_store::write_rawdata(std::ofstream& file)
 			<< "mtrl, "
 			<< mat_d.material_id << ", "
 			<< mat_d.material_name << ", "
-			<< std::scientific  << mat_d.youngs_mod << ", "
-			<< std::scientific  << mat_d.mat_density << ", "
+			<< std::scientific << mat_d.youngs_mod << ", "
+			<< std::scientific << mat_d.mat_density << ", "
 			<< std::fixed << std::setprecision(6) << mat_d.cs_area << std::endl;
 	}
 }
@@ -204,7 +204,7 @@ void geom_store::read_dxfdata(std::ostringstream& input_data)
 	mloads loadMap;
 	loadMap.init(&geom_param);
 
-		// Re-instantitize geom_store object using the nodeMap and lineMap
+	// Re-instantitize geom_store object using the nodeMap and lineMap
 	deleteResources();
 	create_geometry(model_nodes, model_lines, constraintMap, loadMap);
 }
@@ -241,7 +241,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 	mloads loadMap;
 	loadMap.init(&geom_param);
 	// Material data list
-	std::unordered_map<int,material_data> mat_data;
+	std::unordered_map<int, material_data> mat_data;
 
 	// Process the lines
 	while (j < lines.size())
@@ -307,7 +307,7 @@ void geom_store::read_rawdata(std::ifstream& input_file)
 			inpt_material.cs_area = std::stod(fields[5]); // Get the material cross section area
 
 			// Add to materail list
-			mat_data[inpt_material.material_id]=inpt_material;
+			mat_data[inpt_material.material_id] = inpt_material;
 		}
 
 		// Iterate line
@@ -464,7 +464,7 @@ void geom_store::read_varai2d(std::ifstream& input_file)
 	mat_window->material_list.clear();
 	mat_window->material_list[rigidlink_material.material_id] = rigidlink_material;
 	mat_window->material_list[default_material.material_id] = default_material;
-	
+
 
 
 
@@ -624,7 +624,7 @@ void geom_store::set_geometry()
 	loadMap.set_buffer();
 
 	// Create shader
-	std::filesystem::path shadersPath =geom_param.resourcePath;
+	std::filesystem::path shadersPath = geom_param.resourcePath;
 
 	// Text shader
 	text_shader.create_shader((shadersPath.string() + "/src/geometry_store/shaders/text_vert_shader.vert").c_str(),
@@ -677,7 +677,10 @@ void geom_store::paint_geometry()
 			reaction_x.init(&geom_param);
 			reaction_y.init(&geom_param);
 
-;			fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,&mat_window->material_list, reaction_x, reaction_y,fe_window);
+			//Main Solver Call
+			//  fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,&mat_window->material_list, reaction_x, reaction_y,fe_window);
+			fe_penalty_sol.solve_start(&model_nodes, &model_lines, &constraintMap, &loadMap, &mat_window->material_list, reaction_x, reaction_y, fe_window);
+
 			// Analysis execution complete
 			fe_window->execute_solver = false;
 		}
@@ -753,7 +756,7 @@ void geom_store::paint_model()
 	// Paint the model
 
 	model_lines.paint_lines();	// Paint the Lines
-	
+
 	model_nodes.paint_nodes(); // Paint the Nodes
 
 	constraintMap.paint_constraints();	// Paint the constraints
@@ -825,9 +828,9 @@ void geom_store::update_model_transperency(bool is_transparent)
 	model_lines.update_geometry_matrices(false, false, false, true);
 	model_nodes.update_geometry_matrices(false, false, false, true);
 	constraintMap.update_geometry_matrices(false, false, false, true);
-	loadMap.update_geometry_matrices(false, false, false, true,false);
-	reaction_x.update_geometry_matrices(false, false, false, true,true);
-	reaction_y.update_geometry_matrices(false, false, false, true,true);
+	loadMap.update_geometry_matrices(false, false, false, true, false);
+	reaction_x.update_geometry_matrices(false, false, false, true, true);
+	reaction_y.update_geometry_matrices(false, false, false, true, true);
 }
 
 void geom_store::set_model_matrix()
@@ -853,12 +856,12 @@ void geom_store::set_model_matrix()
 	geom_param.modelMatrix = g_transl * glm::scale(glm::mat4(1.0f), glm::vec3(geom_param.geom_scale));
 
 
-	model_lines.update_geometry_matrices(true, false, false,true);
+	model_lines.update_geometry_matrices(true, false, false, true);
 	model_nodes.update_geometry_matrices(true, false, false, true);
 	constraintMap.update_geometry_matrices(true, false, false, true);
-	loadMap.update_geometry_matrices(true, false, false, true,false);
-	reaction_x.update_geometry_matrices(true, false, false, false,true);
-	reaction_y.update_geometry_matrices(true, false, false, false,true);
+	loadMap.update_geometry_matrices(true, false, false, true, false);
+	reaction_x.update_geometry_matrices(true, false, false, false, true);
+	reaction_y.update_geometry_matrices(true, false, false, false, true);
 
 	text_shader.setUniform("transparency", 0.7f);
 	text_shader.setUniform("modelMatrix", geom_param.modelMatrix, false);
@@ -897,9 +900,9 @@ void geom_store::zoomfit_geometry()
 	model_lines.update_geometry_matrices(false, true, true, false);
 	model_nodes.update_geometry_matrices(false, true, true, false);
 	constraintMap.update_geometry_matrices(false, true, true, false);
-	loadMap.update_geometry_matrices(false, true, true, false,false);
-	reaction_x.update_geometry_matrices(false, true, true, false,true);
-	reaction_y.update_geometry_matrices(false, true, true, false,true);
+	loadMap.update_geometry_matrices(false, true, true, false, false);
+	reaction_x.update_geometry_matrices(false, true, true, false, true);
+	reaction_y.update_geometry_matrices(false, true, true, false, true);
 
 	text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 	result_text_shader.setUniform("zoomscale", geom_param.zoom_scale);
@@ -916,12 +919,12 @@ void geom_store::pan_geometry(glm::vec2& transl)
 	geom_param.panTranslation[0][3] = -1.0f * transl.x;
 	geom_param.panTranslation[1][3] = transl.y;
 
-	model_lines.update_geometry_matrices(false, true, false,false);
+	model_lines.update_geometry_matrices(false, true, false, false);
 	model_nodes.update_geometry_matrices(false, true, false, false);
 	constraintMap.update_geometry_matrices(false, true, false, false);
-	loadMap.update_geometry_matrices(false, true, false, false,false);
-	reaction_x.update_geometry_matrices(false, true, false, false,true);
-	reaction_y.update_geometry_matrices(false, true, false, false,true);
+	loadMap.update_geometry_matrices(false, true, false, false, false);
+	reaction_x.update_geometry_matrices(false, true, false, false, true);
+	reaction_y.update_geometry_matrices(false, true, false, false, true);
 
 	text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
 	result_text_shader.setUniform("panTranslation", geom_param.panTranslation, false);
@@ -938,9 +941,9 @@ void geom_store::zoom_geometry(float& z_scale)
 	model_lines.update_geometry_matrices(false, false, true, false);
 	model_nodes.update_geometry_matrices(false, false, true, false);
 	constraintMap.update_geometry_matrices(false, false, true, false);
-	loadMap.update_geometry_matrices(false, false, true, false,false);
-	reaction_x.update_geometry_matrices(false, false, true, false,true);
-	reaction_y.update_geometry_matrices(false, false, true, false,true);
+	loadMap.update_geometry_matrices(false, false, true, false, false);
+	reaction_x.update_geometry_matrices(false, false, true, false, true);
+	reaction_y.update_geometry_matrices(false, false, true, false, true);
 
 	text_shader.setUniform("zoomscale", geom_param.zoom_scale);
 	result_text_shader.setUniform("zoomscale", geom_param.zoom_scale);

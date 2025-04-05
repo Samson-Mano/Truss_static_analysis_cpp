@@ -10,13 +10,13 @@ penalty_solver::~penalty_solver()
 	// Empty destructor
 }
 
-void penalty_solver::solve_start(nodes_store_list* nodes, 
-	lines_store_list* lines, 
-	mconstraints* cnsts, 
-	mloads* loads, 
-	std::unordered_map<int, material_data>* mdatas, 
-	mloads& reaction_x, 
-	mloads& reaction_y, 
+void penalty_solver::solve_start(nodes_store_list* nodes,
+	lines_store_list* lines,
+	mconstraints* cnsts,
+	mloads* loads,
+	std::unordered_map<int, material_data>* mdatas,
+	mloads& reaction_x,
+	mloads& reaction_y,
 	solver_window* fe_window)
 {
 	// Main Solver Start
@@ -218,7 +218,7 @@ void penalty_solver::solve_start(nodes_store_list* nodes,
 
 
 
-void penalty_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix, 
+void penalty_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix,
 	lines_store_list* lines, std::unordered_map<int, material_data>* mdatas, mconstraints* cnsts, std::ofstream& output_file)
 {
 	this->penaltyK = 0.0;
@@ -248,11 +248,11 @@ void penalty_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnes
 	// Set the penalty stiffness
 	if (this->penaltyK > 0.000001)
 	{
-		this->penaltyK = this->penaltyK * 1000000.0;
+		this->penaltyK = this->penaltyK * 10000000.0;
 	}
 	else
 	{
-		this->penaltyK = 1000000.0;
+		this->penaltyK = 10000000.0;
 	}
 
 	if (print_matrix == true)
@@ -267,7 +267,7 @@ void penalty_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnes
 
 
 
-void penalty_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix, 
+void penalty_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix,
 	lines_store& ln, material_data& mdata, mconstraints* cnsts, std::ofstream& output_file)
 {
 	// Create a element stiffness matrix
@@ -284,7 +284,7 @@ void penalty_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffn
 
 	// Compute the stiffness factor
 	double k1 = 0.0;
-	
+
 	if (mdata.material_id == 0)
 	{
 		// Rigid element
@@ -299,7 +299,7 @@ void penalty_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffn
 		// Find the maximum stiffness
 		this->penaltyK = std::max(this->penaltyK, k1);
 	}
-	
+
 
 	//Stiffness matrix components
 	double v1 = k1 * std::pow(Lcos, 2);
@@ -390,43 +390,62 @@ void penalty_solver::get_boundary_condition_penalty_matrix(Eigen::MatrixXd& glob
 			constraint_data c_data = cnsts->c_data[nd.node_id];
 
 			int constraint_type = c_data.constraint_type; // constraint type
-			double constraint_angle_rad = (c_data.constraint_angle - 90.0f)* (m_pi / 180.0f); // constraint angle
+			double constraint_angle_rad = (c_data.constraint_angle - 90.0f) * (m_pi / 180.0f); // constraint angle
 			double support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
 			double support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
 
 			// Penalty single point constraint A vector
-			Eigen::VectorXd penalty_SPC_AVector(numDOF);
-			penalty_SPC_AVector.setZero();
+			Eigen::VectorXd penalty_SPC_AxVector(numDOF);
+			penalty_SPC_AxVector.setZero();
 
+			Eigen::VectorXd penalty_SPC_AyVector(numDOF);
+			penalty_SPC_AyVector.setZero();
 
 
 			if (constraint_type == 0)
 			{
 				// Pinned support
-				penalty_SPC_AVector[(nd_map * 2) + 0] = 1.0;
-				penalty_SPC_AVector[(nd_map * 2) + 1] = -1.0;
+				penalty_SPC_AxVector[(nd_map * 2) + 0] = 1.0;
+				penalty_SPC_AxVector[(nd_map * 2) + 1] = 0.0;
 
+				penalty_SPC_AyVector[(nd_map * 2) + 0] = 0.0;
+				penalty_SPC_AyVector[(nd_map * 2) + 1] = 1.0;
 
 			}
 			else if (constraint_type == 1)
 			{
 				// Roller support
-				penalty_SPC_AVector[(nd_map * 2) + 0] = support_Lcos;
-				penalty_SPC_AVector[(nd_map * 2) + 1] = support_Msin;
+				penalty_SPC_AxVector[(nd_map * 2) + 0] = support_Msin * support_Msin;
+				penalty_SPC_AxVector[(nd_map * 2) + 1] = support_Lcos * support_Msin;
+
+				penalty_SPC_AyVector[(nd_map * 2) + 0] = support_Lcos * support_Msin;
+				penalty_SPC_AyVector[(nd_map * 2) + 1] = support_Lcos * support_Lcos;
+
+
+				//penalty_SPC_AxVector[(nd_map * 2) + 0] = support_Lcos * support_Lcos ;
+				//penalty_SPC_AxVector[(nd_map * 2) + 1] = support_Lcos * support_Msin;
+
+				//penalty_SPC_AyVector[(nd_map * 2) + 0] = support_Lcos * support_Msin;
+				//penalty_SPC_AyVector[(nd_map * 2) + 1] = support_Msin * support_Msin;
+
 
 			}
 
 			// **Expand A_matrix by adding a new column**
 			int currentCols = global_penalty_SPC_AMatrix.cols();
 			global_penalty_SPC_AMatrix.conservativeResize(numDOF, currentCols + 1); // Add one column
-			global_penalty_SPC_AMatrix.col(currentCols) = penalty_SPC_AVector;       // Insert the new vector
+			global_penalty_SPC_AMatrix.col(currentCols) = penalty_SPC_AxVector;       // Insert the new vector
+
+			currentCols = global_penalty_SPC_AMatrix.cols();
+			global_penalty_SPC_AMatrix.conservativeResize(numDOF, currentCols + 1); // Add one column
+			global_penalty_SPC_AMatrix.col(currentCols) = penalty_SPC_AyVector;       // Insert the new vector
 
 		}
 
 	}
 
 	// Find the global penalty stiffness matrix
-	globalPenaltyStiffnessMatrix = this->penaltyK * (global_penalty_SPC_AMatrix.transpose() * global_penalty_SPC_AMatrix);
+	globalPenaltyStiffnessMatrix = this->penaltyK * (global_penalty_SPC_AMatrix * global_penalty_SPC_AMatrix.transpose());
 
 
 	if (print_matrix == true)
@@ -614,7 +633,7 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 		// Transformation matrices to include support inclinatation
 		Eigen::Matrix2d s_transformation_matrix = Eigen::Matrix2d::Zero(); // support inclination transformation matrix
 
-		// Assume No constraint at the node
+		// Assume No constraint at the node (Free)
 		s_transformation_matrix.row(0) = Eigen::RowVector2d(1.0, 0.0);
 		s_transformation_matrix.row(1) = Eigen::RowVector2d(0.0, 1.0);
 
@@ -676,8 +695,37 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 			support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
 
 			// Pin or Roller Support
-			s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Lcos, -support_Msin);
-			s_transformation_matrix.row(1) = Eigen::RowVector2d(support_Msin, support_Lcos);
+			//s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Lcos, -support_Msin);
+			//s_transformation_matrix.row(1) = Eigen::RowVector2d(support_Msin, support_Lcos);
+
+			if (cnsts->c_data[node_id].constraint_type == 0)
+			{
+				// Pinned
+				// s_transformation_matrix.row(0) = Eigen::RowVector2d(1, -1);
+				// s_transformation_matrix.row(1) = Eigen::RowVector2d(-1, 1);
+
+				s_transformation_matrix.row(0) = Eigen::RowVector2d(1.0, 0.0);
+				s_transformation_matrix.row(1) = Eigen::RowVector2d(0.0, 1.0);
+
+			}
+			else if (cnsts->c_data[node_id].constraint_type == 1)
+			{
+				// Roller
+				//s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Lcos, -support_Msin );
+				//s_transformation_matrix.row(1) = Eigen::RowVector2d(-support_Msin, support_Lcos);
+
+				//s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Lcos * support_Lcos, -support_Lcos * support_Msin);
+				//s_transformation_matrix.row(1) = Eigen::RowVector2d(-support_Lcos * support_Msin, support_Msin * support_Msin);
+
+				//s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Msin * support_Msin, -support_Lcos * support_Msin);
+				//s_transformation_matrix.row(1) = Eigen::RowVector2d(-support_Lcos * support_Msin, support_Lcos * support_Lcos);
+
+				s_transformation_matrix.row(0) = Eigen::RowVector2d(1.0, 0.0);
+				s_transformation_matrix.row(1) = Eigen::RowVector2d(0.0, 1.0);
+
+			}
+
+
 
 		}
 
@@ -689,7 +737,7 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 
 
 		// Extract the node displacement transformed
-		Eigen::Vector2d node_displacement_transformed = s_transformation_matrix * globalDisplacementMatrix;
+		Eigen::Vector2d node_displacement_transformed = s_transformation_matrix * node_displacement;
 
 
 		double displ_x = node_displacement_transformed[0];
