@@ -33,7 +33,10 @@ public:
 private:
 	std::unordered_map<int, int> nodeid_map;
 
-	double penaltyK = 0.0; // Penalty stiffness
+	// Penalty stiffness
+	double max_stiffness = 0.0;
+	const double penalty_factor = 1E+6;
+
 
 	void get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix, lines_store_list* lines,
 		std::unordered_map<int, material_data>* mdatas, mconstraints* cnsts, std::ofstream& output_file);
@@ -48,7 +51,8 @@ private:
 
 
 	void get_boundary_condition_penalty_matrix(Eigen::MatrixXd& globalPenaltyStiffnessMatrix, int numDOF,
-		nodes_store_list* nodes, lines_store_list* lines, mconstraints* cnsts, std::ofstream& output_file);
+		nodes_store_list* nodes, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas, 
+		mconstraints* cnsts, std::ofstream& output_file);
 
 
 	void map_analysis_results(Eigen::VectorXd& globalDisplacementMatrix,

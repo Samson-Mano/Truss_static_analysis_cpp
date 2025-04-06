@@ -678,8 +678,27 @@ void geom_store::paint_geometry()
 			reaction_y.init(&geom_param);
 
 			//Main Solver Call
-			//  fe_sol.solve_start(&model_nodes,&model_lines,&constraintMap,&loadMap,&mat_window->material_list, reaction_x, reaction_y,fe_window);
-			fe_penalty_sol.solve_start(&model_nodes, &model_lines, &constraintMap, &loadMap, &mat_window->material_list, reaction_x, reaction_y, fe_window);
+			
+			if (fe_window->solver_type == 0)
+			{
+				// Penalty Augmentation boundary condition approach
+				fe_penalty_sol.solve_start(&model_nodes, &model_lines, &constraintMap, &loadMap, &mat_window->material_list, reaction_x, reaction_y, fe_window);
+
+			}
+			else if (fe_window->solver_type == 1)
+			{
+				// Lagrange multiplier boundary condition approach
+
+
+			}
+			else if (fe_window->solver_type == 2)
+			{
+				// Elimination boundary condition approach
+				fe_elimination_sol.solve_start(&model_nodes, &model_lines, &constraintMap, &loadMap, &mat_window->material_list, reaction_x, reaction_y, fe_window);
+
+			}
+
+			
 
 			// Analysis execution complete
 			fe_window->execute_solver = false;

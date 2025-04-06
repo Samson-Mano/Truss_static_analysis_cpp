@@ -17,6 +17,35 @@ void solver_window::render_window()
 
 	ImGui::Begin("Finite Element Solver");
 
+	// Option to select the types of solver
+	// Define an array of options
+	const int options_count = 3;
+	const char* options[] = { "Penalty approach", "Lagrange approach", "Elimination approach"};
+
+	// Define a string to hold the label for the popup select button
+	std::string popupLabel = "Solver: ";
+
+	if (ImGui::Button((popupLabel + options[solver_type]).c_str()))
+	{
+		ImGui::OpenPopup("Select an option");
+	}
+
+	if (ImGui::BeginPopup("Select an option")) {
+		ImGui::Text("- Solver Type -");
+		ImGui::Separator();
+
+		for (int i = 0; i < options_count; i++) 
+		{
+			if (ImGui::Selectable(options[i], solver_type == i))
+			{
+				solver_type = i;
+			}
+		}
+
+		ImGui::EndPopup();
+	}
+	//_________________________________________________________________________________________
+
 
 	// Add a "Sovle" button
 	if (ImGui::Button("FE Solve"))
@@ -263,9 +292,11 @@ void solver_window::reset_solver_window()
 	show_undeformed_model = true; // show undeformed model 
 	show_reactionforce = true; // show the results on deformed
 	show_result_text_values = true; // show the result text values
-	animate_play = true;
+	animate_play = false;
 	animate_pause = false;
 	selected_solution_option = 0;
+	solver_type = 0;
+
 }
 
 

@@ -236,6 +236,36 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 void fe_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas,
 	mconstraints* cnsts, std::ofstream& output_file)
 {
+	this->max_stiffness = 0.0;
+
+	// Set the maximum stiffnes
+	for (auto& ln_m : lines->lineMap)
+	{
+		lines_store ln = ln_m.second;
+		material_data mdata = (*mdatas)[ln.material_id];
+
+		if (mdata.material_id != 0)
+		{
+			// Compute the differences in x and y coordinates
+			double dx = ln.endNode.node_pt.x - ln.startNode.node_pt.x;
+			double dy = -1.0 * (ln.endNode.node_pt.y - ln.startNode.node_pt.y);
+
+			// Compute the length of the truss element
+			double eLength = std::sqrt((dx * dx) + (dy * dy));
+
+			double ln_stiffness = (mdata.cs_area * mdata.youngs_mod) / eLength;
+
+			// Set the maximum stiffness
+			this->max_stiffness = std::max(this->max_stiffness, ln_stiffness);
+		}
+	}
+
+	if (this->max_stiffness < (1.0 / this->penalty_factor))
+	{
+		// This case is to handle when all the elements are rigid links
+		this->max_stiffness = (1.0 / this->penalty_factor);
+	}
+
 	// Create the global stiffness matrix
 	for (auto& ln_m : lines->lineMap)
 	{
@@ -256,6 +286,7 @@ void fe_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatr
 		globalStiffnessMatrix.block<2, 2>(sn_id * 2, en_id * 2) += elementStiffnessMatrix.block<2, 2>(0, 2);
 		globalStiffnessMatrix.block<2, 2>(en_id * 2, sn_id * 2) += elementStiffnessMatrix.block<2, 2>(2, 0);
 		globalStiffnessMatrix.block<2, 2>(en_id * 2, en_id * 2) += elementStiffnessMatrix.block<2, 2>(2, 2);
+
 	}
 
 	if (print_matrix == true)
@@ -283,7 +314,20 @@ void fe_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMa
 	double Msin = (dy / eLength);
 
 	// Compute the stiffness factor
-	double k1 = (mdata.cs_area * mdata.youngs_mod) / eLength;
+	double k1 = 0.0;
+
+	if (mdata.material_id == 0)
+	{
+		// Rigid element
+		k1 = this->max_stiffness * this->penalty_factor;
+
+	}
+	else
+	{
+		// Flexible element
+		k1 = (mdata.cs_area * mdata.youngs_mod) / eLength;
+
+	}
 
 	//Stiffness matrix components
 	double v1 = k1 * std::pow(Lcos, 2);
@@ -424,7 +468,7 @@ void fe_solver::get_global_supportinclination_matrix(Eigen::MatrixXd& globalSupp
 }
 
 void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eigen::MatrixXd& globalSupportInclinationMatrix,
-	nodes_store_list* nodes,mloads* loads, std::ofstream& output_file)
+	nodes_store_list* nodes, mloads* loads, std::ofstream& output_file)
 {
 	// Create a global force matrix
 	for (auto& nd_l : nodes->nodeMap)
@@ -726,7 +770,21 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 		material_data mdata = (*mdatas)[ln.material_id];
 
 		// Get the element properties
-		double youngs_mod = mdata.youngs_mod;
+		double youngs_mod = 0.0;
+		
+		if (mdata.material_id == 0)
+		{
+			// Rigid element
+			youngs_mod = this->max_stiffness * (eLength / mdata.cs_area) * this->penalty_factor;
+
+		}
+		else
+		{
+			// Flexible factor
+			youngs_mod = mdata.youngs_mod;
+
+		}
+		
 		double cs_area = mdata.cs_area;
 
 
@@ -913,8 +971,8 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 	reaction_x.update_buffer();
 	reaction_y.update_buffer();
 
-	reaction_x.update_geometry_matrices(true, true, true, true,true);
-	reaction_y.update_geometry_matrices(true, true, true, true,true);
+	reaction_x.update_geometry_matrices(true, true, true, true, true);
+	reaction_y.update_geometry_matrices(true, true, true, true, true);
 }
 
 

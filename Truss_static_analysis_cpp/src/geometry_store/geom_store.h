@@ -60,7 +60,7 @@ private:
 	solver_window* fe_window;
 
 	// Solver store
-	fe_solver fe_sol;
+	fe_solver fe_elimination_sol;
 	penalty_solver fe_penalty_sol;
 
 	// Store the openGL buffers

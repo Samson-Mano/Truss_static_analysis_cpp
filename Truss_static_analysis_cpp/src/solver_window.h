@@ -16,14 +16,15 @@ public:
 	bool show_undeformed_model = true; // show undeformed model 
 	bool show_reactionforce = true; // show the results on deformed
 	bool show_result_text_values = true; // show the result text values
-	bool animate_play = true;
+	bool animate_play = false;
 	bool animate_pause = false;
 	int selected_solution_option = 0;
 	float time_val = 0.0f;
-	double deformation_scale_max = 10.0f;
+	double deformation_scale_max = 30.0f;
 	double animation_speed = 10.0f;
-	double deformation_scale;
+	double deformation_scale = 0.0;
 
+	int solver_type = 0;
 
 	std::string log_buffer;
 

@@ -527,8 +527,8 @@ void nodes_store_list::update_results(int& node_id, double displ_x, double displ
 {
 	// Update the Nodal results 
 	nodeMap[node_id].nodal_displ = glm::vec2(displ_x, displ_y);
-	nodeMap[node_id].nodal_reaction = glm::vec2(resultant_x, resultant_y);
-	nodeMap[node_id].nodal_reaction_angle = resultant_angle;
+	// nodeMap[node_id].nodal_reaction = glm::vec2(resultant_x, resultant_y);
+	// nodeMap[node_id].nodal_reaction_angle = resultant_angle;
 }
 
 

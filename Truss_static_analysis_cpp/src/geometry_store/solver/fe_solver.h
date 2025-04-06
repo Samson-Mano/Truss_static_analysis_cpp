@@ -32,6 +32,9 @@ public:
 private:
 	std::unordered_map<int, int> nodeid_map;
 
+	double max_stiffness = 0.0;
+	const double penalty_factor = 1E+6;
+
 	void get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix, lines_store_list* lines, 
 		std::unordered_map<int, material_data>* mdatas, mconstraints* cnsts, std::ofstream& output_file);
 
