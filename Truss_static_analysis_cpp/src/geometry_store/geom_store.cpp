@@ -688,7 +688,7 @@ void geom_store::paint_geometry()
 			else if (fe_window->solver_type == 1)
 			{
 				// Lagrange multiplier boundary condition approach
-
+				fe_lagrange_sol.solve_start(&model_nodes, &model_lines, &constraintMap, &loadMap, &mat_window->material_list, reaction_x, reaction_y, fe_window);
 
 			}
 			else if (fe_window->solver_type == 2)
@@ -697,8 +697,6 @@ void geom_store::paint_geometry()
 				fe_elimination_sol.solve_start(&model_nodes, &model_lines, &constraintMap, &loadMap, &mat_window->material_list, reaction_x, reaction_y, fe_window);
 
 			}
-
-			
 
 			// Analysis execution complete
 			fe_window->execute_solver = false;

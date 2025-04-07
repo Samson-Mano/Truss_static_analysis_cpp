@@ -111,10 +111,13 @@
     <ClCompile Include="src\solver_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\geometry_store\solver\fe_solver.cpp">
+    <ClCompile Include="src\geometry_store\solver\elim_solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\geometry_store\solver\penalty_solver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\geometry_store\solver\lagrange_solver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -224,10 +227,13 @@
     <ClInclude Include="src\solver_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\geometry_store\solver\fe_solver.h">
+    <ClInclude Include="src\geometry_store\solver\elim_solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\geometry_store\solver\penalty_solver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\geometry_store\solver\lagrange_solver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

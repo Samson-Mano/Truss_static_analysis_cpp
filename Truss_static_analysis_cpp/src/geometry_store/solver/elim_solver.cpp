@@ -1,14 +1,14 @@
-#include "fe_solver.h"
+#include "elim_solver.h"
 
-fe_solver::fe_solver()
+elim_solver::elim_solver()
 {
 }
 
-fe_solver::~fe_solver()
+elim_solver::~elim_solver()
 {
 }
 
-void fe_solver::solve_start(nodes_store_list* nodes,
+void elim_solver::solve_start(nodes_store_list* nodes,
 	lines_store_list* lines,
 	mconstraints* cnsts,
 	mloads* loads,
@@ -91,7 +91,7 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 
 	// Create a file to keep track of matrices
 	std::ofstream output_file;
-	output_file.open("fe_matrices.txt");
+	output_file.open("fe_elimination_matrices.txt");
 
 	//____________________________________________________________________________________________________________________
 	int numDOF = nodes->node_count * 2; // Number of degrees of freedom (2 DOFs per node)
@@ -233,7 +233,7 @@ void fe_solver::solve_start(nodes_store_list* nodes,
 	fe_window->is_analysis_complete = true;
 }
 
-void fe_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas,
+void elim_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas,
 	mconstraints* cnsts, std::ofstream& output_file)
 {
 	this->max_stiffness = 0.0;
@@ -298,7 +298,7 @@ void fe_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatr
 	}
 }
 
-void fe_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix, lines_store& ln, material_data& mdata,
+void elim_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix, lines_store& ln, material_data& mdata,
 	mconstraints* cnsts, std::ofstream& output_file)
 {
 	// Create a element stiffness matrix
@@ -416,7 +416,8 @@ void fe_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMa
 	}
 }
 
-void fe_solver::get_global_supportinclination_matrix(Eigen::MatrixXd& globalSupportInclinationMatrix, nodes_store_list* nodes,
+
+void elim_solver::get_global_supportinclination_matrix(Eigen::MatrixXd& globalSupportInclinationMatrix, nodes_store_list* nodes,
 	mconstraints* cnsts, std::ofstream& output_file)
 {
 	int node_id = 0;
@@ -467,7 +468,8 @@ void fe_solver::get_global_supportinclination_matrix(Eigen::MatrixXd& globalSupp
 	}
 }
 
-void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eigen::MatrixXd& globalSupportInclinationMatrix,
+
+void elim_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eigen::MatrixXd& globalSupportInclinationMatrix,
 	nodes_store_list* nodes, mloads* loads, std::ofstream& output_file)
 {
 	// Create a global force matrix
@@ -510,7 +512,8 @@ void fe_solver::get_global_force_matrix(Eigen::MatrixXd& globalForceMatrix, Eige
 	}
 }
 
-void fe_solver::get_global_dof_matrix(std::unordered_map<int, int>& dofIndices, int& reducedDOF, nodes_store_list* nodes,
+
+void elim_solver::get_global_dof_matrix(std::unordered_map<int, int>& dofIndices, int& reducedDOF, nodes_store_list* nodes,
 	mconstraints* cnsts, std::ofstream& output_file)
 {
 	// Get the Degree of Freedom matrix
@@ -557,7 +560,7 @@ void fe_solver::get_global_dof_matrix(std::unordered_map<int, int>& dofIndices, 
 }
 
 
-void fe_solver::get_reduced_global_matrices(Eigen::MatrixXd& globalStiffnessMatrix, Eigen::MatrixXd& globalForceMatrix,
+void elim_solver::get_reduced_global_matrices(Eigen::MatrixXd& globalStiffnessMatrix, Eigen::MatrixXd& globalForceMatrix,
 	Eigen::SparseMatrix<double>& reduced_globalStiffnessMatrix, Eigen::SparseMatrix<double>& reduced_globalForceMatrix,
 	std::unordered_map<int, int>& dofIndices, std::ofstream& output_file)
 {
@@ -612,7 +615,8 @@ void fe_solver::get_reduced_global_matrices(Eigen::MatrixXd& globalStiffnessMatr
 	}
 }
 
-void fe_solver::get_global_displacement_matrix(Eigen::MatrixXd& globalDisplacementMatrix,
+
+void elim_solver::get_global_displacement_matrix(Eigen::MatrixXd& globalDisplacementMatrix,
 	Eigen::SparseMatrix<double>& reduced_globalDisplacementMatrix,
 	std::unordered_map<int, int>& dofIndices, std::ofstream& output_file)
 {
@@ -647,7 +651,8 @@ void fe_solver::get_global_displacement_matrix(Eigen::MatrixXd& globalDisplaceme
 	}
 }
 
-void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
+
+void elim_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 	Eigen::MatrixXd globalResultantMatrix,
 	Eigen::MatrixXd& globalSupportInclinationMatrix,
 	nodes_store_list* nodes,
@@ -771,21 +776,24 @@ void fe_solver::map_analysis_results(Eigen::MatrixXd& globalDisplacementMatrix,
 
 		// Get the element properties
 		double youngs_mod = 0.0;
-		
+		double cs_area = 0.0; 
+
 		if (mdata.material_id == 0)
 		{
 			// Rigid element
-			youngs_mod = this->max_stiffness * (eLength / mdata.cs_area) * this->penalty_factor;
+			youngs_mod = 0.0; // this->max_stiffness * (eLength / mdata.cs_area) * this->penalty_factor;
+			cs_area = 0.0;
 
 		}
 		else
 		{
 			// Flexible factor
 			youngs_mod = mdata.youngs_mod;
+			cs_area = mdata.cs_area;
 
 		}
 		
-		double cs_area = mdata.cs_area;
+
 
 
 		// Compute the direction cosines

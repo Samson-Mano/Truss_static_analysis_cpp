@@ -1,16 +1,17 @@
-#include "penalty_solver.h"
+#include "lagrange_solver.h"
 
-penalty_solver::penalty_solver()
+lagrange_solver::lagrange_solver()
 {
 	// Empty constructor
 }
 
-penalty_solver::~penalty_solver()
+lagrange_solver::~lagrange_solver()
 {
 	// Empty destructor
 }
 
-void penalty_solver::solve_start(nodes_store_list* nodes,
+
+void lagrange_solver::solve_start(nodes_store_list* nodes,
 	lines_store_list* lines,
 	mconstraints* cnsts,
 	mloads* loads,
@@ -93,7 +94,7 @@ void penalty_solver::solve_start(nodes_store_list* nodes,
 
 	// Create a file to keep track of matrices
 	std::ofstream output_file;
-	output_file.open("fe_matrices_penalty.txt");
+	output_file.open("fe_matrices_lagrange.txt");
 
 	//____________________________________________________________________________________________________________________
 	int numDOF = nodes->node_count * 2; // Number of degrees of freedom (2 DOFs per node)
@@ -111,78 +112,168 @@ void penalty_solver::solve_start(nodes_store_list* nodes,
 
 	//____________________________________________________________________________________________________________________
 	// Global force matrix
-	Eigen::VectorXd globalForceMatrix(numDOF);
-	globalForceMatrix.setZero();
+	Eigen::VectorXd globalForceVector(numDOF);
+	globalForceVector.setZero();
 
-	get_global_force_matrix(globalForceMatrix, nodes, loads, output_file);
+	get_global_force_vector(globalForceVector, nodes, loads, output_file);
 
 	fe_window->log_buffer.append("3. Global Force Matrix created \n");
 
 	//____________________________________________________________________________________________________________________
-	// Global Penalty Stiffness matrix
-	Eigen::MatrixXd globalPenalty_SPC_StiffnessMatrix(numDOF, numDOF);
-	globalPenalty_SPC_StiffnessMatrix.setZero();
+	// Global Constraint A matrix
+	Eigen::MatrixXd globalConstraint_SPC_AMatrix; // resize inside the function
+	Eigen::MatrixXd globalConstraint_MPC_AMatrix; // resize inside the function
+		
+	get_global_constraint_A_matrix(globalConstraint_SPC_AMatrix, globalConstraint_MPC_AMatrix, numDOF, nodes, lines, mdatas, cnsts, output_file);
 
-	Eigen::MatrixXd globalPenalty_MPC_StiffnessMatrix(numDOF, numDOF);
-	globalPenalty_MPC_StiffnessMatrix.setZero();
+	Eigen::MatrixXd globalConstraint_AMatrix; // resize inside the function
 
-	get_boundary_condition_penalty_matrix(globalPenalty_SPC_StiffnessMatrix, globalPenalty_MPC_StiffnessMatrix, numDOF, nodes, lines, mdatas, cnsts, output_file);
+	// Create the global constraint A matrix
+	int row_spc = globalConstraint_SPC_AMatrix.rows();
+	int row_mpc = globalConstraint_MPC_AMatrix.rows();
 
-	fe_window->log_buffer.append("4. Global Penalty Stiffness Matrix created \n");
+	globalConstraint_AMatrix.conservativeResize(row_spc + row_mpc, numDOF); // where the row size is SPC A matrix + MPC A matrix
 
+	if (row_spc > 0)
+	{
+		globalConstraint_AMatrix.topRows(row_spc) = globalConstraint_SPC_AMatrix;
+	}
 
-	//____________________________________________________________________________________________________________________
-	// Penalty Augmentation of global stiffness matrix
-	Eigen::MatrixXd globalPenaltyAugmentedStiffnessMatrix(numDOF, numDOF);
-	globalPenaltyAugmentedStiffnessMatrix.setZero();
-
-	globalPenaltyAugmentedStiffnessMatrix = globalStiffnessMatrix + (globalPenalty_SPC_StiffnessMatrix + globalPenalty_MPC_StiffnessMatrix);
-
-	//____________________________________________________________________________________________________________________
-	// Global Displacement matrix
-	Eigen::VectorXd globalDisplacementMatrix(numDOF);
-	globalDisplacementMatrix.setZero();
-
-
-	// Solve using Partial Pivot LU decomposition
-	globalDisplacementMatrix = globalPenaltyAugmentedStiffnessMatrix.lu().solve(globalForceMatrix);
+	if (row_mpc > 0)
+	{
+		globalConstraint_AMatrix.bottomRows(row_mpc) = globalConstraint_MPC_AMatrix;
+	}
 
 
 	if (print_matrix == true)
 	{
-		// Print the Global Displacement matrix
-		output_file << "Global Displacement Matrix" << std::endl;
-		output_file << globalDisplacementMatrix << std::endl;
+		// Print the Global Constraint A matrix
+		output_file << "Global Constraint A Matrix" << std::endl;
+		output_file << std::fixed << std::setprecision(6) << globalConstraint_AMatrix << std::endl;  // Set decimal precision to 6 
 		output_file << std::endl;
 	}
 
-	fe_window->log_buffer.append("5. LU Decomposition Matrix solution for Displacement completed \n");
+
+	fe_window->log_buffer.append("4. Global Constraint A Matrix created \n");
+
+
+	//____________________________________________________________________________________________________________________
+	// Lagrange Augmentation of global stiffness matrix with global constratint A matrix
+	int SPCconstraintEqnSize = globalConstraint_SPC_AMatrix.rows();
+	int MPCconstraintEqnSize = globalConstraint_MPC_AMatrix.rows();
+
+	int constraintEqnSize = SPCconstraintEqnSize + MPCconstraintEqnSize;
+
+	int LagrageAugmentedMatrixSize = numDOF + constraintEqnSize;
+
+	Eigen::MatrixXd globalLagrangeAugmentedStiffnessMatrix(LagrageAugmentedMatrixSize, LagrageAugmentedMatrixSize);
+	globalLagrangeAugmentedStiffnessMatrix.setZero();
+
+	// Top-left block: K
+	globalLagrangeAugmentedStiffnessMatrix.topLeftCorner(numDOF, numDOF) = globalStiffnessMatrix;
+
+	// Top-right block: A^T
+	globalLagrangeAugmentedStiffnessMatrix.topRightCorner(numDOF, constraintEqnSize) = globalConstraint_AMatrix.transpose();
+
+	// Bottom-left block: A
+	globalLagrangeAugmentedStiffnessMatrix.bottomLeftCorner(constraintEqnSize, numDOF) = globalConstraint_AMatrix;
+
+	// Bottom-right block: zero matrix (already zero-initialized)
+
+
+	if (print_matrix == true)
+	{
+		// Print the Reduced Global Displacement matrix
+		output_file << "Global Lagrange Augmented Stiffness Matrix" << std::endl;
+		output_file << globalLagrangeAugmentedStiffnessMatrix << std::endl;
+		output_file << std::endl;
+	}
+
+
+
+	// Lagrange Augmentation of global force matrix
+	Eigen::VectorXd globalLagrangeAugmentedForceVector(LagrageAugmentedMatrixSize);
+	globalLagrangeAugmentedForceVector.setZero();
+
+	// Fill top part with F
+	globalLagrangeAugmentedForceVector.topRows(numDOF) = globalForceVector;
+
+	// Fill bottom part with b (b is zero which is already initialized
+	
+
+	if (print_matrix == true)
+	{
+		// Print the Reduced Global Displacement matrix
+		output_file << "Global Lagrange Augmented Force Matrix" << std::endl;
+		output_file << globalLagrangeAugmentedForceVector << std::endl;
+		output_file << std::endl;
+	}
+
+	fe_window->log_buffer.append("5. Global Lagrange Augmented stiffness and force matrix created \n");
+
+	//____________________________________________________________________________________________________________________
+	// Global Displacement matrix
+	Eigen::VectorXd globalLagrangeAugmentedDisplacementVector(LagrageAugmentedMatrixSize);
+	globalLagrangeAugmentedDisplacementVector.setZero();
+
+	// Solve using Partial Pivot LU decomposition
+	globalLagrangeAugmentedDisplacementVector = globalLagrangeAugmentedStiffnessMatrix.lu().solve(globalLagrangeAugmentedForceVector);
+
+
+	// Get the global dispalcement and lagrange multipliers
+	Eigen::VectorXd globalDisplacementVector(numDOF);
+	globalDisplacementVector.setZero();
+
+	Eigen::VectorXd globalLagrangeMultiplierVector(constraintEqnSize);
+	globalLagrangeMultiplierVector.setZero();
+
+
+	// global displacement
+	globalDisplacementVector = globalLagrangeAugmentedDisplacementVector.topRows(numDOF);
+
+	// lagrange multiplier (SPC)
+	globalLagrangeMultiplierVector = globalLagrangeAugmentedDisplacementVector.segment(numDOF, SPCconstraintEqnSize);
+
+
+	if (print_matrix == true)
+	{
+		// Print the Global Lagrange Augmented Displacement matrix
+		output_file << "Global Displacement Matrix" << std::endl;
+		output_file << globalDisplacementVector << std::endl;
+		output_file << std::endl;
+
+		output_file << "Lagrange Multipliers SPC" << std::endl;
+		output_file << globalLagrangeMultiplierVector << std::endl;
+		output_file << std::endl;
+	}
+
+	fe_window->log_buffer.append("6. LU Decomposition Matrix solution for Displacement completed \n");
 
 	//____________________________________________________________________________________________________________________
 	// Global Resultant matrix
-	Eigen::VectorXd globalResultantMatrix(numDOF);
-	globalResultantMatrix.setZero();
+	Eigen::VectorXd globalResultantVector(numDOF);
+	globalResultantVector.setZero();
 
-	// globalResultantMatrix = (globalStiffnessMatrix * globalDisplacementMatrix) - globalForceMatrix;
-	globalResultantMatrix = -1.0 * (globalPenalty_SPC_StiffnessMatrix * globalDisplacementMatrix);
+	globalResultantVector = -1.0 * (globalConstraint_SPC_AMatrix.transpose() * globalLagrangeMultiplierVector);
+
 
 	if (print_matrix == true)
 	{
 		// Print the Global Resultant matrix
 		output_file << "Global Resultant Matrix" << std::endl;
-		output_file << globalResultantMatrix << std::endl;
+		output_file << globalResultantVector << std::endl;
 		output_file << std::endl;
 	}
 
-	fe_window->log_buffer.append("6. Resultant forces calculated \n");
+	fe_window->log_buffer.append("7. Resultant forces calculated \n");
 
 
 	//____________________________________________________________________________________________________________________
 	// Map the analysis Results
 	bool is_map_success = false;
 
-	map_analysis_results(globalDisplacementMatrix,
-		globalResultantMatrix,
+	map_analysis_results(globalDisplacementVector,
+		globalResultantVector,
 		nodes,
 		lines,
 		cnsts,
@@ -224,7 +315,7 @@ void penalty_solver::solve_start(nodes_store_list* nodes,
 
 
 
-void penalty_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix,
+void lagrange_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnessMatrix,
 	lines_store_list* lines, std::unordered_map<int, material_data>* mdatas, mconstraints* cnsts, std::ofstream& output_file)
 {
 	this->max_stiffness = 0.0;
@@ -292,7 +383,7 @@ void penalty_solver::get_global_stiffness_matrix(Eigen::MatrixXd& globalStiffnes
 
 
 
-void penalty_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix,
+void lagrange_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffnessMatrix,
 	lines_store& ln, material_data& mdata, mconstraints* cnsts, std::ofstream& output_file)
 {
 	// Create a element stiffness matrix
@@ -347,7 +438,7 @@ void penalty_solver::get_element_stiffness_matrix(Eigen::Matrix4d& elementStiffn
 
 
 
-void penalty_solver::get_global_force_matrix(Eigen::VectorXd& globalForceMatrix,
+void lagrange_solver::get_global_force_vector(Eigen::VectorXd& globalForceVector,
 	nodes_store_list* nodes, mloads* loads, std::ofstream& output_file)
 {
 	// Create a global force matrix
@@ -367,14 +458,14 @@ void penalty_solver::get_global_force_matrix(Eigen::VectorXd& globalForceMatrix,
 			double f_x = load_val * std::cos(load_angle_rad);
 			double f_y = load_val * std::sin(load_angle_rad);
 
-			globalForceMatrix((nd_map * 2) + 0, 0) += f_x;
-			globalForceMatrix((nd_map * 2) + 1, 0) += f_y;
+			globalForceVector((nd_map * 2) + 0, 0) += f_x;
+			globalForceVector((nd_map * 2) + 1, 0) += f_y;
 		}
 		else
 		{
 			// Nodes doesn't have loads
-			globalForceMatrix((nd_map * 2) + 0, 0) += 0.0;
-			globalForceMatrix((nd_map * 2) + 1, 0) += 0.0;
+			globalForceVector((nd_map * 2) + 0, 0) += 0.0;
+			globalForceVector((nd_map * 2) + 1, 0) += 0.0;
 		}
 	}
 
@@ -382,7 +473,7 @@ void penalty_solver::get_global_force_matrix(Eigen::VectorXd& globalForceMatrix,
 	{
 		// Print the Global Force matrix
 		output_file << "Global Force Matrix" << std::endl;
-		output_file << std::fixed << std::setprecision(6) << globalForceMatrix << std::endl;  // Set decimal precision to 6 
+		output_file << std::fixed << std::setprecision(6) << globalForceVector << std::endl;  // Set decimal precision to 6 
 		output_file << std::endl;
 	}
 
@@ -390,17 +481,19 @@ void penalty_solver::get_global_force_matrix(Eigen::VectorXd& globalForceMatrix,
 
 
 
-void penalty_solver::get_boundary_condition_penalty_matrix(Eigen::MatrixXd& globalPenalty_SPC_StiffnessMatrix,
-	Eigen::MatrixXd& globalPenalty_MPC_StiffnessMatrix, int numDOF,
+void lagrange_solver::get_global_constraint_A_matrix(Eigen::MatrixXd& globalConstraint_SPC_AMatrix, 
+	Eigen::MatrixXd& globalConstraint_MPC_AMatrix, int numDOF,
 	nodes_store_list* nodes, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas,
 	mconstraints* cnsts, std::ofstream& output_file)
 {
 
-	// Apply boundary condition using Penalty method
+	// Apply boundary condition using Lagrange method
 	// Single point constraint (Pinned or Roller boundary condition)
 
-	Eigen::MatrixXd global_penalty_SPC_AMatrix(numDOF, 0); // Start with zero columns
+	globalConstraint_SPC_AMatrix.resize(0, numDOF); // Start with zero rows
 
+
+	int currentRows = 0;
 
 	for (auto& nd_l : nodes->nodeMap)
 	{
@@ -418,43 +511,42 @@ void penalty_solver::get_boundary_condition_penalty_matrix(Eigen::MatrixXd& glob
 			double support_Lcos = std::cos(constraint_angle_rad); // cosine of support inclination
 			double support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
 
-			// Penalty single point constraint A vector
-			Eigen::VectorXd penalty_SPC_AVector(numDOF);
-			penalty_SPC_AVector.setZero();
+			// Single point constraint A vector
+			Eigen::VectorXd SPC_AVector(numDOF);
+			SPC_AVector.setZero();
 
-			int currentCols = 0;
 
 			if (constraint_type == 0)
 			{
 				// Pinned support
-				penalty_SPC_AVector[(nd_map * 2) + 0] = 1.0;
-				penalty_SPC_AVector[(nd_map * 2) + 1] = 0.0;
+				SPC_AVector[(nd_map * 2) + 0] = 1.0;
+				SPC_AVector[(nd_map * 2) + 1] = 0.0;
 
 
-				// **Expand A_matrix by adding a new column**
-				currentCols = global_penalty_SPC_AMatrix.cols();
-				global_penalty_SPC_AMatrix.conservativeResize(numDOF, currentCols + 1); // Add one column
-				global_penalty_SPC_AMatrix.col(currentCols) = penalty_SPC_AVector;       // Insert the new vector (X fixed)
+				// **Expand A_matrix by adding a new row**
+				currentRows = globalConstraint_SPC_AMatrix.rows();
+				globalConstraint_SPC_AMatrix.conservativeResize(currentRows + 1, numDOF); // Add one row
+				globalConstraint_SPC_AMatrix.row(currentRows) = SPC_AVector;       // Insert the new vector (X fixed)
 
-				penalty_SPC_AVector[(nd_map * 2) + 0] = 0.0;
-				penalty_SPC_AVector[(nd_map * 2) + 1] = 1.0;
+				SPC_AVector[(nd_map * 2) + 0] = 0.0;
+				SPC_AVector[(nd_map * 2) + 1] = 1.0;
 
-				// **Expand A_matrix by adding a new column**
-				currentCols = global_penalty_SPC_AMatrix.cols();
-				global_penalty_SPC_AMatrix.conservativeResize(numDOF, currentCols + 1); // Add one column
-				global_penalty_SPC_AMatrix.col(currentCols) = penalty_SPC_AVector;       // Insert the new vector (Y fixed)
+				// **Expand A_matrix by adding a new row**
+				currentRows = globalConstraint_SPC_AMatrix.rows();
+				globalConstraint_SPC_AMatrix.conservativeResize(currentRows + 1, numDOF); // Add one row
+				globalConstraint_SPC_AMatrix.row(currentRows) = SPC_AVector;       // Insert the new vector (Y fixed)
 
 			}
 			else if (constraint_type == 1)
 			{
 				// Roller support
-				penalty_SPC_AVector[(nd_map * 2) + 0] = -support_Msin;
-				penalty_SPC_AVector[(nd_map * 2) + 1] = support_Lcos;
+				SPC_AVector[(nd_map * 2) + 0] = -support_Msin;
+				SPC_AVector[(nd_map * 2) + 1] = support_Lcos;
 
-				// **Expand A_matrix by adding a new column**
-				currentCols = global_penalty_SPC_AMatrix.cols();
-				global_penalty_SPC_AMatrix.conservativeResize(numDOF, currentCols + 1); // Add one column
-				global_penalty_SPC_AMatrix.col(currentCols) = penalty_SPC_AVector;       // Insert the new vector
+				// **Expand A_matrix by adding a new row**
+				currentRows = globalConstraint_SPC_AMatrix.rows();
+				globalConstraint_SPC_AMatrix.conservativeResize(currentRows + 1, numDOF); // Add one row
+				globalConstraint_SPC_AMatrix.row(currentRows) = SPC_AVector;       // Insert the new vector
 
 			}
 
@@ -465,7 +557,7 @@ void penalty_solver::get_boundary_condition_penalty_matrix(Eigen::MatrixXd& glob
 
 	// Multi point constraint (Rigid link)
 
-	Eigen::MatrixXd global_penalty_MPC_AMatrix(numDOF, 0); // Start with zero columns
+	globalConstraint_MPC_AMatrix.resize(0, numDOF); // Start with zero rows
 
 
 	for (auto& ln_m : lines->lineMap)
@@ -493,74 +585,33 @@ void penalty_solver::get_boundary_condition_penalty_matrix(Eigen::MatrixXd& glob
 			double Lcos = (dx / eLength);
 			double Msin = (dy / eLength);
 
-			// Penalty multi point constraint A vector
-			Eigen::VectorXd penalty_MPC_AVector(numDOF);
-			penalty_MPC_AVector.setZero();
+			// Multi point constraint A vector
+			Eigen::VectorXd MPC_AVector(numDOF);
+			MPC_AVector.setZero();
 
 			// start node transformation
-			penalty_MPC_AVector[(sn_id * 2) + 0] = Lcos;
-			penalty_MPC_AVector[(sn_id * 2) + 1] = Msin;
+			MPC_AVector[(sn_id * 2) + 0] = Lcos;
+			MPC_AVector[(sn_id * 2) + 1] = Msin;
 
 			// end node transformation
-			penalty_MPC_AVector[(en_id * 2) + 0] = -Lcos;
-			penalty_MPC_AVector[(en_id * 2) + 1] = -Msin;
+			MPC_AVector[(en_id * 2) + 0] = -Lcos;
+			MPC_AVector[(en_id * 2) + 1] = -Msin;
 
-			// **Expand A_matrix by adding a new column**
-			int currentCols = global_penalty_MPC_AMatrix.cols();
-			global_penalty_MPC_AMatrix.conservativeResize(numDOF, currentCols + 1); // Add one column
-			global_penalty_MPC_AMatrix.col(currentCols) = penalty_MPC_AVector;       // Insert the new vector
+			// **Expand A_matrix by adding a new row**
+			currentRows = globalConstraint_MPC_AMatrix.rows();
+			globalConstraint_MPC_AMatrix.conservativeResize(currentRows + 1, numDOF); // Add one row
+			globalConstraint_MPC_AMatrix.row(currentRows) = MPC_AVector;       // Insert the new vector
 
 		}
 
 	}
 
-	//// Create the global penalty A matrix
-	//int m = global_penalty_SPC_AMatrix.cols();
-	//int n = global_penalty_MPC_AMatrix.cols();
-
-	//Eigen::MatrixXd global_penalty_AMatrix(numDOF, m + n); // where the column size is SPC penalty + MPC penalty
-
-	//if (m > 0)
-	//{
-	//	global_penalty_AMatrix.leftCols(m) = global_penalty_SPC_AMatrix;
-	//}
-
-	//if (n > 0)
-	//{
-	//	global_penalty_AMatrix.rightCols(n) = global_penalty_MPC_AMatrix;
-	//}
-
-
-
-	// Find the global penalty stiffness matrix
-	// globalPenaltyStiffnessMatrix = (this->max_stiffness * this->penalty_factor) *  (global_penalty_SPC_AMatrix * global_penalty_SPC_AMatrix.transpose());
-
-	// globalPenaltyStiffnessMatrix = (this->max_stiffness * this->penalty_factor) * (global_penalty_AMatrix * global_penalty_AMatrix.transpose());
-
-
-	globalPenalty_SPC_StiffnessMatrix = (this->max_stiffness * this->penalty_factor) * (global_penalty_SPC_AMatrix * global_penalty_SPC_AMatrix.transpose());
-
-	if (global_penalty_MPC_AMatrix.cols() > 0)
-	{
-		globalPenalty_MPC_StiffnessMatrix = (this->max_stiffness * this->penalty_factor) * (global_penalty_MPC_AMatrix * global_penalty_MPC_AMatrix.transpose());
-	}
-
-
-	if (print_matrix == true)
-	{
-		// Print the Global Penalty Stiffness matrix
-		output_file << "Global Penalty Stiffness Matrix" << std::endl;
-		output_file << std::fixed << std::setprecision(6) << (globalPenalty_SPC_StiffnessMatrix + globalPenalty_MPC_StiffnessMatrix) << std::endl;  // Set decimal precision to 6 
-		output_file << std::endl;
-	}
-
-
 }
 
 
 
-void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMatrix,
-	Eigen::VectorXd& globalResultantMatrix,
+void lagrange_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementVector,
+	Eigen::VectorXd& globalResultantVector,
 	nodes_store_list* nodes,
 	lines_store_list* lines,
 	mconstraints* cnsts,
@@ -588,10 +639,10 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 		// Extract the start and end node displacement
 		Eigen::Vector4d element_displacement;
 
-		element_displacement.coeffRef(0) = globalDisplacementMatrix((SN_matrix_index * 2) + 0);
-		element_displacement.coeffRef(1) = globalDisplacementMatrix((SN_matrix_index * 2) + 1);
-		element_displacement.coeffRef(2) = globalDisplacementMatrix((EN_matrix_index * 2) + 0);
-		element_displacement.coeffRef(3) = globalDisplacementMatrix((EN_matrix_index * 2) + 1);
+		element_displacement.coeffRef(0) = globalDisplacementVector((SN_matrix_index * 2) + 0);
+		element_displacement.coeffRef(1) = globalDisplacementVector((SN_matrix_index * 2) + 1);
+		element_displacement.coeffRef(2) = globalDisplacementVector((EN_matrix_index * 2) + 0);
+		element_displacement.coeffRef(3) = globalDisplacementVector((EN_matrix_index * 2) + 1);
 
 		// Compute the differences in x and y coordinates
 		double dx = ln.endNode.node_pt.x - ln.startNode.node_pt.x;
@@ -604,24 +655,21 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 
 		// Get the element properties
 		double youngs_mod = 0.0;
-		double cs_area = 0.0;
 
 		if (mdata.material_id == 0)
 		{
 			// Rigid element
-			youngs_mod = 0.0; // this->max_stiffness * (eLength / mdata.cs_area) * this->penalty_factor;
-			cs_area = 0.0;
+			youngs_mod = this->max_stiffness * (eLength / mdata.cs_area) * this->penalty_factor;
 
 		}
 		else
 		{
 			// Flexible factor
 			youngs_mod = mdata.youngs_mod;
-			cs_area = mdata.cs_area;
 
 		}
 
-		
+		double cs_area = mdata.cs_area;
 
 		// Compute the direction cosines
 		double Lcos = (dx / eLength);
@@ -672,8 +720,8 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 
 
 		// Extract the node resultant
-		double resultant_x = 0.0; // globalResultantMatrix((matrix_index * 2) + 0);
-		double resultant_y = 0.0; // globalResultantMatrix((matrix_index * 2) + 1);
+		double resultant_x = 0.0; // globalResultantVector((matrix_index * 2) + 0);
+		double resultant_y = 0.0; // globalResultantVector((matrix_index * 2) + 1);
 
 		double constraint_angle = 0.0;
 
@@ -683,8 +731,8 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 			constraint_angle = cnsts->c_data[node_id].constraint_angle; // Constrint angle in radians
 
 			Eigen::Vector2d resultant_vector;
-			resultant_vector.coeffRef(0) = globalResultantMatrix((matrix_index * 2) + 0);
-			resultant_vector.coeffRef(1) = globalResultantMatrix((matrix_index * 2) + 1);
+			resultant_vector.coeffRef(0) = globalResultantVector((matrix_index * 2) + 0);
+			resultant_vector.coeffRef(1) = globalResultantVector((matrix_index * 2) + 1);
 
 			// Find the support transformation
 			double	constraint_angle_rad = (constraint_angle - 90.0) * (m_pi / 180.0f); // Constrint angle in radians
@@ -692,7 +740,7 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 			double	support_Msin = std::sin(constraint_angle_rad); // sine of support inclination
 
 			Eigen::Matrix2d s_transformation_matrix;
-			s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Lcos, support_Msin );
+			s_transformation_matrix.row(0) = Eigen::RowVector2d(support_Lcos, support_Msin);
 			s_transformation_matrix.row(1) = Eigen::RowVector2d(-support_Msin, support_Lcos);
 
 			// Extract the resultant vector transformed
@@ -741,8 +789,8 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 		}
 
 
-		double displ_x = globalDisplacementMatrix((matrix_index * 2) + 0);
-		double displ_y = globalDisplacementMatrix((matrix_index * 2) + 1);
+		double displ_x = globalDisplacementVector((matrix_index * 2) + 0);
+		double displ_y = globalDisplacementVector((matrix_index * 2) + 1);
 
 		nodes->update_results(node_id, displ_x, displ_y, 0.0, 0.0, 0.0);
 
@@ -798,3 +846,5 @@ void penalty_solver::map_analysis_results(Eigen::VectorXd& globalDisplacementMat
 
 
 }
+
+

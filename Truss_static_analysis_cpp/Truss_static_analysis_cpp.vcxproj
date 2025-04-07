@@ -155,7 +155,8 @@
     <ClCompile Include="src\geometry_store\label_text_store.cpp" />
     <ClCompile Include="src\geometry_store\mconstraints.cpp" />
     <ClCompile Include="src\geometry_store\mloads.cpp" />
-    <ClCompile Include="src\geometry_store\solver\fe_solver.cpp" />
+    <ClCompile Include="src\geometry_store\solver\elim_solver.cpp" />
+    <ClCompile Include="src\geometry_store\solver\lagrange_solver.cpp" />
     <ClCompile Include="src\geometry_store\solver\penalty_solver.cpp" />
     <ClCompile Include="src\loadconstraint_window.cpp" />
     <ClCompile Include="src\geometry_store\buffers\gBuffers.cpp" />
@@ -194,7 +195,8 @@
     <ClInclude Include="src\geometry_store\mconstraints.h" />
     <ClInclude Include="src\geometry_store\mloads.h" />
     <ClInclude Include="src\geometry_store\label_text_store.h" />
-    <ClInclude Include="src\geometry_store\solver\fe_solver.h" />
+    <ClInclude Include="src\geometry_store\solver\elim_solver.h" />
+    <ClInclude Include="src\geometry_store\solver\lagrange_solver.h" />
     <ClInclude Include="src\geometry_store\solver\penalty_solver.h" />
     <ClInclude Include="src\loadconstraint_window.h" />
     <ClInclude Include="src\geometry_store\buffers\gBuffers.h" />

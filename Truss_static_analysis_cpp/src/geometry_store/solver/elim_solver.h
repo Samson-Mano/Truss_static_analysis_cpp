@@ -12,14 +12,14 @@
 // Define the sparse matrix type for the reduced global stiffness matrix
 typedef Eigen::SparseMatrix<double> SparseMatrix;
 
-class fe_solver
+class elim_solver
 {
 public:
 	const double m_pi = 3.14159265358979323846;
 	bool print_matrix = true;
 
-	fe_solver();
-	~fe_solver();
+	elim_solver();
+	~elim_solver();
 	void solve_start(nodes_store_list* nodes,
 		lines_store_list* lines,
 		mconstraints* cnsts,

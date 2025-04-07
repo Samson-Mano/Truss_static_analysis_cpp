@@ -10,14 +10,15 @@
 #include <Eigen/Sparse>
 
 
-class penalty_solver
+
+class lagrange_solver
 {
 public:
 	const double m_pi = 3.14159265358979323846;
 	bool print_matrix = true;
 
-	penalty_solver();
-	~penalty_solver();
+	lagrange_solver();
+	~lagrange_solver();
 
 	void solve_start(nodes_store_list* nodes,
 		lines_store_list* lines,
@@ -46,18 +47,18 @@ private:
 		material_data& mdata, mconstraints* cnsts, std::ofstream& output_file);
 
 
-	void get_global_force_matrix(Eigen::VectorXd& globalForceMatrix,
+	void get_global_force_vector(Eigen::VectorXd& globalForceVector,
 		nodes_store_list* nodes, mloads* loads, std::ofstream& output_file);
 
 
-	void get_boundary_condition_penalty_matrix(Eigen::MatrixXd& globalPenalty_SPC_StiffnessMatrix,
-		Eigen::MatrixXd& globalPenalty_MPC_StiffnessMatrix, int numDOF,
-		nodes_store_list* nodes, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas, 
+	void get_global_constraint_A_matrix(Eigen::MatrixXd& globalConstraint_SPC_AMatrix,
+		Eigen::MatrixXd& globalConstraint_MPC_AMatrix, int numDOF,
+		nodes_store_list* nodes, lines_store_list* lines, std::unordered_map<int, material_data>* mdatas,
 		mconstraints* cnsts, std::ofstream& output_file);
 
 
-	void map_analysis_results(Eigen::VectorXd& globalDisplacementMatrix,
-		Eigen::VectorXd& globalResultantMatrix,
+	void map_analysis_results(Eigen::VectorXd& globalDisplacementVector,
+		Eigen::VectorXd& globalResultantVector,
 		nodes_store_list* nodes,
 		lines_store_list* lines,
 		mconstraints* cnsts,
@@ -65,9 +66,11 @@ private:
 		mloads& reaction_x,
 		mloads& reaction_y,
 		std::unordered_map<int, material_data>* mdatas,
-		bool& is_map_success, 
+		bool& is_map_success,
 		std::ofstream& output_file);
 
 
 
 };
+
+
